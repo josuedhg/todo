@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(c-template)
+project(todo)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 include(CTest)

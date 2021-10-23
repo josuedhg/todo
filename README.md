@@ -1,3 +1,3 @@
-# c code template
+# Todo lib
 
-This is a template for coding in C
+This is a library for todo task tracker
