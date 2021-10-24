@@ -13,6 +13,14 @@ static void save_tasks(struct todo *todo)
 {
 }
 
+void clean_tasks(struct todo *todo)
+{
+	for (int i = 0; i < todo->task_counter; i++) {
+		destroy_task(&todo->task_list[i]);
+	}
+	todo->task_counter = 0;
+}
+
 void add_task(struct todo *todo, struct task *task)
 {
 	todo->task_list[todo->task_counter] = task;
@@ -45,11 +53,16 @@ struct todo *create_todo()
 	todo->ops->save_tasks = save_tasks;
 	todo->ops->add_task = add_task;
 	todo->ops->remove_task = remove_task;
+	todo->ops->clean_tasks = clean_tasks;
 	return todo;
 }
 
 void destroy_todo(struct todo **todo)
 {
+	if (todo == NULL || *todo == NULL)
+		return;
+	free((*todo)->ops);
+	free((*todo)->task_list);
 	free(*todo);
 	*todo = NULL;
 }
@@ -79,4 +92,12 @@ void todo_remove_task(struct todo *todo, struct task *task)
 	if (todo->task_counter == 0)
 		return;
 	todo->ops->remove_task(todo, task);
+}
+
+void todo_clean_tasks(struct todo *todo)
+{
+	assert(todo != NULL);
+	if (todo->task_counter == 0)
+		return;
+	todo->ops->clean_tasks(todo);
 }
