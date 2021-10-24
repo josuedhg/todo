@@ -40,6 +40,12 @@ void test_create_task(void **state)
 	destroy_task(&task);
 }
 
+void test_negative_create_new_task_null(void **state)
+{
+	struct task *task = create_new_task(NULL, NULL, TASK_PRIORITY_LOW);
+	assert_null(task);
+}
+
 void test_create_new_task(void **state)
 {
 	time_t before = time(NULL);
@@ -94,6 +100,7 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_negative_create_task_name_long),
 		cmocka_unit_test(test_create_task),
 		cmocka_unit_test(test_create_new_task),
+		cmocka_unit_test(test_negative_create_new_task_null),
 		cmocka_unit_test(test_negative_set_completed_null),
 		cmocka_unit_test(test_task_set_completed),
 		cmocka_unit_test(test_negative_destroy_task),
