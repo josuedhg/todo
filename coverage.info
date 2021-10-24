@@ -5,11 +5,11 @@ FN:14,create_task
 FN:33,create_new_task
 FN:42,destroy_task
 FN:51,task_set_completed
-FNDA:4,create_new_task
-FNDA:18,create_task
-FNDA:8,task_set_completed
 FNDA:10,destroy_task
 FNDA:2,set_completed
+FNDA:8,task_set_completed
+FNDA:18,create_task
+FNDA:4,create_new_task
 FNF:5
 FNH:5
 DA:8,2
