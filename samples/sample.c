@@ -20,5 +20,6 @@ int main(void)
 	       task->priority,
 	       task->status,
 	       time_str);
+	destroy_task(&task);
 	return 0;
 }

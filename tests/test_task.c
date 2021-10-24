@@ -37,6 +37,7 @@ void test_create_task(void **state)
 	assert_int_equal(task->priority, TASK_PRIORITY_HIGH);
 	assert_non_null(task->ops);
 	assert_non_null(task->ops->set_completed);
+	destroy_task(&task);
 }
 
 void test_create_new_task(void **state)
@@ -50,6 +51,7 @@ void test_create_new_task(void **state)
 	assert_true(before <= task->creation_date);
 	assert_non_null(task->ops);
 	assert_non_null(task->ops->set_completed);
+	destroy_task(&task);
 }
 
 void test_negative_set_completed_null(void **state)
@@ -69,6 +71,20 @@ void test_task_set_completed(void **state)
 	task_set_completed(task);
 	assert_int_equal(task->status, TASK_STATUS_COMPLETED);
 	assert_true(before <= task->completion_date);
+	destroy_task(&task);
+}
+
+void test_negative_destroy_task(void **state)
+{
+	destroy_task(NULL);
+}
+
+void test_destroy_task(void **state)
+{
+	struct task *task = create_task("name", "pname", TASK_PRIORITY_LOW);
+	assert_non_null(task);
+	destroy_task(&task);
+	assert_null(task);
 }
 
 int main(int argc, char *argv[])
@@ -80,6 +96,8 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_create_new_task),
 		cmocka_unit_test(test_negative_set_completed_null),
 		cmocka_unit_test(test_task_set_completed),
+		cmocka_unit_test(test_negative_destroy_task),
+		cmocka_unit_test(test_destroy_task),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

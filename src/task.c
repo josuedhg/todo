@@ -39,6 +39,15 @@ struct task *create_new_task(const char *name, const char *project_name, int pri
 	return task;
 }
 
+void destroy_task(struct task **task)
+{
+	if (task == NULL || *task == NULL)
+		return;
+	free((*task)->ops);
+	free(*task);
+	*task = NULL;
+}
+
 void task_set_completed(struct task *task)
 {
 	assert(task != NULL);

@@ -28,6 +28,7 @@ struct task {
 
 struct task *create_task(const char *name, const char *project_name, int priority);
 struct task *create_new_task(const char *name, const char *project_name, int priority);
+void destroy_task(struct task **task);
 void task_set_completed(struct task *task);
 
 #endif /* end of include guard: __TASK_H__ */
