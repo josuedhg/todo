@@ -1,16 +1,17 @@
 #define _XOPEN_SOURCE
+#include <assert.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
 
 #include "todotxt.h"
+#include "debug_i.h"
 
 #define STATUS_FORMAT_LENGTH 12
 
 bool get_time_from_string(const char *str, time_t *time)
 {
-	if (str == NULL || time == NULL)
-		return false;
+	assert(str != NULL && time != NULL);
 	struct tm tm = { 0 };
 	if (strptime(str, "%Y-%m-%d", &tm) == NULL)
 		return false;
@@ -21,8 +22,7 @@ bool get_time_from_string(const char *str, time_t *time)
 
 bool todotxt_get_status(const char *str, time_t *time)
 {
-	if (str == NULL || time == NULL)
-		return false;
+	assert(str != NULL && time != NULL);
 	int str_len = strlen(str);
 	if (str_len < STATUS_FORMAT_LENGTH)
 		return false;

@@ -9,9 +9,9 @@
 void test_negative_get_time_from_string_null(void **status)
 {
 	time_t time = 0;
-	assert_false(get_time_from_string(NULL, &time));
-	assert_false(get_time_from_string("2001-02-12", NULL));
-	assert_false(get_time_from_string(NULL, NULL));
+	expect_assert_failure(get_time_from_string(NULL, &time));
+	expect_assert_failure(get_time_from_string("2001-02-12", NULL));
+	expect_assert_failure(get_time_from_string(NULL, NULL));
 }
 
 void test_negative_get_time_from_string_bad_format(void **state)
@@ -33,9 +33,9 @@ void test_get_time_from_string(void **state)
 void test_negative_get_status_null(void **state)
 {
 	time_t time = 0;
-	assert_false(todotxt_get_status(NULL, &time));
-	assert_false(todotxt_get_status("x 2001-12-02", NULL));
-	assert_false(todotxt_get_status(NULL, NULL));
+	expect_assert_failure(todotxt_get_status(NULL, &time));
+	expect_assert_failure(todotxt_get_status("x 2001-12-02", NULL));
+	expect_assert_failure(todotxt_get_status(NULL, NULL));
 }
 
 void test_negative_get_status_short(void **status)
