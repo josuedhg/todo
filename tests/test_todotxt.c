@@ -4,6 +4,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
+#include "task.h"
 #include "todotxt.h"
 
 void test_negative_get_time_from_string_null(void **status)
@@ -66,6 +67,44 @@ void test_get_status_with_priority(void **state)
 	assert_true(time > 0);
 }
 
+void test_negative_get_project_name_from_desc(void **state)
+{
+	expect_assert_failure(get_project_name_from_desc(NULL));
+}
+
+void test_negative_get_project_name_from_desc_bad_format(void **state)
+{
+	char *project_name = get_project_name_from_desc("something+myproject something");
+	assert_null(project_name);
+
+	project_name = get_project_name_from_desc("something + myproject something");
+	assert_null(project_name);
+
+	project_name = get_project_name_from_desc("something+ something");
+	assert_null(project_name);
+
+	project_name = get_project_name_from_desc("something something +");
+	assert_null(project_name);
+
+	project_name = get_project_name_from_desc("something something");
+	assert_null(project_name);
+}
+
+void test_get_project_name_from_desc(void **state)
+{
+	char *project_name = get_project_name_from_desc("something +myproject something");
+	assert_string_equal(project_name, "myproject");
+
+	char *project_name2 = get_project_name_from_desc("+myproject something something");
+	assert_string_equal(project_name2, "myproject");
+
+	char *project_name3 = get_project_name_from_desc("something something +myproject");
+	assert_string_equal(project_name3, "myproject");
+
+	char *project_name4 = get_project_name_from_desc("+myproject something something +myproject2");
+	assert_string_equal(project_name4, "myproject");
+}
+
 int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
@@ -77,6 +116,9 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_negative_get_status_bad_format),
 		cmocka_unit_test(test_get_status),
 		cmocka_unit_test(test_get_status_with_priority),
+		cmocka_unit_test(test_negative_get_project_name_from_desc),
+		cmocka_unit_test(test_negative_get_project_name_from_desc_bad_format),
+		cmocka_unit_test(test_get_project_name_from_desc),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

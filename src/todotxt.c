@@ -3,8 +3,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "todotxt.h"
+#include "task.h"
 #include "debug_i.h"
 
 #define STATUS_FORMAT_LENGTH 12
@@ -36,4 +38,30 @@ bool todotxt_get_status(const char *str, time_t *time)
 	if (!get_time_from_string(&str[index], time))
 		return false;
 	return true;
+}
+
+char *get_project_name_from_desc(const char *str)
+{
+	assert(str != NULL);
+	int str_len = strlen(str);
+	bool buffering = false;
+	int buffer_index = 0;
+	char buffer[TASK_NAME_LENGTH] = { 0 };
+	for (int i = 0; i < str_len; i++)
+	{
+		if (str[i] == '+' && (i == 0 || str[i - 1] == ' ') && isalpha(str[i + 1])) {
+			buffering = true;
+			continue;
+		}
+		if (buffering && str[i] == ' ') {
+			break;
+		}
+		if (buffering)
+			buffer[buffer_index++] = str[i];
+	}
+	if (buffer_index == 0)
+		return NULL;
+	char *project_name = calloc(1, buffer_index + 1);
+	memcpy(project_name, buffer, buffer_index);
+	return project_name;
 }

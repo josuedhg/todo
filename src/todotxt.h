@@ -6,5 +6,6 @@
 
 bool get_time_from_string(const char *, time_t *);
 bool todotxt_get_status(const char *, time_t *);
+char *get_project_name_from_desc(const char *);
 
 #endif /* end of include guard: __TODOTXT_H__ */
