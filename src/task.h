@@ -17,9 +17,9 @@ struct task {
 #define TASK_STATUS_OPEN 0
 #define TASK_STATUS_COMPLETED 1
 	int status;
-#define TASK_PRIORITY_HIGH 2
+#define TASK_PRIORITY_HIGH 0
 #define TASK_PRIORITY_MEDIUM 1
-#define TASK_PRIORITY_LOW 0
+#define TASK_PRIORITY_LOW 2
 	int priority;
 	time_t creation_date;
 	time_t completion_date;

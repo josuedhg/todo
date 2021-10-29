@@ -10,6 +10,7 @@
 #include "debug_i.h"
 
 #define STATUS_FORMAT_LENGTH 12
+#define PRIORITY_FORMAT_LENGTH 3
 
 bool todotxt_get_time_from_string(const char *str, time_t *time)
 {
@@ -64,4 +65,15 @@ char *todotxt_get_project_name_from_desc(const char *str)
 	char *project_name = calloc(1, buffer_index + 1);
 	memcpy(project_name, buffer, buffer_index);
 	return project_name;
+}
+
+int todotxt_get_priority(const char *str)
+{
+	assert(str != NULL);
+	int str_len = strlen(str);
+	if (str_len < PRIORITY_FORMAT_LENGTH)
+		return NO_PRIORITY_FORMAT;
+	if (str[0] != '(' || str[2] != ')' || !isalpha(str[1]) || !isupper(str[1]))
+		return NO_PRIORITY_FORMAT;
+	return str[1] - 'A';
 }
