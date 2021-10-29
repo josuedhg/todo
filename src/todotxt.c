@@ -11,7 +11,7 @@
 
 #define STATUS_FORMAT_LENGTH 12
 
-bool get_time_from_string(const char *str, time_t *time)
+bool todotxt_get_time_from_string(const char *str, time_t *time)
 {
 	assert(str != NULL && time != NULL);
 	struct tm tm = { 0 };
@@ -35,12 +35,12 @@ bool todotxt_get_status(const char *str, time_t *time)
 	index += 2;
 	if (str[index] == '(' && str[index + 2] == ')')
 		index += 4;
-	if (!get_time_from_string(&str[index], time))
+	if (!todotxt_get_time_from_string(&str[index], time))
 		return false;
 	return true;
 }
 
-char *get_project_name_from_desc(const char *str)
+char *todotxt_get_project_name_from_desc(const char *str)
 {
 	assert(str != NULL);
 	int str_len = strlen(str);
