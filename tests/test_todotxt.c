@@ -126,6 +126,33 @@ void test_todotxt_get_priority(void **state)
 	assert_int_equal(todotxt_get_priority("(D) something"), 3);
 }
 
+void test_negative_todotxt_get_duedate_from_desc_null(void **state)
+{
+	time_t duedate = 0;
+	expect_assert_failure(todotxt_get_duedate_from_desc(NULL, &duedate));
+	expect_assert_failure(todotxt_get_duedate_from_desc("due:2002-05-12", NULL));
+	expect_assert_failure(todotxt_get_duedate_from_desc(NULL, NULL));
+}
+
+void test_negative_todotxt_get_duedate_from_desc_bad_format(void **state)
+{
+	time_t duedate = 0;
+	assert_false(todotxt_get_duedate_from_desc("", &duedate));
+	assert_false(todotxt_get_duedate_from_desc("due 2002-05-12", &duedate));
+	assert_false(todotxt_get_duedate_from_desc("due:2002-55-12", &duedate));
+	assert_false(todotxt_get_duedate_from_desc("due:20A2-55-12", &duedate));
+	assert_false(todotxt_get_duedate_from_desc("something", &duedate));
+	assert_false(todotxt_get_duedate_from_desc("somethingdue:2002-05-12", &duedate));
+	assert_false(todotxt_get_duedate_from_desc("something due2002-05-12", &duedate));
+}
+
+void test_todotxt_get_duedate_from_desc(void **state)
+{
+	time_t duedate = 0;
+	assert_true(todotxt_get_duedate_from_desc("due:2002-05-12 something", &duedate));
+	assert_true(duedate > 0);
+}
+
 int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
@@ -143,6 +170,9 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_negative_todotxt_get_priority_null),
 		cmocka_unit_test(test_negative_todotxt_get_priority_bad_format),
 		cmocka_unit_test(test_todotxt_get_priority),
+		cmocka_unit_test(test_negative_todotxt_get_duedate_from_desc_null),
+		cmocka_unit_test(test_negative_todotxt_get_duedate_from_desc_bad_format),
+		cmocka_unit_test(test_todotxt_get_duedate_from_desc),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

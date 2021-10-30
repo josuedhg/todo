@@ -10,6 +10,7 @@
 #include "debug_i.h"
 
 #define STATUS_FORMAT_LENGTH 12
+#define DUEDATE_FORMAT_LENGTH 14
 #define PRIORITY_FORMAT_LENGTH 3
 
 bool todotxt_get_time_from_string(const char *str, time_t *time)
@@ -37,6 +38,25 @@ bool todotxt_get_status(const char *str, time_t *time)
 	if (str[index] == '(' && str[index + 2] == ')')
 		index += 4;
 	if (!todotxt_get_time_from_string(&str[index], time))
+		return false;
+	return true;
+}
+
+bool todotxt_get_duedate_from_desc(const char *str, time_t *time)
+{
+	assert(str != NULL && time != NULL);
+	int str_len = strlen(str);
+	if (str_len < DUEDATE_FORMAT_LENGTH)
+		return false;
+	int offset = 5;
+	char *duematch = strstr(str, " due:");
+	if (duematch == NULL) {
+		duematch = strstr(str, "due:");
+		offset = 4;
+		if (duematch != str || duematch ==  NULL)
+			return false;
+	}
+	if (!todotxt_get_time_from_string(&duematch[offset], time))
 		return false;
 	return true;
 }

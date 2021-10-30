@@ -8,6 +8,7 @@
 
 bool todotxt_get_time_from_string(const char *, time_t *);
 bool todotxt_get_status(const char *, time_t *);
+bool todotxt_get_duedate_from_desc(const char *, time_t *);
 char *todotxt_get_project_name_from_desc(const char *);
 int todotxt_get_priority(const char *);
 
