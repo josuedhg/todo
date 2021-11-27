@@ -1,16 +1,21 @@
 #ifndef __TODO_H__
 #define __TODO_H__
 
+#include <stddef.h>
+
 #include "task.h"
+
+#define container_of(ptr, type, member) (type *)( (char *)(ptr) - offsetof(type,member) )
 
 struct todo;
 
 struct todo_ops {
-	void (*load_tasks)(struct todo*);
+	int (*load_tasks)(struct todo*);
 	void (*save_tasks)(struct todo*);
 	void (*clean_tasks)(struct todo*);
 	void (*add_task)(struct todo*, struct task*);
 	void (*remove_task)(struct todo*, struct task*);
+	void (*destroy)(struct todo**);
 };
 
 struct todo {
@@ -27,7 +32,7 @@ void clean_tasks(struct todo *);
 
 struct todo *create_todo();
 void destroy_todo(struct todo **);
-void todo_load_tasks(struct todo*);
+int todo_load_tasks(struct todo*);
 void todo_save_tasks(struct todo*);
 void todo_add_task(struct todo*, struct task*);
 void todo_remove_task(struct todo*, struct task*);

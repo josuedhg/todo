@@ -5,12 +5,21 @@
 
 #include "debug_i.h"
 
-static void load_tasks(struct todo *todo)
+static int load_tasks(struct todo *todo)
 {
+	return 0;
 }
 
 static void save_tasks(struct todo *todo)
 {
+}
+
+static void destroy(struct todo **todo)
+{
+	free((*todo)->ops);
+	free((*todo)->task_list);
+	free(*todo);
+	*todo = NULL;
 }
 
 void clean_tasks(struct todo *todo)
@@ -54,6 +63,7 @@ struct todo *create_todo()
 	todo->ops->add_task = add_task;
 	todo->ops->remove_task = remove_task;
 	todo->ops->clean_tasks = clean_tasks;
+	todo->ops->destroy = destroy;
 	return todo;
 }
 
@@ -61,16 +71,14 @@ void destroy_todo(struct todo **todo)
 {
 	if (todo == NULL || *todo == NULL)
 		return;
-	free((*todo)->ops);
-	free((*todo)->task_list);
-	free(*todo);
-	*todo = NULL;
+	(*todo)->ops->destroy(todo);
 }
 
-void todo_load_tasks(struct todo *todo)
+int todo_load_tasks(struct todo *todo)
 {
-	assert(todo != NULL);
-	todo->ops->load_tasks(todo);
+	if (todo == NULL)
+		return -1;
+	return todo->ops->load_tasks(todo);
 }
 
 void todo_save_tasks(struct todo *todo)

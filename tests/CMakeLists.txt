@@ -12,9 +12,14 @@ file(GLOB c_sources ${CMAKE_SOURCE_DIR}/src/*.c)
 
 file(GLOB c_tests test_*.c)
 
+add_link_options(-Wl,--wrap=access)
+add_link_options(-Wl,--wrap=fopen)
+add_link_options(-Wl,--wrap=fclose)
+add_link_options(-Wl,--wrap=getline)
+
 foreach(file ${c_tests})
 	get_filename_component(test_name ${file} NAME_WE)
-	add_executable(${test_name} ${file} ${c_sources})
+	add_executable(${test_name} ${file} ${c_sources} instrument.c)
 
 	target_link_libraries(${test_name} cmocka)
 

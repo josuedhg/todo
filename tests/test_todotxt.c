@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <setjmp.h>
 #include <cmocka.h>
+#include <errno.h>
+#include <string.h>
 
 #include "task.h"
 #include "todotxt.h"
@@ -153,6 +155,155 @@ void test_todotxt_get_duedate_from_desc(void **state)
 	assert_true(duedate > 0);
 }
 
+void test_negative_create_task_from_todotxt_line_null(void **state)
+{
+	struct task *task = create_task_from_todotxt(NULL);
+	assert_null(task);
+}
+
+void test_create_task_from_todottxt_line(void **state)
+{
+	struct task *task = create_task_from_todotxt("new task");
+	assert_non_null(task);
+	assert_string_equal(task->name, "new task");
+	assert_int_equal(task->status, TASK_STATUS_OPEN);
+	assert_int_equal(task->priority, TASK_PRIORITY_LOW);
+
+	struct task *task1 = create_task_from_todotxt("new task other due:2021-12-30");
+	assert_non_null(task1);
+	assert_string_equal(task1->name, "new task other due:2021-12-30");
+	assert_true(task1->due_date > 0);
+	assert_int_equal(task1->status, TASK_STATUS_OPEN);
+	assert_int_equal(task1->priority, TASK_PRIORITY_LOW);
+
+	struct task *task2 = create_task_from_todotxt("(A) task with priority");
+	assert_non_null(task2);
+	assert_string_equal(task2->name, "task with priority");
+	assert_int_equal(task2->priority, TASK_PRIORITY_HIGH);
+	assert_int_equal(task2->status, TASK_STATUS_OPEN);
+
+	struct task *task3 = create_task_from_todotxt("x 2011-03-03 do something");
+	assert_non_null(task3);
+	assert_string_equal(task3->name, "do something");
+	assert_true(task3->completion_date > 0);
+	assert_int_equal(task3->status, TASK_STATUS_COMPLETED);
+	assert_int_equal(task3->priority, TASK_PRIORITY_LOW);
+
+	struct task *task4 = create_task_from_todotxt("task of +project");
+	assert_non_null(task4);
+	assert_string_equal(task4->name, "task of +project");
+	assert_string_equal(task4->project_name, "project");
+	assert_int_equal(task1->status, TASK_STATUS_OPEN);
+	assert_int_equal(task1->priority, TASK_PRIORITY_LOW);
+
+	struct task *task5 = create_task_from_todotxt("x (B) 2011-03-03 2011-03-03 task of +myproject due:2012-01-01");
+	assert_non_null(task5);
+	assert_int_equal(task5->status, TASK_STATUS_COMPLETED);
+	assert_int_equal(task5->priority, TASK_PRIORITY_MEDIUM);
+	assert_true(task5->completion_date > 0);
+	assert_true(task5->creation_date > 0);
+	assert_string_equal(task5->name, "task of +myproject due:2012-01-01");
+	assert_string_equal(task5->project_name, "myproject");
+
+	destroy_task(&task);
+	destroy_task(&task1);
+	destroy_task(&task2);
+	destroy_task(&task3);
+	destroy_task(&task4);
+	destroy_task(&task5);
+}
+
+int setup(void **state)
+{
+	will_return(__wrap_access, 0);
+	struct todo *todo = create_todotxt("filename");
+	*state = todo;
+	errno = 0;
+	return 0;
+}
+
+int teardown(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	destroy_todo(&todo);
+	return 0;
+}
+
+void test_negative_create_todotxt_null(void **state)
+{
+	struct todo *todo = create_todotxt(NULL);
+	assert_null(todo);
+}
+
+void test_negative_create_todotxt_bad_file(void **state)
+{
+	will_return(__wrap_access, -1);
+	struct todo *todo = create_todotxt("badfilename");
+	assert_null(todo);
+}
+
+void test_create_todotxt(void **state)
+{
+	will_return(__wrap_access, 0);
+	struct todo *todo = create_todotxt("filename");
+	struct todotxt *todotxt = container_of(todo,
+					       struct todotxt,
+					       todo);
+	assert_non_null(todo);
+	assert_int_equal(todo->task_counter, 0);
+	assert_non_null(todo->task_list);
+	assert_non_null(todo->ops);
+	assert_non_null(todo->ops->load_tasks);
+	assert_non_null(todo->ops->clean_tasks);
+	assert_non_null(todo->ops->save_tasks);
+	assert_non_null(todo->ops->add_task);
+	assert_non_null(todo->ops->remove_task);
+
+	assert_string_equal(todotxt->filename, "filename");
+	destroy_todo(&todo);
+}
+
+void test_negative_todotxt_load_tasks_cannot_open(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	will_return(__wrap_fopen, NULL);
+	int res = todo_load_tasks(todo);
+	assert_int_equal(res, -1);
+}
+
+void test_negative_todo_load_task_bad_read(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	int file_p = 1;
+	will_return(__wrap_fopen, &file_p);
+	will_return(__wrap_getline, EINVAL);
+	will_return(__wrap_getline, NULL);
+	will_return(__wrap_getline, -1);
+	int res = todo_load_tasks(todo);
+	assert_int_equal(res, -1);
+}
+
+void test_todo_load_task(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	int file_p = 1;
+#define SAMPLE_TEXT_LEN 8
+	char *line = calloc(1, sizeof(char) * SAMPLE_TEXT_LEN + 1);
+	memcpy(line, "new task", SAMPLE_TEXT_LEN);
+	will_return(__wrap_fopen, &file_p);
+	will_return(__wrap_getline, 0);
+	will_return(__wrap_getline, line);
+	will_return(__wrap_getline, strlen(line));
+	will_return(__wrap_getline, 0);
+	will_return(__wrap_getline, NULL);
+	will_return(__wrap_getline, -1);
+	int res = todo_load_tasks(todo);
+	assert_int_equal(res, 0);
+	assert_int_equal(todo->task_counter, 1);
+	assert_string_equal(todo->task_list[0]->name, "new task");
+	free(line);
+}
+
 int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
@@ -173,6 +324,14 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_negative_todotxt_get_duedate_from_desc_null),
 		cmocka_unit_test(test_negative_todotxt_get_duedate_from_desc_bad_format),
 		cmocka_unit_test(test_todotxt_get_duedate_from_desc),
+		cmocka_unit_test(test_negative_create_task_from_todotxt_line_null),
+		cmocka_unit_test(test_create_task_from_todottxt_line),
+		cmocka_unit_test(test_negative_create_todotxt_null),
+		cmocka_unit_test(test_negative_create_todotxt_bad_file),
+		cmocka_unit_test(test_create_todotxt),
+		cmocka_unit_test_setup_teardown(test_negative_todotxt_load_tasks_cannot_open, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_negative_todo_load_task_bad_read, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_todo_load_task, setup, teardown),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

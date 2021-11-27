@@ -36,7 +36,8 @@ void test_destroy_todo(void **state)
 
 void test_negative_todo_load_tasks_null(void **state)
 {
-	expect_assert_failure(todo_load_tasks(NULL));
+	int res = todo_load_tasks(NULL);
+	assert_int_equal(res, -1);
 }
 
 void test_todo_load_tasks(void **state)
