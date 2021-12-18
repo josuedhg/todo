@@ -31,13 +31,13 @@
             <td class="headerValue">coverage.info</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">32</td>
-            <td class="headerCovTableEntry">32</td>
+            <td class="headerCovTableEntry">36</td>
+            <td class="headerCovTableEntry">36</td>
             <td class="headerCovTableEntryHi">100.0 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2021-12-18 05:12:08</td>
+            <td class="headerValue">2021-12-18 08:21:14</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">5</td>
@@ -76,12 +76,12 @@
 <a name="14"><span class="lineNum">      14 </span><span class="lineCov">        140 : struct task *create_task(const char *name, const char *project_name, int priority)</span></a>
 <a name="15"><span class="lineNum">      15 </span>            : {</a>
 <a name="16"><span class="lineNum">      16 </span><span class="lineCov">        140 :         if (name == NULL || project_name == NULL)</span></a>
-<a name="17"><span class="lineNum">      17 </span>            :                 return NULL;</a>
+<a name="17"><span class="lineNum">      17 </span><span class="lineCov">          6 :                 return NULL;</span></a>
 <a name="18"><span class="lineNum">      18 </span>            : </a>
 <a name="19"><span class="lineNum">      19 </span><span class="lineCov">        134 :         int namelen = strlen(name);</span></a>
 <a name="20"><span class="lineNum">      20 </span><span class="lineCov">        134 :         int pnamelen = strlen(project_name);</span></a>
 <a name="21"><span class="lineNum">      21 </span><span class="lineCov">        134 :         if (namelen &gt;= TASK_NAME_LENGTH || pnamelen &gt;= TASK_NAME_LENGTH)</span></a>
-<a name="22"><span class="lineNum">      22 </span>            :                 return NULL;</a>
+<a name="22"><span class="lineNum">      22 </span><span class="lineCov">          4 :                 return NULL;</span></a>
 <a name="23"><span class="lineNum">      23 </span>            : </a>
 <a name="24"><span class="lineNum">      24 </span><span class="lineCov">        130 :         struct task *task = calloc(1, sizeof(struct task));</span></a>
 <a name="25"><span class="lineNum">      25 </span><span class="lineCov">        130 :         task-&gt;ops = calloc(1, sizeof(struct task_ops));</span></a>
@@ -96,7 +96,7 @@
 <a name="34"><span class="lineNum">      34 </span>            : {</a>
 <a name="35"><span class="lineNum">      35 </span><span class="lineCov">         12 :         struct task *task = create_task(name, project_name, priority);</span></a>
 <a name="36"><span class="lineNum">      36 </span><span class="lineCov">         12 :         if (task == NULL)</span></a>
-<a name="37"><span class="lineNum">      37 </span>            :                 return NULL;</a>
+<a name="37"><span class="lineNum">      37 </span><span class="lineCov">          2 :                 return NULL;</span></a>
 <a name="38"><span class="lineNum">      38 </span><span class="lineCov">         10 :         task-&gt;creation_date = time(NULL);</span></a>
 <a name="39"><span class="lineNum">      39 </span><span class="lineCov">         10 :         return task;</span></a>
 <a name="40"><span class="lineNum">      40 </span>            : }</a>
@@ -104,7 +104,7 @@
 <a name="42"><span class="lineNum">      42 </span><span class="lineCov">        144 : void destroy_task(struct task **task)</span></a>
 <a name="43"><span class="lineNum">      43 </span>            : {</a>
 <a name="44"><span class="lineNum">      44 </span><span class="lineCov">        144 :         if (task == NULL || *task == NULL)</span></a>
-<a name="45"><span class="lineNum">      45 </span>            :                 return;</a>
+<a name="45"><span class="lineNum">      45 </span><span class="lineCov">          2 :                 return;</span></a>
 <a name="46"><span class="lineNum">      46 </span><span class="lineCov">        142 :         free((*task)-&gt;ops);</span></a>
 <a name="47"><span class="lineNum">      47 </span><span class="lineCov">        142 :         free(*task);</span></a>
 <a name="48"><span class="lineNum">      48 </span><span class="lineCov">        142 :         *task = NULL;</span></a>
