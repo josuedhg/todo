@@ -10,8 +10,9 @@ static int load_tasks(struct todo *todo)
 	return 0;
 }
 
-static void save_tasks(struct todo *todo)
+static int save_tasks(struct todo *todo)
 {
+	return 0;
 }
 
 static void destroy(struct todo **todo)
@@ -81,10 +82,11 @@ int todo_load_tasks(struct todo *todo)
 	return todo->ops->load_tasks(todo);
 }
 
-void todo_save_tasks(struct todo *todo)
+int todo_save_tasks(struct todo *todo)
 {
-	assert(todo != NULL);
-	todo->ops->save_tasks(todo);
+	if (todo == NULL)
+		return -1;
+	return todo->ops->save_tasks(todo);
 }
 
 void todo_add_task(struct todo *todo, struct task *task)

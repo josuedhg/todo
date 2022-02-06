@@ -16,6 +16,7 @@
 #define STATUS_FORMAT_LENGTH 12
 #define DUEDATE_FORMAT_LENGTH 14
 #define PRIORITY_FORMAT_LENGTH 3
+#define DATE_LENGHT 11
 
 bool todotxt_get_time_from_string(const char *str, time_t *time)
 {
@@ -148,6 +149,50 @@ struct task *create_task_from_todotxt(const char *todoline)
 	return task;
 }
 
+#define DATE_FORMAT "%Y-%m-%d"
+int create_todotxt_line_from_task(struct task *task, char **buffer)
+{
+	if (task == NULL || buffer == NULL)
+		return -1;
+	char *line = NULL;
+	char create_date[DATE_LENGHT] = { 0 };
+	char due_date[DATE_LENGHT] = { 0 };
+	char completion_date[DATE_LENGHT] = { 0 };
+
+	char *line_header_format = (task->status == TASK_STATUS_COMPLETED)? "x (%c) %s %s":"(%c) %s";
+	char line_header[100] = { 0 };
+
+	if (task->status == TASK_STATUS_COMPLETED) {
+		strftime(completion_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->completion_date));
+		strftime(create_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
+		sprintf(line_header, line_header_format, task->priority + 'A', create_date, completion_date);
+	} else {
+		strftime(create_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
+		sprintf(line_header, line_header_format, task->priority + 'A', create_date, "");
+	}
+
+	int line_length = strlen(line_header) + strlen(task->name) + 1;
+
+	if (strstr(task->name, "+") == NULL)
+		line_length += strlen(task->project_name) + 1;
+
+	if (task->due_date != 0) {
+		strftime(due_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->due_date));
+		line_length += strlen(due_date) + 1;
+	}
+
+	line = calloc(1, line_length * 2);
+	sprintf(line, "%s %s", line_header, task->name);
+
+	if (strstr(task->name, "+") == NULL)
+		sprintf(line, "%s +%s", line, task->project_name);
+
+	if (task->due_date != 0 && strstr(task->name, "due:") == NULL)
+		sprintf(line, "%s due:%s", line, due_date);
+	*buffer = line;
+	return line_length;
+}
+
 static int load_tasks(struct todo *todo)
 {
 	struct todotxt *todotxt = container_of(todo, struct todotxt, todo);
@@ -169,8 +214,14 @@ static int load_tasks(struct todo *todo)
 	return ret;
 }
 
-static void save_tasks(struct todo *todo)
+static int save_tasks(struct todo *todo)
 {
+	struct todotxt *todotxt = container_of(todo, struct todotxt, todo);
+	FILE *file = fopen(todotxt->filename, "w");
+	if (file == NULL)
+		return -1;
+	fclose(file);
+	return 0;
 }
 
 static void destroy(struct todo **todo)

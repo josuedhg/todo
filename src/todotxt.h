@@ -19,6 +19,7 @@ bool todotxt_get_duedate_from_desc(const char *, time_t *);
 char *todotxt_get_project_name_from_desc(const char *);
 int todotxt_get_priority(const char *);
 struct task *create_task_from_todotxt(const char *);
+int create_todotxt_line_from_task(struct task *, char **);
 
 struct todo *create_todotxt(char *filename);
 

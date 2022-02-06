@@ -43,19 +43,22 @@ void test_negative_todo_load_tasks_null(void **state)
 void test_todo_load_tasks(void **state)
 {
 	struct todo *todo = create_todo();
-	todo_load_tasks(todo);
+	int res = todo_load_tasks(todo);
+	assert_int_equal(res, 0);
 	destroy_todo(&todo);
 }
 
 void test_negative_todo_save_tasks_null(void **state)
 {
-	expect_assert_failure(todo_save_tasks(NULL));
+	int res = todo_save_tasks(NULL);
+	assert_int_equal(res, -1);
 }
 
 void test_todo_save_tasks(void **state)
 {
 	struct todo *todo = create_todo();
-	todo_save_tasks(todo);
+	int res = todo_save_tasks(todo);
+	assert_int_equal(res, 0);
 	destroy_todo(&todo);
 }
 

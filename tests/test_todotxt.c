@@ -5,6 +5,8 @@
 #include <cmocka.h>
 #include <errno.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "task.h"
 #include "todotxt.h"
@@ -213,6 +215,125 @@ void test_create_task_from_todottxt_line(void **state)
 	destroy_task(&task5);
 }
 
+void test_negative_create_todotxt_line_from_task_null(void **state)
+{
+	int todotxtline_len = 0;
+	char *todotxtline_buffer = NULL;
+	struct task *task = create_task("name", "pname", TASK_PRIORITY_HIGH);
+
+	todotxtline_len = create_todotxt_line_from_task(NULL, NULL);
+	assert_int_equal(todotxtline_len, -1);
+
+	todotxtline_len = create_todotxt_line_from_task(NULL, &todotxtline_buffer);
+	assert_int_equal(todotxtline_len, -1);
+
+	todotxtline_len = create_todotxt_line_from_task(task, NULL);
+	assert_int_equal(todotxtline_len, -1);
+	destroy_task(&task);
+}
+
+int func(struct task *task, char **buffer)
+{
+	if (task == NULL || buffer == NULL)
+		return -1;
+	int len = 32;
+	*buffer = calloc(len, sizeof(char));
+	return len;
+}
+
+#define FIRST_DAY_UNIX_TIME (time_t)86400
+#define DATE_FORMAT "%Y-%m-%d"
+#define DATE_LENGHT 11
+
+void test_create_todotxt_line_from_task(void **state)
+{
+	int todotxtline_len = 0;
+	char *todotxtline_buffer = NULL;
+	struct task *task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	task->creation_date = FIRST_DAY_UNIX_TIME;
+
+	todotxtline_len = create_todotxt_line_from_task(task, &todotxtline_buffer);
+	assert_int_not_equal(todotxtline_len, -1);
+
+	char creation_date[DATE_LENGHT] = { 0 };
+	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
+
+#define EXPECTED_LINE_SIZE 34
+	char expected_todotxtline[EXPECTED_LINE_SIZE] = { 0 };
+	sprintf(expected_todotxtline, "(A) %s my task +myproject", creation_date);
+
+	assert_string_equal(todotxtline_buffer, expected_todotxtline);
+
+	destroy_task(&task);
+	free(todotxtline_buffer);
+}
+
+void test_create_todotxt_line_from_task_completed(void **state)
+{
+	int todotxtline_len = 0;
+	char *todotxtline_buffer = NULL;
+	struct task *task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
+
+	task_set_completed(task);
+
+	// set dates as 0 to have control in the date
+	task->creation_date = FIRST_DAY_UNIX_TIME;
+	task->completion_date = FIRST_DAY_UNIX_TIME;
+
+	todotxtline_len = create_todotxt_line_from_task(task, &todotxtline_buffer);
+	assert_int_not_equal(todotxtline_len, -1);
+
+	char creation_date[DATE_LENGHT] = { 0 };
+	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
+
+	char completion_date[DATE_LENGHT] = { 0 };
+	strftime(completion_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->completion_date));
+
+#define EXPECTED_COMPLETED_LINE_SIZE 47
+	char expected_todotxtline[EXPECTED_COMPLETED_LINE_SIZE] = { 0 };
+	sprintf(expected_todotxtline, "x (A) %s %s my task +myproject", creation_date, completion_date);
+
+	assert_string_equal(todotxtline_buffer, expected_todotxtline);
+
+	destroy_task(&task);
+	free(todotxtline_buffer);
+}
+
+void test_create_todotxt_line_from_task_completed_with_date(void **state)
+{
+	int todotxtline_len = 0;
+	char *todotxtline_buffer = NULL;
+	struct task *task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	task_set_completed(task);
+
+	// set dates as 0 to have control in the date
+	task->creation_date = FIRST_DAY_UNIX_TIME;
+	task->completion_date = FIRST_DAY_UNIX_TIME;
+
+	task->due_date = FIRST_DAY_UNIX_TIME + 86400;
+
+	todotxtline_len = create_todotxt_line_from_task(task, &todotxtline_buffer);
+	assert_int_not_equal(todotxtline_len, -1);
+
+	char creation_date[DATE_LENGHT] = { 0 };
+	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
+
+	char completion_date[DATE_LENGHT] = { 0 };
+	strftime(completion_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->completion_date));
+
+	char due_date[DATE_LENGHT] = { 0 };
+	strftime(due_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->due_date));
+
+#define EXPECTED_DUE_DATE_LINE_SIZE 62
+	char expected_todotxtline[EXPECTED_DUE_DATE_LINE_SIZE] = { 0 };
+	sprintf(expected_todotxtline, "x (A) %s %s my task +myproject due:%s", creation_date, completion_date, due_date);
+
+	assert_string_equal(todotxtline_buffer, expected_todotxtline);
+
+	destroy_task(&task);
+	free(todotxtline_buffer);
+}
+
 int setup(void **state)
 {
 	will_return(__wrap_access, 0);
@@ -271,7 +392,7 @@ void test_negative_todotxt_load_tasks_cannot_open(void **state)
 	assert_int_equal(res, -1);
 }
 
-void test_negative_todo_load_task_bad_read(void **state)
+void test_negative_todo_load_tasks_bad_read(void **state)
 {
 	struct todo *todo = (struct todo *)*state;
 	int file_p = 1;
@@ -283,7 +404,7 @@ void test_negative_todo_load_task_bad_read(void **state)
 	assert_int_equal(res, -1);
 }
 
-void test_todo_load_task(void **state)
+void test_todo_load_tasks(void **state)
 {
 	struct todo *todo = (struct todo *)*state;
 	int file_p = 1;
@@ -302,6 +423,14 @@ void test_todo_load_task(void **state)
 	assert_int_equal(todo->task_counter, 1);
 	assert_string_equal(todo->task_list[0]->name, "new task");
 	free(line);
+}
+
+void test_negative_todo_save_tasks_cannot_open(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	will_return(__wrap_fopen, NULL);
+	int res = todo_save_tasks(todo);
+	assert_int_equal(res, -1);
 }
 
 int main(int argc, char *argv[])
@@ -326,12 +455,17 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_todotxt_get_duedate_from_desc),
 		cmocka_unit_test(test_negative_create_task_from_todotxt_line_null),
 		cmocka_unit_test(test_create_task_from_todottxt_line),
+		cmocka_unit_test(test_negative_create_todotxt_line_from_task_null),
+		cmocka_unit_test(test_create_todotxt_line_from_task),
+		cmocka_unit_test(test_create_todotxt_line_from_task_completed),
+		cmocka_unit_test(test_create_todotxt_line_from_task_completed_with_date),
 		cmocka_unit_test(test_negative_create_todotxt_null),
 		cmocka_unit_test(test_negative_create_todotxt_bad_file),
 		cmocka_unit_test(test_create_todotxt),
 		cmocka_unit_test_setup_teardown(test_negative_todotxt_load_tasks_cannot_open, setup, teardown),
-		cmocka_unit_test_setup_teardown(test_negative_todo_load_task_bad_read, setup, teardown),
-		cmocka_unit_test_setup_teardown(test_todo_load_task, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_negative_todo_load_tasks_bad_read, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_todo_load_tasks, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_negative_todo_save_tasks_cannot_open, setup, teardown),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

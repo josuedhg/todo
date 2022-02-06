@@ -1,7 +1,7 @@
 #ifndef __DEBUG_I_H__
 #define __DEBUG_I_H__
 
-#ifdef UNIT_TESTING
+#ifdef FAKE_ASSERT
 extern void mock_assert(const int result, const char* const expression,
                         const char * const file, const int line);
 #undef assert

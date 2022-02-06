@@ -4,7 +4,7 @@ enable_testing()
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
-add_definitions(-DUNIT_TESTING=ON)
+add_definitions(-DFAKE_ASSERT=ON)
 
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
 
