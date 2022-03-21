@@ -10,6 +10,7 @@
 
 #include "task.h"
 #include "todotxt.h"
+#include "todotxt_i.h"
 
 void test_negative_todotxt_get_time_from_string_null(void **status)
 {

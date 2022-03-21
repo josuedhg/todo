@@ -45,7 +45,6 @@ size_t __wrap_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 		return __real_fwrite(ptr, size, nmemb, stream);
 
 	errno = mock_type(int);
-	print_message("-%s-\n", (char *)ptr);
 	if (errno == 0) {
 		check_expected(size);
 		check_expected(ptr);

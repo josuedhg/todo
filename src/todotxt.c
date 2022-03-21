@@ -10,6 +10,7 @@
 #include <errno.h>
 
 #include "todotxt.h"
+#include "todotxt_i.h"
 #include "task.h"
 #include "debug_i.h"
 
