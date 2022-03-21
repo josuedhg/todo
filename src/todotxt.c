@@ -174,11 +174,11 @@ int create_todotxt_line_from_task(struct task *task, char **buffer)
 	int line_length = strlen(line_header) + strlen(task->name) + 1;
 
 	if (strstr(task->name, "+") == NULL)
-		line_length += strlen(task->project_name) + 1;
+		line_length += strlen(task->project_name) + 2; // +2 for the space and the +
 
 	if (task->due_date != 0) {
 		strftime(due_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->due_date));
-		line_length += strlen(due_date) + 1;
+		line_length += strlen(due_date) + 5; // +5 for the space, the : and the due:
 	}
 
 	line = calloc(1, line_length * 2);
@@ -220,6 +220,22 @@ static int save_tasks(struct todo *todo)
 	FILE *file = fopen(todotxt->filename, "w");
 	if (file == NULL)
 		return -1;
+	struct task **task = todo->task_list;
+	for (int i = 0; i < todo->task_counter; i++) {
+		char *line = NULL;
+		int line_length = create_todotxt_line_from_task(task[i], &line);
+		if (i < todo->task_counter - 1) {
+			line_length = line_length + 1;
+			line = realloc(line, line_length);
+			line[line_length - 1] = '\n';
+		}
+		if (fwrite(line, line_length, 1, file) != 1) {
+			free(line);
+			fclose(file);
+			return -1;
+		}
+		free(line);
+	}
 	fclose(file);
 	return 0;
 }

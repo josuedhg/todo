@@ -343,10 +343,13 @@ int setup(void **state)
 	return 0;
 }
 
+extern void wrap_fwrite();
+extern void reset_fwrite();
 int teardown(void **state)
 {
 	struct todo *todo = (struct todo *)*state;
 	destroy_todo(&todo);
+	reset_fwrite();
 	return 0;
 }
 
@@ -433,6 +436,89 @@ void test_negative_todo_save_tasks_cannot_open(void **state)
 	assert_int_equal(res, -1);
 }
 
+void test_negative_todo_save_tasks_bad_write(void **state)
+{
+	wrap_fwrite();
+	struct todo *todo = (struct todo *)*state;
+	struct task *task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	todo_add_task(todo, task);
+	int file_p = 1;
+	will_return(__wrap_fopen, &file_p);
+	will_return(__wrap_fwrite, EINVAL);
+	will_return(__wrap_fwrite, -1);
+	int res = todo_save_tasks(todo);
+	assert_int_equal(res, -1);
+}
+
+void test_todo_save_tasks(void **state)
+{
+	wrap_fwrite();
+	struct todo *todo = (struct todo *)*state;
+	struct task *task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	task->creation_date = FIRST_DAY_UNIX_TIME;
+	todo_add_task(todo, task);
+
+	char creation_date[DATE_LENGHT] = { 0 };
+	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
+
+#define EXPECTED_LINE_SIZE_IN_FILE 33
+	char expected_todotxtline[EXPECTED_LINE_SIZE_IN_FILE] = { 0 };
+	sprintf(expected_todotxtline, "(A) %s my task +myproject", creation_date);
+
+	int file_p = 1;
+	will_return(__wrap_fopen, &file_p);
+	will_return(__wrap_fwrite, 0);
+	will_return(__wrap_fwrite, 1);
+
+	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE_IN_FILE);
+	expect_memory(__wrap_fwrite, ptr, expected_todotxtline, EXPECTED_LINE_SIZE_IN_FILE);
+
+	int res = todo_save_tasks(todo);
+	assert_int_equal(res, 0);
+}
+
+void test_todo_save_tasks_multiline(void **state)
+{
+	wrap_fwrite();
+	struct todo *todo = (struct todo *)*state;
+
+	struct task *task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	task->creation_date = FIRST_DAY_UNIX_TIME;
+	todo_add_task(todo, task);
+
+	struct task *task2 = create_new_task("my tazk", "myproject", TASK_PRIORITY_HIGH);
+	task2->creation_date = FIRST_DAY_UNIX_TIME;
+	todo_add_task(todo, task2);
+
+	char creation_date[DATE_LENGHT] = { 0 };
+	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
+
+	// task1
+	char expected_todotxtline[EXPECTED_LINE_SIZE_IN_FILE + 1] = { 0 };
+	sprintf(expected_todotxtline, "(A) %s my task +myproject\n", creation_date);
+
+	int file_p = 1;
+	will_return(__wrap_fopen, &file_p);
+	will_return(__wrap_fwrite, 0);
+	will_return(__wrap_fwrite, 1);
+
+	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE_IN_FILE + 1);
+	expect_memory(__wrap_fwrite, ptr, expected_todotxtline, EXPECTED_LINE_SIZE_IN_FILE + 1);
+
+	// task2
+	char expected_todotxtline2[EXPECTED_LINE_SIZE_IN_FILE] = { 0 };
+	sprintf(expected_todotxtline2, "(A) %s my tazk +myproject", creation_date);
+
+	will_return(__wrap_fwrite, 0);
+	will_return(__wrap_fwrite, 1);
+
+	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE_IN_FILE);
+	expect_memory(__wrap_fwrite, ptr, expected_todotxtline2, EXPECTED_LINE_SIZE_IN_FILE);
+
+	int res = todo_save_tasks(todo);
+	assert_int_equal(res, 0);
+}
+
 int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
@@ -466,6 +552,9 @@ int main(int argc, char *argv[])
 		cmocka_unit_test_setup_teardown(test_negative_todo_load_tasks_bad_read, setup, teardown),
 		cmocka_unit_test_setup_teardown(test_todo_load_tasks, setup, teardown),
 		cmocka_unit_test_setup_teardown(test_negative_todo_save_tasks_cannot_open, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_negative_todo_save_tasks_bad_write, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_todo_save_tasks, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_todo_save_tasks_multiline, setup, teardown),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

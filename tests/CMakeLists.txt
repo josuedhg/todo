@@ -16,6 +16,7 @@ add_link_options(-Wl,--wrap=access)
 add_link_options(-Wl,--wrap=fopen)
 add_link_options(-Wl,--wrap=fclose)
 add_link_options(-Wl,--wrap=getline)
+add_link_options(-Wl,--wrap=fwrite)
 
 foreach(file ${c_tests})
 	get_filename_component(test_name ${file} NAME_WE)
