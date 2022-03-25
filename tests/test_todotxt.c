@@ -349,7 +349,7 @@ extern void reset_fwrite();
 int teardown(void **state)
 {
 	struct todo *todo = (struct todo *)*state;
-	destroy_todo(&todo);
+	destroy_todotxt(&todo);
 	reset_fwrite();
 	return 0;
 }
@@ -385,7 +385,7 @@ void test_create_todotxt(void **state)
 	assert_non_null(todo->ops->remove_task);
 
 	assert_string_equal(todotxt->filename, "filename");
-	destroy_todo(&todo);
+	destroy_todotxt(&todo);
 }
 
 void test_negative_todotxt_load_tasks_cannot_open(void **state)

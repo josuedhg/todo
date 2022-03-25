@@ -241,13 +241,11 @@ static int save_tasks(struct todo *todo)
 	return 0;
 }
 
-static void destroy(struct todo **todo)
+void destroy_todotxt(struct todo **todo)
 {
 	struct todotxt *todotxt = container_of(*todo,
 					       struct todotxt,
 					       todo);
-	free(todotxt->todo.ops);
-	free(todotxt->todo.task_list);
 	free(todotxt);
 	*todo = NULL;
 }
@@ -259,15 +257,9 @@ struct todo *create_todotxt(char *filename)
 	if (access(filename, R_OK | W_OK) != 0)
 		return NULL;
 	struct todotxt *todotxt = calloc(1, sizeof(struct todotxt));
-	todotxt->todo.ops = calloc(1, sizeof(struct todo_ops));
-	todotxt->todo.task_list = calloc(1, sizeof(struct task *) * TODO_TASK_LIST_LENGTH);
-	todotxt->todo.task_counter = 0;
+	todo_init(&todotxt->todo);
 	todotxt->todo.ops->load_tasks = load_tasks;
 	todotxt->todo.ops->save_tasks = save_tasks;
-	todotxt->todo.ops->add_task = add_task;
-	todotxt->todo.ops->remove_task = remove_task;
-	todotxt->todo.ops->clean_tasks = clean_tasks;
-	todotxt->todo.ops->destroy = destroy;
 	todotxt->filename = filename;
 	return &todotxt->todo;
 }

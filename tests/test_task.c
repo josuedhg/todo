@@ -35,8 +35,6 @@ void test_create_task(void **state)
 	assert_string_equal(task->name, "name");
 	assert_string_equal(task->project_name, "pname");
 	assert_int_equal(task->priority, TASK_PRIORITY_HIGH);
-	assert_non_null(task->ops);
-	assert_non_null(task->ops->set_completed);
 	destroy_task(&task);
 }
 
@@ -55,19 +53,13 @@ void test_create_new_task(void **state)
 	assert_string_equal(task->project_name, "pname");
 	assert_int_equal(task->priority, TASK_PRIORITY_LOW);
 	assert_true(before <= task->creation_date);
-	assert_non_null(task->ops);
-	assert_non_null(task->ops->set_completed);
 	destroy_task(&task);
 }
 
 void test_negative_set_completed_null(void **state)
 {
-	struct task task = {.ops = NULL};
-	struct task_ops task_ops = {.set_completed = NULL};
-	struct task task2 = {.ops = &task_ops};
+	struct task task = {};
 	expect_assert_failure(task_set_completed(NULL));
-	expect_assert_failure(task_set_completed(&task));
-	expect_assert_failure(task_set_completed(&task2));
 }
 
 void test_task_set_completed(void **state)

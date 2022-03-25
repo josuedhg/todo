@@ -3,14 +3,7 @@
 
 #include <time.h>
 
-struct task;
-
-struct task_ops {
-	void (*set_completed)(struct task *);
-};
-
 struct task {
-	struct task_ops *ops;
 #define TASK_NAME_LENGTH 50
 	char name[TASK_NAME_LENGTH];
 	char project_name[TASK_NAME_LENGTH];

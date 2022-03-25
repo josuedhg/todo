@@ -15,23 +15,16 @@ struct todo_ops {
 	void (*clean_tasks)(struct todo*);
 	void (*add_task)(struct todo*, struct task*);
 	void (*remove_task)(struct todo*, struct task*);
-	void (*destroy)(struct todo**);
 };
 
 struct todo {
 	struct todo_ops *ops;
 #define TODO_TASK_LIST_LENGTH 50
-	struct task **task_list;
+	struct task *task_list[TODO_TASK_LIST_LENGTH];
 	int task_counter;
 };
 
-// default todo operators
-void add_task(struct todo *, struct task *);
-void remove_task(struct todo *, struct task *);
-void clean_tasks(struct todo *);
-
-struct todo *create_todo();
-void destroy_todo(struct todo **);
+void todo_init(struct todo *);
 int todo_load_tasks(struct todo*);
 int todo_save_tasks(struct todo*);
 void todo_add_task(struct todo*, struct task*);

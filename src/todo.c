@@ -15,15 +15,7 @@ static int save_tasks(struct todo *todo)
 	return 0;
 }
 
-static void destroy(struct todo **todo)
-{
-	free((*todo)->ops);
-	free((*todo)->task_list);
-	free(*todo);
-	*todo = NULL;
-}
-
-void clean_tasks(struct todo *todo)
+static void clean_tasks(struct todo *todo)
 {
 	for (int i = 0; i < todo->task_counter; i++) {
 		destroy_task(&todo->task_list[i]);
@@ -31,13 +23,13 @@ void clean_tasks(struct todo *todo)
 	todo->task_counter = 0;
 }
 
-void add_task(struct todo *todo, struct task *task)
+static void add_task(struct todo *todo, struct task *task)
 {
 	todo->task_list[todo->task_counter] = task;
 	todo->task_counter++;
 }
 
-void remove_task(struct todo *todo, struct task *task)
+static void remove_task(struct todo *todo, struct task *task)
 {
 	int index = 0;
 	for (; index < todo->task_counter; index++) {
@@ -53,26 +45,18 @@ void remove_task(struct todo *todo, struct task *task)
 	todo->task_list[index] = NULL;
 }
 
-struct todo *create_todo()
-{
-	struct todo *todo = calloc(1, sizeof(struct todo));
-	todo->ops = calloc(1, sizeof(struct todo_ops));
-	todo->task_list = calloc(1, sizeof(struct task *) * TODO_TASK_LIST_LENGTH);
-	todo->task_counter = 0;
-	todo->ops->load_tasks = load_tasks;
-	todo->ops->save_tasks = save_tasks;
-	todo->ops->add_task = add_task;
-	todo->ops->remove_task = remove_task;
-	todo->ops->clean_tasks = clean_tasks;
-	todo->ops->destroy = destroy;
-	return todo;
-}
+struct todo_ops ops = {
+	.load_tasks = load_tasks,
+	.save_tasks = save_tasks,
+	.clean_tasks = clean_tasks,
+	.add_task = add_task,
+	.remove_task = remove_task,
+};
 
-void destroy_todo(struct todo **todo)
+void todo_init(struct todo *todo)
 {
-	if (todo == NULL || *todo == NULL)
-		return;
-	(*todo)->ops->destroy(todo);
+	todo->task_counter = 0;
+	todo->ops = &ops;
 }
 
 int todo_load_tasks(struct todo *todo)
