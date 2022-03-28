@@ -17,7 +17,7 @@ add_subdirectory(bin)
 if(${TESTS})
 add_subdirectory(tests)
 	if(${COVERAGE})
-		coverage_target(. */lib/* check)
+		coverage_target(. */tests/* check)
 	endif(${COVERAGE})
 endif(${TESTS})
 
