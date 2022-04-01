@@ -6,9 +6,13 @@
 
 #include "todo.h"
 
+struct todo_ops todo_ops;
+
 void test_todo_init(void **state)
 {
-	struct todo todo;
+	struct todo todo = {
+		.ops = &todo_ops,
+	};
 	todo_init(&todo);
 	assert_int_equal(todo.task_counter, 0);
 	assert_non_null(todo.task_list);
@@ -28,7 +32,9 @@ void test_negative_todo_load_tasks_null(void **state)
 
 void test_todo_load_tasks(void **state)
 {
-	struct todo todo;
+	struct todo todo = {
+		.ops = &todo_ops,
+	};
 	todo_init(&todo);
 	int res = todo_load_tasks(&todo);
 	assert_int_equal(res, 0);
@@ -42,7 +48,9 @@ void test_negative_todo_save_tasks_null(void **state)
 
 void test_todo_save_tasks(void **state)
 {
-	struct todo todo;
+	struct todo todo = {
+		.ops = &todo_ops,
+	};
 	todo_init(&todo);
 	int res = todo_save_tasks(&todo);
 	assert_int_equal(res, 0);
@@ -50,7 +58,9 @@ void test_todo_save_tasks(void **state)
 
 void test_negative_todo_add_task_null(void **state)
 {
-	struct todo todo;
+	struct todo todo = {
+		.ops = &todo_ops,
+	};
 	todo_init(&todo);
 	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);
 	expect_assert_failure(todo_add_task(NULL, task));
@@ -61,7 +71,9 @@ void test_negative_todo_add_task_null(void **state)
 
 void test_negative_todo_add_task_full(void **state)
 {
-	struct todo todo;
+	struct todo todo = {
+		.ops = &todo_ops,
+	};
 	todo_init(&todo);
 	for (int i = 0; i < TODO_TASK_LIST_LENGTH; i++) {
 		struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
@@ -75,7 +87,9 @@ void test_negative_todo_add_task_full(void **state)
 
 void test_todo_add_task_empty(void **state)
 {
-	struct todo todo;
+	struct todo todo = {
+		.ops = &todo_ops,
+	};
 	todo_init(&todo);
 	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);
 	todo_add_task(&todo, task);
@@ -86,7 +100,9 @@ void test_todo_add_task_empty(void **state)
 
 void test_negative_todo_remove_task_null(void **state)
 {
-	struct todo todo;
+	struct todo todo = {
+		.ops = &todo_ops,
+	};
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 	expect_assert_failure(todo_remove_task(NULL, task));
@@ -97,7 +113,9 @@ void test_negative_todo_remove_task_null(void **state)
 
 void test_negative_todo_remove_task_empty(void **state)
 {
-	struct todo todo;
+	struct todo todo = {
+		.ops = &todo_ops,
+	};
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 	todo_remove_task(&todo, task);
@@ -106,7 +124,9 @@ void test_negative_todo_remove_task_empty(void **state)
 
 void test_negative_todo_remove_task_not_found(void **state)
 {
-	struct todo todo;
+	struct todo todo = {
+		.ops = &todo_ops,
+	};
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 	struct task *task2 = create_task("name", "project", TASK_PRIORITY_LOW);
@@ -120,7 +140,9 @@ void test_negative_todo_remove_task_not_found(void **state)
 
 void test_todo_remove_task(void **state)
 {
-	struct todo todo;
+	struct todo todo = {
+		.ops = &todo_ops,
+	};
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 	struct task *task2 = create_task("name", "project", TASK_PRIORITY_LOW);
@@ -140,14 +162,18 @@ void test_negative_todo_clean_tasks_null(void **state)
 
 void test_negative_todo_clean_tasks_empty(void **state)
 {
-	struct todo todo;
+	struct todo todo = {
+		.ops = &todo_ops,
+	};
 	todo_init(&todo);
 	todo_clean_tasks(&todo);
 }
 
 void test_todo_clean_tasks(void **state)
 {
-	struct todo todo;
+	struct todo todo = {
+		.ops = &todo_ops,
+	};
 	todo_init(&todo);
 	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);
 	struct task *task2 = create_new_task("name", "project", TASK_PRIORITY_LOW);

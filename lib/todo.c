@@ -56,7 +56,7 @@ struct todo_ops ops = {
 void todo_init(struct todo *todo)
 {
 	todo->task_counter = 0;
-	todo->ops = &ops;
+	*todo->ops = ops;
 }
 
 int todo_load_tasks(struct todo *todo)
