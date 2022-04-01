@@ -1,4 +1,4 @@
-file(GLOB c_sources ${CMAKE_SOURCE_DIR}/lib/*.c)
+file(GLOB c_sources ${CMAKE_SOURCE_DIR}/bin/*.c)
 
 file(GLOB c_tests test_*.c)
 

@@ -19,17 +19,21 @@ const struct command *find_command(char *name)
 	return NULL;
 }
 
+#ifdef TESTING_MODE
+int test_main(int argc, char **argv)
+#else
 int main(int argc, char **argv)
+#endif
 {
 	if (argc < 2) {
 		printf("Usage: %s <command>\n", argv[0]);
-		return 1;
+		return -1;
 	}
 
 	const struct command *cmd = find_command(argv[1]);
 	if (cmd == NULL) {
 		printf("Unknown command: %s\n", argv[1]);
-		return 1;
+		return -1;
 	}
 
 	return cmd->command_handle(argc - 1, argv + 1);
