@@ -1,25 +1,36 @@
 #include <stdio.h>
+#include <string.h>
 
+#include "command.h"
 #include "task.h"
 
-int main(void)
-{
-	char time_str[50];
-	struct tm *tm = NULL;
-	struct task *task = create_new_task("my task", "my project", TASK_PRIORITY_LOW);
+static const struct command *commands[] = {
+	NULL
+};
 
-	tm = localtime(&task->creation_date);
-	strftime(time_str, sizeof(time_str), "%a %b %d %H:%M:%S %Y", tm);
-	printf("task name: %s\n"
-	       "project name: %s\n"
-	       "prority: %d\n"
-	       "status: %d\n"
-	       "creation date: %s\n",
-	       task->name,
-	       task->project_name,
-	       task->priority,
-	       task->status,
-	       time_str);
-	destroy_task(&task);
-	return 0;
+const struct command *find_command(char *name)
+{
+	int i;
+	for (i = 0; commands[i] != NULL; i++) {
+		if (strcmp(name, commands[i]->name) == 0) {
+			return commands[i];
+		}
+	}
+	return NULL;
+}
+
+int main(int argc, char **argv)
+{
+	if (argc < 2) {
+		printf("Usage: %s <command>\n", argv[0]);
+		return 1;
+	}
+
+	const struct command *cmd = find_command(argv[1]);
+	if (cmd == NULL) {
+		printf("Unknown command: %s\n", argv[1]);
+		return 1;
+	}
+
+	return cmd->command_handle(argc - 1, argv + 1);
 }
