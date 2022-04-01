@@ -250,7 +250,7 @@ void destroy_todotxt(struct todo **todo)
 	*todo = NULL;
 }
 
-struct todo_ops todotxt_ops;
+struct todo_driver todotxt_driver;
 
 struct todo *create_todotxt(char *filename)
 {
@@ -259,10 +259,10 @@ struct todo *create_todotxt(char *filename)
 	if (access(filename, R_OK | W_OK) != 0)
 		return NULL;
 	struct todotxt *todotxt = calloc(1, sizeof(struct todotxt));
-	todotxt->todo.ops = &todotxt_ops;
+	todotxt->todo.driver = &todotxt_driver;
 	todo_init(&todotxt->todo);
-	todotxt->todo.ops->load_tasks = load_tasks;
-	todotxt->todo.ops->save_tasks = save_tasks;
+	todotxt->todo.driver->load_tasks = load_tasks;
+	todotxt->todo.driver->save_tasks = save_tasks;
 	todotxt->filename = filename;
 	return &todotxt->todo;
 }

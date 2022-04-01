@@ -6,22 +6,22 @@
 
 #include "todo.h"
 
-struct todo_ops todo_ops;
+struct todo_driver todo_driver;
 
 void test_todo_init(void **state)
 {
 	struct todo todo = {
-		.ops = &todo_ops,
+		.driver = &todo_driver,
 	};
 	todo_init(&todo);
 	assert_int_equal(todo.task_counter, 0);
 	assert_non_null(todo.task_list);
-	assert_non_null(todo.ops);
-	assert_non_null(todo.ops->load_tasks);
-	assert_non_null(todo.ops->clean_tasks);
-	assert_non_null(todo.ops->save_tasks);
-	assert_non_null(todo.ops->add_task);
-	assert_non_null(todo.ops->remove_task);
+	assert_non_null(todo.driver);
+	assert_non_null(todo.driver->load_tasks);
+	assert_non_null(todo.driver->clean_tasks);
+	assert_non_null(todo.driver->save_tasks);
+	assert_non_null(todo.driver->add_task);
+	assert_non_null(todo.driver->remove_task);
 }
 
 void test_negative_todo_load_tasks_null(void **state)
@@ -33,7 +33,7 @@ void test_negative_todo_load_tasks_null(void **state)
 void test_todo_load_tasks(void **state)
 {
 	struct todo todo = {
-		.ops = &todo_ops,
+		.driver = &todo_driver,
 	};
 	todo_init(&todo);
 	int res = todo_load_tasks(&todo);
@@ -49,7 +49,7 @@ void test_negative_todo_save_tasks_null(void **state)
 void test_todo_save_tasks(void **state)
 {
 	struct todo todo = {
-		.ops = &todo_ops,
+		.driver = &todo_driver,
 	};
 	todo_init(&todo);
 	int res = todo_save_tasks(&todo);
@@ -59,7 +59,7 @@ void test_todo_save_tasks(void **state)
 void test_negative_todo_add_task_null(void **state)
 {
 	struct todo todo = {
-		.ops = &todo_ops,
+		.driver = &todo_driver,
 	};
 	todo_init(&todo);
 	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);
@@ -72,7 +72,7 @@ void test_negative_todo_add_task_null(void **state)
 void test_negative_todo_add_task_full(void **state)
 {
 	struct todo todo = {
-		.ops = &todo_ops,
+		.driver = &todo_driver,
 	};
 	todo_init(&todo);
 	for (int i = 0; i < TODO_TASK_LIST_LENGTH; i++) {
@@ -88,7 +88,7 @@ void test_negative_todo_add_task_full(void **state)
 void test_todo_add_task_empty(void **state)
 {
 	struct todo todo = {
-		.ops = &todo_ops,
+		.driver = &todo_driver,
 	};
 	todo_init(&todo);
 	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);
@@ -101,7 +101,7 @@ void test_todo_add_task_empty(void **state)
 void test_negative_todo_remove_task_null(void **state)
 {
 	struct todo todo = {
-		.ops = &todo_ops,
+		.driver = &todo_driver,
 	};
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
@@ -114,7 +114,7 @@ void test_negative_todo_remove_task_null(void **state)
 void test_negative_todo_remove_task_empty(void **state)
 {
 	struct todo todo = {
-		.ops = &todo_ops,
+		.driver = &todo_driver,
 	};
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
@@ -125,7 +125,7 @@ void test_negative_todo_remove_task_empty(void **state)
 void test_negative_todo_remove_task_not_found(void **state)
 {
 	struct todo todo = {
-		.ops = &todo_ops,
+		.driver = &todo_driver,
 	};
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
@@ -141,7 +141,7 @@ void test_negative_todo_remove_task_not_found(void **state)
 void test_todo_remove_task(void **state)
 {
 	struct todo todo = {
-		.ops = &todo_ops,
+		.driver = &todo_driver,
 	};
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
@@ -163,7 +163,7 @@ void test_negative_todo_clean_tasks_null(void **state)
 void test_negative_todo_clean_tasks_empty(void **state)
 {
 	struct todo todo = {
-		.ops = &todo_ops,
+		.driver = &todo_driver,
 	};
 	todo_init(&todo);
 	todo_clean_tasks(&todo);
@@ -172,7 +172,7 @@ void test_negative_todo_clean_tasks_empty(void **state)
 void test_todo_clean_tasks(void **state)
 {
 	struct todo todo = {
-		.ops = &todo_ops,
+		.driver = &todo_driver,
 	};
 	todo_init(&todo);
 	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);

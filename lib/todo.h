@@ -9,7 +9,7 @@
 
 struct todo;
 
-struct todo_ops {
+struct todo_driver {
 	int (*load_tasks)(struct todo*);
 	int (*save_tasks)(struct todo*);
 	void (*clean_tasks)(struct todo*);
@@ -18,7 +18,7 @@ struct todo_ops {
 };
 
 struct todo {
-	struct todo_ops *ops;
+	struct todo_driver *driver;
 #define TODO_TASK_LIST_LENGTH 50
 	struct task *task_list[TODO_TASK_LIST_LENGTH];
 	int task_counter;

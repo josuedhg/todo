@@ -377,12 +377,12 @@ void test_create_todotxt(void **state)
 	assert_non_null(todo);
 	assert_int_equal(todo->task_counter, 0);
 	assert_non_null(todo->task_list);
-	assert_non_null(todo->ops);
-	assert_non_null(todo->ops->load_tasks);
-	assert_non_null(todo->ops->clean_tasks);
-	assert_non_null(todo->ops->save_tasks);
-	assert_non_null(todo->ops->add_task);
-	assert_non_null(todo->ops->remove_task);
+	assert_non_null(todo->driver);
+	assert_non_null(todo->driver->load_tasks);
+	assert_non_null(todo->driver->clean_tasks);
+	assert_non_null(todo->driver->save_tasks);
+	assert_non_null(todo->driver->add_task);
+	assert_non_null(todo->driver->remove_task);
 
 	assert_string_equal(todotxt->filename, "filename");
 	destroy_todotxt(&todo);
