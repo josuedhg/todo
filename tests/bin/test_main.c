@@ -24,11 +24,21 @@ static void test_main_invalid_command(void **state)
 	assert_int_equal(test_main(2, argv), -1);
 }
 
+static void test_main_help(void **state)
+{
+	char *argv[] = {
+		"test_main",
+		"help"
+	};
+	assert_int_equal(test_main(2, argv), -1);
+}
+
 int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
 		cmocka_unit_test(test_main_no_command),
 		cmocka_unit_test(test_main_invalid_command),
+		cmocka_unit_test(test_main_help)
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);
