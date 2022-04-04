@@ -10,7 +10,7 @@ add_link_options(-Wl,--wrap=fwrite)
 
 foreach(file ${c_tests})
 	get_filename_component(test_name ${file} NAME_WE)
-	add_executable(${test_name} ${file} ${c_sources} ${CMAKE_SOURCE_DIR}/tests/instrument.c)
+	add_executable(${test_name} ${file} ${c_sources} instrument.c)
 
 	target_link_libraries(${test_name} cmocka)
 

@@ -1,0 +1,6 @@
+#ifndef __CONFIGURE_H__
+#define __CONFIGURE_H__
+
+#cmakedefine TODOTXT_FILE_NAME "@TODOTXT_FILE_NAME@"
+
+#endif /* end of include guard: __CONFIGURE_H__ */
