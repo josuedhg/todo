@@ -31,13 +31,13 @@
             <td class="headerValue">coverage.info</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">176</td>
             <td class="headerCovTableEntry">177</td>
-            <td class="headerCovTableEntryHi">99.4 %</td>
+            <td class="headerCovTableEntry">177</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-06 01:30:00</td>
+            <td class="headerValue">2022-04-06 02:45:53</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">11</td>
@@ -268,7 +268,7 @@
 <a name="206"><span class="lineNum">     206 </span><span class="lineCov">          4 :         ssize_t line_size = 0;</span></a>
 <a name="207"><span class="lineNum">     207 </span><span class="lineCov">          6 :         while ((line_size = getline(&amp;line, &amp;lines_len, file)) != -1) {</span></a>
 <a name="208"><span class="lineNum">     208 </span><span class="lineCov">          2 :                 if (line[line_size - 1] == '\n')</span></a>
-<a name="209"><span class="lineNum">     209 </span><span class="lineNoCov">          0 :                         line[line_size - 1] = '\0';</span></a>
+<a name="209"><span class="lineNum">     209 </span><span class="lineCov">          2 :                         line[line_size - 1] = '\0';</span></a>
 <a name="210"><span class="lineNum">     210 </span><span class="lineCov">          2 :                 struct task *task = create_task_from_todotxt(line);</span></a>
 <a name="211"><span class="lineNum">     211 </span><span class="lineCov">          2 :                 todo_add_task(todo, task);</span></a>
 <a name="212"><span class="lineNum">     212 </span>            :         }</a>
