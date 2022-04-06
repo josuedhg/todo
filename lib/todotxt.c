@@ -205,6 +205,8 @@ static int load_tasks(struct todo *todo)
 	char *line = NULL;
 	ssize_t line_size = 0;
 	while ((line_size = getline(&line, &lines_len, file)) != -1) {
+		if (line[line_size - 1] == '\n')
+			line[line_size - 1] = '\0';
 		struct task *task = create_task_from_todotxt(line);
 		todo_add_task(todo, task);
 	}

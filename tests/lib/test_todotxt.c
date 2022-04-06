@@ -412,9 +412,9 @@ void test_todo_load_tasks(void **state)
 {
 	struct todo *todo = (struct todo *)*state;
 	int file_p = 1;
-#define SAMPLE_TEXT_LEN 8
+#define SAMPLE_TEXT_LEN 9
 	char *line = calloc(1, sizeof(char) * SAMPLE_TEXT_LEN + 1);
-	memcpy(line, "new task", SAMPLE_TEXT_LEN);
+	memcpy(line, "new task\n", SAMPLE_TEXT_LEN);
 	will_return(__wrap_fopen, &file_p);
 	will_return(__wrap_getline, 0);
 	will_return(__wrap_getline, line);
