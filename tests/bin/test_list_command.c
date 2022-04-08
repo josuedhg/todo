@@ -5,7 +5,7 @@
 #include <cmocka.h>
 
 #include "todo.h"
-#include "list_command.h"
+#include "commands.h"
 
 // TODO: Check stdout and stderr for correct output
 

@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "list_command.h"
 #include "command.h"
+#include "commands.h"
 #include "configure.h"
 #include "todotxt.h"
 

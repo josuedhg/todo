@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "command.h"
-#include "list_command.h"
+#include "commands.h"
 #include "task.h"
 
 static int help_handler(int argc, char **argv);
@@ -18,6 +18,7 @@ const struct command help_command = {
 static const struct command *commands[] = {
 	&help_command,
 	&list_command,
+	&show_command,
 	NULL
 };
 
