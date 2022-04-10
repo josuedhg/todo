@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-10 17:17:50</td>
+            <td class="headerValue">2022-04-10 22:23:27</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">1</td>
@@ -116,7 +116,7 @@
 <a name="54"><span class="lineNum">      54 </span>            :         }</a>
 <a name="55"><span class="lineNum">      55 </span>            : </a>
 <a name="56"><span class="lineNum">      56 </span><span class="lineCov">          2 :         printf(&quot;Task %d: %s\n&quot;, task_id, task-&gt;name);</span></a>
-<a name="57"><span class="lineNum">      57 </span><span class="lineCov">          2 :         printf(&quot;Project %s\n&quot;, (strlen(task-&gt;project_name)? task-&gt;project_name : &quot;-&quot;));</span></a>
+<a name="57"><span class="lineNum">      57 </span><span class="lineCov">          2 :         printf(&quot;Project %s\n&quot;, (task-&gt;project_name)? task-&gt;project_name : &quot;-&quot;);</span></a>
 <a name="58"><span class="lineNum">      58 </span><span class="lineCov">          2 :         printf(&quot;Status %s\n&quot;, (task-&gt;status) ? &quot;done&quot; : &quot;open&quot;);</span></a>
 <a name="59"><span class="lineNum">      59 </span>            : </a>
 <a name="60"><span class="lineNum">      60 </span><span class="lineCov">          6 : cleanup_and_exit:</span></a>
