@@ -12,20 +12,8 @@ void test_negative_create_task_name_null(void **state)
 	assert_null(task);
 
 	struct task *task2 = create_task("name", NULL, TASK_PRIORITY_LOW);
-	assert_null(task2);
-}
-
-void test_negative_create_task_name_long(void **state)
-{
-	const char long_string[] = "This is a project with a very very very very"
-		"that could be used as project name or any other kind of name"
-		"in the project this is just with test purpuses but all validation"
-		"is needed";
-	struct task *task = create_task(long_string, "project", TASK_PRIORITY_LOW);
-	assert_null(task);
-
-	struct task *task2 = create_task("name", long_string, TASK_PRIORITY_LOW);
-	assert_null(task2);
+	assert_non_null(task2);
+	destroy_task(&task2);
 }
 
 void test_create_task(void **state)
@@ -89,7 +77,6 @@ int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
 		cmocka_unit_test(test_negative_create_task_name_null),
-		cmocka_unit_test(test_negative_create_task_name_long),
 		cmocka_unit_test(test_create_task),
 		cmocka_unit_test(test_create_new_task),
 		cmocka_unit_test(test_negative_create_new_task_null),

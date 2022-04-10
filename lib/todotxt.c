@@ -73,18 +73,23 @@ char *todotxt_get_project_name_from_desc(const char *str)
 	int str_len = strlen(str);
 	bool buffering = false;
 	int buffer_index = 0;
-	char buffer[TASK_NAME_LENGTH] = { 0 };
-	for (int i = 0; i < str_len; i++)
+	int i = 0;
+	const char *buffer = NULL;
+	for (i = 0; i < str_len; i++)
 	{
 		if (str[i] == '+' && (i == 0 || str[i - 1] == ' ') && isalpha(str[i + 1])) {
 			buffering = true;
 			continue;
 		}
-		if (buffering && str[i] == ' ') {
+
+		if (buffering && str[i] == ' ')
 			break;
-		}
-		if (buffering)
-			buffer[buffer_index++] = str[i];
+
+		if (buffering && buffer == NULL)
+			buffer = &str[i];
+
+		if (buffer != NULL)
+			buffer_index++;
 	}
 	if (buffer_index == 0)
 		return NULL;
@@ -140,11 +145,10 @@ struct task *create_task_from_todotxt(const char *todoline)
 	}
 
 	char *project_name = todotxt_get_project_name_from_desc(&todoline[index]);
-	if (project_name != NULL) {
-		memcpy(task->project_name, project_name, strlen(project_name));
-		free(project_name);
-	}
+	if (project_name != NULL)
+		task->project_name = project_name;
 
+	task->name = calloc(1, strlen(&todoline[index]) + 1);
 	memcpy(task->name, &todoline[index], strlen(&todoline[index]));
 
 	return task;
@@ -174,7 +178,7 @@ int create_todotxt_line_from_task(struct task *task, char **buffer)
 
 	int line_length = strlen(line_header) + strlen(task->name) + 1;
 
-	if (strstr(task->name, "+") == NULL)
+	if (strstr(task->name, "+") == NULL && task->project_name != NULL)
 		line_length += strlen(task->project_name) + 2; // +2 for the space and the +
 
 	if (task->due_date != 0) {
@@ -185,7 +189,7 @@ int create_todotxt_line_from_task(struct task *task, char **buffer)
 	line = calloc(1, line_length * 2);
 	sprintf(line, "%s %s", line_header, task->name);
 
-	if (strstr(task->name, "+") == NULL)
+	if (strstr(task->name, "+") == NULL && task->project_name != NULL)
 		sprintf(line, "%s +%s", line, task->project_name);
 
 	if (task->due_date != 0 && strstr(task->name, "due:") == NULL)

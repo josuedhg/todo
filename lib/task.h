@@ -4,9 +4,8 @@
 #include <time.h>
 
 struct task {
-#define TASK_NAME_LENGTH 50
-	char name[TASK_NAME_LENGTH];
-	char project_name[TASK_NAME_LENGTH];
+	char *name;
+	char *project_name;
 #define TASK_STATUS_OPEN 0
 #define TASK_STATUS_COMPLETED 1
 	int status;

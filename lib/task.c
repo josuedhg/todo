@@ -7,17 +7,19 @@
 
 struct task *create_task(const char *name, const char *project_name, int priority)
 {
-	if (name == NULL || project_name == NULL)
+	if (name == NULL)
 		return NULL;
 
 	int namelen = strlen(name);
-	int pnamelen = strlen(project_name);
-	if (namelen >= TASK_NAME_LENGTH || pnamelen >= TASK_NAME_LENGTH)
-		return NULL;
+	int pnamelen = (project_name == NULL) ? 0 : strlen(project_name);
 
 	struct task *task = calloc(1, sizeof(struct task));
-	memcpy(task->name, name, namelen);
-	memcpy(task->project_name, project_name, pnamelen);
+	task->name = calloc(1, namelen + 1);
+	task->project_name = calloc(1, pnamelen + 1);
+
+	strncpy(task->name, name, namelen);
+	if (project_name != NULL)
+		strncpy(task->project_name, project_name, pnamelen);
 	task->priority = priority;
 	return task;
 }
@@ -42,6 +44,8 @@ void destroy_task(struct task **task)
 {
 	if (task == NULL || *task == NULL)
 		return;
+	free((*task)->name);
+	free((*task)->project_name);
 	free(*task);
 	*task = NULL;
 }

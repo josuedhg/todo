@@ -54,7 +54,7 @@ int show_command_handler(int argc, char **argv)
 	}
 
 	printf("Task %d: %s\n", task_id, task->name);
-	printf("Project %s\n", (strlen(task->project_name)? task->project_name : "-"));
+	printf("Project %s\n", (task->project_name)? task->project_name : "-");
 	printf("Status %s\n", (task->status) ? "done" : "open");
 
 cleanup_and_exit:
