@@ -100,6 +100,29 @@ void deinstrument_stderr()
 }
 
 // instrument output
+int __wrap_printf(const char *format, ...)
+{
+	int ret = 0;
+	int fd = fileno(stdout);
+	va_list args;
+	char *buffer = NULL;
+	struct entry *entry = NULL;
+	va_start(args, format);
+
+	if (!instrument_output[fd]) {
+		ret = vprintf(format, args);
+	} else {
+		ret = vasprintf(&buffer, format, args);
+		entry = calloc(1, sizeof(*entry));
+		entry->data = buffer;
+		entry->data_len = ret;
+		TAILQ_INSERT_TAIL(&entries[fd], entry, entries);
+	}
+
+	va_end(args);
+	return ret;
+}
+
 int __wrap_fprintf(FILE *stream, const char *format, ...)
 {
 	int ret = 0;
