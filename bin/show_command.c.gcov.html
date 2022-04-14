@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-14 05:14:17</td>
+            <td class="headerValue">2022-04-14 22:43:24</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">1</td>
@@ -115,23 +115,26 @@
 <a name="53"><span class="lineNum">      53 </span><span class="lineCov">          2 :                 goto cleanup_and_exit;</span></a>
 <a name="54"><span class="lineNum">      54 </span>            :         }</a>
 <a name="55"><span class="lineNum">      55 </span>            : </a>
-<a name="56"><span class="lineNum">      56 </span><span class="lineCov">          2 :         printf(&quot;Task %d: %s\n&quot;, task_id, task-&gt;name);</span></a>
-<a name="57"><span class="lineNum">      57 </span><span class="lineCov">          2 :         printf(&quot;Project %s\n&quot;, (task-&gt;project_name)? task-&gt;project_name : &quot;-&quot;);</span></a>
-<a name="58"><span class="lineNum">      58 </span><span class="lineCov">          2 :         printf(&quot;Status %s\n&quot;, (task-&gt;status) ? &quot;done&quot; : &quot;open&quot;);</span></a>
-<a name="59"><span class="lineNum">      59 </span>            : </a>
-<a name="60"><span class="lineNum">      60 </span><span class="lineCov">          6 : cleanup_and_exit:</span></a>
-<a name="61"><span class="lineNum">      61 </span><span class="lineCov">          6 :         todo_clean_tasks(todo);</span></a>
-<a name="62"><span class="lineNum">      62 </span><span class="lineCov">          6 :         destroy_todotxt(&amp;todo);</span></a>
-<a name="63"><span class="lineNum">      63 </span><span class="lineCov">          6 :         free(todotxt_config_dir);</span></a>
-<a name="64"><span class="lineNum">      64 </span><span class="lineCov">          6 :         return ret;</span></a>
-<a name="65"><span class="lineNum">      65 </span>            : }</a>
-<a name="66"><span class="lineNum">      66 </span>            : </a>
-<a name="67"><span class="lineNum">      67 </span>            : const struct command show_command = {</a>
-<a name="68"><span class="lineNum">      68 </span>            :         .name = &quot;show&quot;,</a>
-<a name="69"><span class="lineNum">      69 </span>            :         .description = &quot;Show task details&quot;,</a>
-<a name="70"><span class="lineNum">      70 </span>            :         .usage = &quot;show [task_id]&quot;,</a>
-<a name="71"><span class="lineNum">      71 </span>            :         .command_handle = show_command_handler,</a>
-<a name="72"><span class="lineNum">      72 </span>            : };</a>
+<a name="56"><span class="lineNum">      56 </span><span class="lineCov">          4 :         printf( &quot;Task %d: %s\n&quot;</span></a>
+<a name="57"><span class="lineNum">      57 </span>            :                 &quot;Project %s\n&quot;</a>
+<a name="58"><span class="lineNum">      58 </span>            :                 &quot;Status %s\n&quot;,</a>
+<a name="59"><span class="lineNum">      59 </span>            :                 task_id, task-&gt;name,</a>
+<a name="60"><span class="lineNum">      60 </span><span class="lineCov">          2 :                 (task-&gt;project_name)? task-&gt;project_name : &quot;-&quot;,</span></a>
+<a name="61"><span class="lineNum">      61 </span><span class="lineCov">          2 :                 (task-&gt;status) ? &quot;done&quot; : &quot;open&quot;);</span></a>
+<a name="62"><span class="lineNum">      62 </span>            : </a>
+<a name="63"><span class="lineNum">      63 </span><span class="lineCov">          6 : cleanup_and_exit:</span></a>
+<a name="64"><span class="lineNum">      64 </span><span class="lineCov">          6 :         todo_clean_tasks(todo);</span></a>
+<a name="65"><span class="lineNum">      65 </span><span class="lineCov">          6 :         destroy_todotxt(&amp;todo);</span></a>
+<a name="66"><span class="lineNum">      66 </span><span class="lineCov">          6 :         free(todotxt_config_dir);</span></a>
+<a name="67"><span class="lineNum">      67 </span><span class="lineCov">          6 :         return ret;</span></a>
+<a name="68"><span class="lineNum">      68 </span>            : }</a>
+<a name="69"><span class="lineNum">      69 </span>            : </a>
+<a name="70"><span class="lineNum">      70 </span>            : const struct command show_command = {</a>
+<a name="71"><span class="lineNum">      71 </span>            :         .name = &quot;show&quot;,</a>
+<a name="72"><span class="lineNum">      72 </span>            :         .description = &quot;Show task details&quot;,</a>
+<a name="73"><span class="lineNum">      73 </span>            :         .usage = &quot;show [task_id]&quot;,</a>
+<a name="74"><span class="lineNum">      74 </span>            :         .command_handle = show_command_handler,</a>
+<a name="75"><span class="lineNum">      75 </span>            : };</a>
 </pre>
       </td>
     </tr>
