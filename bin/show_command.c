@@ -53,9 +53,12 @@ int show_command_handler(int argc, char **argv)
 		goto cleanup_and_exit;
 	}
 
-	printf("Task %d: %s\n", task_id, task->name);
-	printf("Project %s\n", (task->project_name)? task->project_name : "-");
-	printf("Status %s\n", (task->status) ? "done" : "open");
+	printf( "Task %d: %s\n"
+		"Project %s\n"
+		"Status %s\n",
+		task_id, task->name,
+		(task->project_name)? task->project_name : "-",
+		(task->status) ? "done" : "open");
 
 cleanup_and_exit:
 	todo_clean_tasks(todo);
