@@ -36,10 +36,11 @@ const struct command *find_command(char *name)
 static int help_handler(int argc, char **argv)
 {
 	int i;
-	printf("Usage: %s <command>\n", bin_name);
-	puts("Available commands:");
+	fprintf(stderr, "Usage: %s <command>\n"
+			"Available commands:\n",
+			bin_name);
 	for (i = 0; commands[i] != NULL; i++) {
-		printf("\t%s: %s\n", commands[i]->name, commands[i]->description);
+		fprintf(stderr, "\t%s: %s\n", commands[i]->name, commands[i]->description);
 	}
 	return -1;
 }
@@ -57,7 +58,7 @@ int main(int argc, char **argv)
 
 	const struct command *cmd = find_command(argv[1]);
 	if (cmd == NULL) {
-		printf("Unknown command: %s\n", argv[1]);
+		fprintf(stderr, "Unknown command: %s\n", argv[1]);
 		return help_handler(argc, argv);
 	}
 
