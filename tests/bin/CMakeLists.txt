@@ -7,6 +7,10 @@ include_directories(${CMAKE_SOURCE_DIR}/lib)
 include_directories(${CMAKE_SOURCE_DIR}/bin)
 configure_file(${CMAKE_SOURCE_DIR}/bin/configure.h.in configure.h @ONLY)
 
+# instrumenting print fuctions
+add_link_options(-Wl,--wrap=fprintf)
+
+# instrumenting libtodo
 add_link_options(-Wl,--wrap=create_todotxt)
 add_link_options(-Wl,--wrap=todo_load_tasks)
 add_link_options(-Wl,--wrap=todo_clean_tasks)
