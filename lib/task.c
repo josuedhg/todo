@@ -15,11 +15,12 @@ struct task *create_task(const char *name, const char *project_name, int priorit
 
 	struct task *task = calloc(1, sizeof(struct task));
 	task->name = calloc(1, namelen + 1);
-	task->project_name = calloc(1, pnamelen + 1);
 
 	strncpy(task->name, name, namelen);
-	if (project_name != NULL)
+	if (project_name != NULL) {
+		task->project_name = calloc(1, pnamelen + 1);
 		strncpy(task->project_name, project_name, pnamelen);
+	}
 	task->priority = priority;
 	return task;
 }
