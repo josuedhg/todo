@@ -19,6 +19,7 @@ static const struct command *commands[] = {
 	&help_command,
 	&list_command,
 	&show_command,
+	&add_command,
 	NULL
 };
 

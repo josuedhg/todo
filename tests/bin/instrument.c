@@ -147,6 +147,27 @@ int __wrap_fprintf(FILE *stream, const char *format, ...)
 }
 
 // libtodo instrument functions
+int __wrap_todo_save_tasks(struct todo *todo)
+{
+	return mock_type(int);
+}
+
+void __wrap_todo_add_task(struct todo *todo, struct task *task)
+{
+	return;
+}
+
+struct task *__wrap_create_new_task(const char *desc, const char *project, int priority)
+{
+	struct task *task = mock_ptr_type(struct task *);
+	if (task == NULL)
+		return NULL;
+	check_expected(desc);
+	check_expected(project);
+	check_expected(priority);
+	return task;
+}
+
 struct todo *__wrap_create_todotxt(const char *pathname)
 {
 	return mock_ptr_type(struct todo *);
