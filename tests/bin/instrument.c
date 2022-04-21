@@ -152,6 +152,11 @@ int __wrap_todo_save_tasks(struct todo *todo)
 	return mock_type(int);
 }
 
+void __wrap_todo_remove_task(struct todo *todo, struct task *task)
+{
+	return;
+}
+
 void __wrap_todo_add_task(struct todo *todo, struct task *task)
 {
 	return;

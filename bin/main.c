@@ -20,6 +20,7 @@ static const struct command *commands[] = {
 	&list_command,
 	&show_command,
 	&add_command,
+	&delete_command,
 	NULL
 };
 
