@@ -9,6 +9,10 @@
 #include "todotxt.h"
 #include "task.h"
 
+#ifdef TESTING_MODE
+#define main test_main
+#endif
+
 static int help_handler(struct todo *todo, int argc, char **argv);
 static char *bin_name = NULL;
 
@@ -56,11 +60,7 @@ static int help_handler(struct todo *todo, int argc, char **argv)
 	return -1;
 }
 
-#ifdef TESTING_MODE
-int test_main(int argc, char **argv)
-#else
 int main(int argc, char **argv)
-#endif
 {
 	bin_name = argv[0];
 	if (argc < 2) {
