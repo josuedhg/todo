@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-24 02:15:02</td>
+            <td class="headerValue">2022-04-24 02:25:49</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">1</td>
@@ -69,13 +69,13 @@
 <a name="7"><span class="lineNum">       7 </span>            : #include &quot;configure.h&quot;</a>
 <a name="8"><span class="lineNum">       8 </span>            : #include &quot;todotxt.h&quot;</a>
 <a name="9"><span class="lineNum">       9 </span>            : </a>
-<a name="10"><span class="lineNum">      10 </span><span class="lineCov">          6 : int list_command_handler(struct todo *todo, int argc, char **argv)</span></a>
+<a name="10"><span class="lineNum">      10 </span><span class="lineCov">          8 : int list_command_handler(struct todo *todo, int argc, char **argv)</span></a>
 <a name="11"><span class="lineNum">      11 </span>            : {</a>
-<a name="12"><span class="lineNum">      12 </span><span class="lineCov">         12 :         for (int i = 0; i &lt; todo-&gt;task_counter; i++) {</span></a>
-<a name="13"><span class="lineNum">      13 </span><span class="lineCov">          6 :                 printf(&quot;%d. %s\n&quot;, i + 1, todo-&gt;task_list[i]-&gt;name);</span></a>
+<a name="12"><span class="lineNum">      12 </span><span class="lineCov">         18 :         for (int i = 0; i &lt; todo-&gt;task_counter; i++) {</span></a>
+<a name="13"><span class="lineNum">      13 </span><span class="lineCov">         10 :                 printf(&quot;%d. %s\n&quot;, i + 1, todo-&gt;task_list[i]-&gt;name);</span></a>
 <a name="14"><span class="lineNum">      14 </span>            :         }</a>
 <a name="15"><span class="lineNum">      15 </span>            : </a>
-<a name="16"><span class="lineNum">      16 </span><span class="lineCov">          6 :         return 0;</span></a>
+<a name="16"><span class="lineNum">      16 </span><span class="lineCov">          8 :         return 0;</span></a>
 <a name="17"><span class="lineNum">      17 </span>            : }</a>
 <a name="18"><span class="lineNum">      18 </span>            : </a>
 <a name="19"><span class="lineNum">      19 </span>            : const struct command list_command = {</a>
