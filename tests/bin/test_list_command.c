@@ -36,41 +36,6 @@ static void test_list_command_listed_in_help(void **state)
 	free(buffer);
 }
 
-static void test_list_command_cannot_access_file(void **state)
-{
-	(void)state; /* unused */
-	char *buffer = NULL;
-	size_t buffer_size = 0;
-
-	instrument_stderr();
-	will_return(__wrap_create_todotxt, NULL);
-	assert_int_equal(list_command.command_handle(0, NULL), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "Error: Unable to read"));
-	free(buffer);
-}
-
-static void test_list_command_cannot_read_file(void **state)
-{
-	(void)state; /* unused */
-	char *buffer = NULL;
-	size_t buffer_size = 0;
-
-	instrument_stderr();
-	will_return(__wrap_create_todotxt, &todo);
-	will_return(__wrap_todo_load_tasks, -1);
-	assert_int_equal(list_command.command_handle(0, NULL), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "Error: Unable to load tasks from"));
-	free(buffer);
-}
-
 static void test_list_command_no_tasks(void **state)
 {
 	(void)state; /* unused */
@@ -78,9 +43,7 @@ static void test_list_command_no_tasks(void **state)
 	size_t buffer_size = 0;
 
 	instrument_stdout();
-	will_return(__wrap_create_todotxt, &todo);
-	will_return(__wrap_todo_load_tasks, 0);
-	assert_int_equal(list_command.command_handle(0, NULL), 0);
+	assert_int_equal(list_command.command_handle(&todo, 0, NULL), 0);
 	buffer_size = get_stdout_buffer(&buffer);
 	deinstrument_stdout();
 
@@ -101,12 +64,8 @@ static void test_list_command_one_task(void **state)
 	// setup stdout
 	instrument_stdout();
 
-	// prepare returns
-	will_return(__wrap_create_todotxt, &todo);
-	will_return(__wrap_todo_load_tasks, 0);
-
 	// run command
-	assert_int_equal(list_command.command_handle(0, NULL), 0);
+	assert_int_equal(list_command.command_handle(&todo, 0, NULL), 0);
 
 	// get stdout
 	buffer_size = get_stdout_buffer(&buffer);
@@ -139,12 +98,8 @@ static void test_list_command_multiple_tasks(void **state)
 	// setup stdout
 	instrument_stdout();
 
-	// prepare returns
-	will_return(__wrap_create_todotxt, &todo);
-	will_return(__wrap_todo_load_tasks, 0);
-
 	// run command
-	assert_int_equal(list_command.command_handle(0, NULL), 0);
+	assert_int_equal(list_command.command_handle(&todo, 0, NULL), 0);
 
 	// get stdout
 	buffer_size = get_stdout_buffer(&buffer);
@@ -169,8 +124,6 @@ int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
 		cmocka_unit_test(test_list_command_listed_in_help),
-		cmocka_unit_test(test_list_command_cannot_access_file),
-		cmocka_unit_test(test_list_command_cannot_read_file),
 		cmocka_unit_test(test_list_command_no_tasks),
 		cmocka_unit_test(test_list_command_one_task),
 		cmocka_unit_test(test_list_command_multiple_tasks),

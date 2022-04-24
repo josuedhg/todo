@@ -1,11 +1,15 @@
+#define _GNU_SOURCE
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "command.h"
 #include "commands.h"
+#include "configure.h"
+#include "todotxt.h"
 #include "task.h"
 
-static int help_handler(int argc, char **argv);
+static int help_handler(struct todo *todo, int argc, char **argv);
 static char *bin_name = NULL;
 
 const struct command help_command = {
@@ -35,8 +39,11 @@ const struct command *find_command(char *name)
 	return NULL;
 }
 
-static int help_handler(int argc, char **argv)
+static int help_handler(struct todo *todo, int argc, char **argv)
 {
+	(void) todo;
+	(void) argc;
+	(void) argv;
 	int i;
 	fprintf(stderr, "Usage: %s <command>\n"
 			"Available commands:\n",
@@ -55,14 +62,36 @@ int main(int argc, char **argv)
 {
 	bin_name = argv[0];
 	if (argc < 2) {
-		return help_handler(argc, argv);
+		return help_handler(NULL, argc, argv);
 	}
 
 	const struct command *cmd = find_command(argv[1]);
 	if (cmd == NULL) {
 		fprintf(stderr, "Unknown command: %s\n", argv[1]);
-		return help_handler(argc, argv);
+		return help_handler(NULL, argc, argv);
 	}
 
-	return cmd->command_handle(argc - 1, argv + 1);
+	int ret = 0;
+	char *todotxt_config_dir = NULL;
+	asprintf(&todotxt_config_dir, "%s/%s", getenv("HOME"), TODOTXT_FILE_NAME);
+
+	struct todo *todo = create_todotxt(todotxt_config_dir);
+	if (todo == NULL) {
+		fprintf(stderr, "Error: Unable to read %s file.\n", todotxt_config_dir);
+		ret = -1;
+		goto EXIT_AND_CLEAN;
+	}
+
+	if (todo_load_tasks(todo) < 0) {
+		fprintf(stderr, "Error: Unable to load tasks from %s file.\n", todotxt_config_dir);
+		ret = -1;
+		goto EXIT_AND_CLEAN;
+	}
+
+	ret = cmd->command_handle(todo, argc - 1, argv + 1);
+EXIT_AND_CLEAN:
+	todo_clean_tasks(todo);
+	destroy_todotxt(&todo);
+	free(todotxt_config_dir);
+	return ret;
 }

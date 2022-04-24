@@ -1,11 +1,13 @@
 #ifndef __COMMAND_H__
 #define __COMMAND_H__
 
+#include "todo.h"
+
 struct command {
   char *name;
   char *usage;
   char *description;
-  int (*command_handle)(int, char **);
+  int (*command_handle)(struct todo *, int, char **);
 };
 
 #endif /* end of include guard: __COMMAND_H__ */
