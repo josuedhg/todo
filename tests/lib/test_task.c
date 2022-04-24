@@ -60,6 +60,21 @@ void test_task_set_completed(void **state)
 	destroy_task(&task);
 }
 
+void test_negative_task_reopen_null(void **state)
+{
+	expect_assert_failure(task_reopen(NULL));
+}
+
+void test_task_reopen(void **state)
+{
+	struct task *task = create_task("name", "pname", TASK_PRIORITY_LOW);
+	task_set_completed(task);
+	task_reopen(task);
+	assert_int_equal(task->status, TASK_STATUS_OPEN);
+	assert_false(task->completion_date);
+	destroy_task(&task);
+}
+
 void test_negative_destroy_task(void **state)
 {
 	destroy_task(NULL);
@@ -82,6 +97,8 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_negative_create_new_task_null),
 		cmocka_unit_test(test_negative_set_completed_null),
 		cmocka_unit_test(test_task_set_completed),
+		cmocka_unit_test(test_negative_task_reopen_null),
+		cmocka_unit_test(test_task_reopen),
 		cmocka_unit_test(test_negative_destroy_task),
 		cmocka_unit_test(test_destroy_task),
 	};

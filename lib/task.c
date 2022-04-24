@@ -32,6 +32,13 @@ void task_set_completed(struct task *task)
 	task->completion_date = time(NULL);
 }
 
+void task_reopen(struct task *task)
+{
+	assert(task != NULL);
+	task->status = TASK_STATUS_OPEN;
+	task->completion_date = 0;
+}
+
 struct task *create_new_task(const char *name, const char *project_name, int priority)
 {
 	struct task *task = create_task(name, project_name, priority);
