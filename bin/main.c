@@ -13,18 +13,7 @@
 #define main test_main
 #endif
 
-static int help_handler(struct todo *todo, int argc, char **argv);
-static char *bin_name = NULL;
-
-const struct command help_command = {
-	.name = "help",
-	.description = "Display this help message",
-	.usage = "help",
-	.command_handle = help_handler,
-};
-
 static const struct command *commands[] = {
-	&help_command,
 	&list_command,
 	&show_command,
 	&add_command,
@@ -45,14 +34,12 @@ const struct command *find_command(char *name)
 	return NULL;
 }
 
-static int help_handler(struct todo *todo, int argc, char **argv)
+static int help(char *bin_name)
 {
-	(void) todo;
-	(void) argc;
-	(void) argv;
 	int i;
 	fprintf(stderr, "Usage: %s <command>\n"
-			"Available commands:\n",
+			"Available commands:\n"
+			"\thelp: Display this help message\n",
 			bin_name);
 	for (i = 0; commands[i] != NULL; i++) {
 		fprintf(stderr, "\t%s: %s\n", commands[i]->name, commands[i]->description);
@@ -62,15 +49,14 @@ static int help_handler(struct todo *todo, int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	bin_name = argv[0];
-	if (argc < 2) {
-		return help_handler(NULL, argc, argv);
+	if (argc < 2 || strcmp(argv[1], "help") == 0) {
+		return help(argv[0]);
 	}
 
 	const struct command *cmd = find_command(argv[1]);
 	if (cmd == NULL) {
 		fprintf(stderr, "Unknown command: %s\n", argv[1]);
-		return help_handler(NULL, argc, argv);
+		return help(argv[0]);
 	}
 
 	int ret = 0;

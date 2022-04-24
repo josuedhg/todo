@@ -57,11 +57,11 @@ static void test_main_invalid_command(void **state)
 	free(buffer);
 }
 
-static void test_main_help_fail_create_todo(void **state)
+static void test_main_command_fail_create_todo(void **state)
 {
 	char *argv[] = {
 		"test_main",
-		"help"
+		"list"
 	};
 	char *buffer = NULL;
 	size_t buffer_size = 0;
@@ -80,11 +80,11 @@ static void test_main_help_fail_create_todo(void **state)
 	free(buffer);
 }
 
-static void test_main_help_fail_loading_tasks(void **state)
+static void test_main_command_fail_loading_tasks(void **state)
 {
 	char *argv[] = {
 		"test_main",
-		"help"
+		"list"
 	};
 	char *buffer = NULL;
 	size_t buffer_size = 0;
@@ -104,27 +104,33 @@ static void test_main_help_fail_loading_tasks(void **state)
 	free(buffer);
 }
 
-static void test_main_help(void **state)
+static void test_main_command(void **state)
 {
 	char *argv[] = {
 		"test_main",
-		"help"
+		"list"
 	};
 	char *buffer = NULL;
 	size_t buffer_size = 0;
 	struct todo todo;
+	struct task *task1 = create_task("name1", "project1", TASK_PRIORITY_LOW);
+	struct task *task2 = create_task("name2", "project2", TASK_PRIORITY_LOW);
+
+	// setup todo
+	todo.task_list[0] = task1;
+	todo.task_list[1] = task2;
+	todo.task_counter = 2;
 
 	// prepare returns
 	will_return(__wrap_create_todotxt, &todo);
 	will_return(__wrap_todo_load_tasks, 0);
 
-	instrument_stderr();
-	assert_int_equal(test_main(2, argv), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
+	instrument_stdout();
+	assert_int_equal(test_main(2, argv), 0);
+	buffer_size = get_stdout_buffer(&buffer);
+	deinstrument_stdout();
 
 	assert_int_not_equal(buffer_size, 0);
-	assert_help_output(buffer);
 	free(buffer);
 }
 
@@ -133,9 +139,9 @@ int main(int argc, char *argv[])
 	struct CMUnitTest tests[] = {
 		cmocka_unit_test(test_main_no_command),
 		cmocka_unit_test(test_main_invalid_command),
-		cmocka_unit_test(test_main_help_fail_create_todo),
-		cmocka_unit_test(test_main_help_fail_loading_tasks),
-		cmocka_unit_test(test_main_help)
+		cmocka_unit_test(test_main_command_fail_create_todo),
+		cmocka_unit_test(test_main_command_fail_loading_tasks),
+		cmocka_unit_test(test_main_command)
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);
