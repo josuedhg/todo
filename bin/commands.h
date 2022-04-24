@@ -8,5 +8,6 @@ extern const struct command show_command;
 extern const struct command add_command;
 extern const struct command delete_command;
 extern const struct command done_command;
+extern const struct command reopen_command;
 
 #endif /* end of include guard: __COMMANDS_H__ */

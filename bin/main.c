@@ -26,6 +26,7 @@ static const struct command *commands[] = {
 	&add_command,
 	&delete_command,
 	&done_command,
+	&reopen_command,
 	NULL
 };
 
