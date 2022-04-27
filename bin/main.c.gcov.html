@@ -31,17 +31,17 @@
             <td class="headerValue">coverage.info</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">35</td>
-            <td class="headerCovTableEntry">35</td>
+            <td class="headerCovTableEntry">41</td>
+            <td class="headerCovTableEntry">41</td>
             <td class="headerCovTableEntryHi">100.0 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-24 02:25:49</td>
+            <td class="headerValue">2022-04-27 02:21:48</td>
             <td></td>
             <td class="headerItem">Functions:</td>
-            <td class="headerCovTableEntry">3</td>
-            <td class="headerCovTableEntry">3</td>
+            <td class="headerCovTableEntry">4</td>
+            <td class="headerCovTableEntry">4</td>
             <td class="headerCovTableEntryHi">100.0 %</td>
           </tr>
           <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
@@ -109,42 +109,53 @@
 <a name="47"><span class="lineNum">      47 </span><span class="lineCov">         16 :         return -1;</span></a>
 <a name="48"><span class="lineNum">      48 </span>            : }</a>
 <a name="49"><span class="lineNum">      49 </span>            : </a>
-<a name="50"><span class="lineNum">      50 </span><span class="lineCov">         22 : int main(int argc, char **argv)</span></a>
+<a name="50"><span class="lineNum">      50 </span><span class="lineCov">          6 : static struct todo *get_todo()</span></a>
 <a name="51"><span class="lineNum">      51 </span>            : {</a>
-<a name="52"><span class="lineNum">      52 </span><span class="lineCov">         22 :         if (argc &lt; 2 || strcmp(argv[1], &quot;help&quot;) == 0) {</span></a>
-<a name="53"><span class="lineNum">      53 </span><span class="lineCov">         14 :                 return help(argv[0]);</span></a>
-<a name="54"><span class="lineNum">      54 </span>            :         }</a>
+<a name="52"><span class="lineNum">      52 </span><span class="lineCov">          6 :         char *todotxt_filepath = NULL;</span></a>
+<a name="53"><span class="lineNum">      53 </span><span class="lineCov">          6 :         struct todo *todo = NULL;</span></a>
+<a name="54"><span class="lineNum">      54 </span><span class="lineCov">          6 :         asprintf(&amp;todotxt_filepath, &quot;%s/%s&quot;, getenv(&quot;HOME&quot;), TODOTXT_FILE_NAME);</span></a>
 <a name="55"><span class="lineNum">      55 </span>            : </a>
-<a name="56"><span class="lineNum">      56 </span><span class="lineCov">          8 :         const struct command *cmd = find_command(argv[1]);</span></a>
-<a name="57"><span class="lineNum">      57 </span><span class="lineCov">          8 :         if (cmd == NULL) {</span></a>
-<a name="58"><span class="lineNum">      58 </span><span class="lineCov">          2 :                 fprintf(stderr, &quot;Unknown command: %s\n&quot;, argv[1]);</span></a>
-<a name="59"><span class="lineNum">      59 </span><span class="lineCov">          2 :                 return help(argv[0]);</span></a>
+<a name="56"><span class="lineNum">      56 </span><span class="lineCov">          6 :         todo = create_todotxt(todotxt_filepath);</span></a>
+<a name="57"><span class="lineNum">      57 </span><span class="lineCov">          6 :         if (todo == NULL) {</span></a>
+<a name="58"><span class="lineNum">      58 </span><span class="lineCov">          2 :                 fprintf(stderr, &quot;Error: Unable to read %s file.\n&quot;, todotxt_filepath);</span></a>
+<a name="59"><span class="lineNum">      59 </span><span class="lineCov">          2 :                 goto FREE_AND_EXIT;</span></a>
 <a name="60"><span class="lineNum">      60 </span>            :         }</a>
 <a name="61"><span class="lineNum">      61 </span>            : </a>
-<a name="62"><span class="lineNum">      62 </span><span class="lineCov">          6 :         int ret = 0;</span></a>
-<a name="63"><span class="lineNum">      63 </span><span class="lineCov">          6 :         char *todotxt_config_dir = NULL;</span></a>
-<a name="64"><span class="lineNum">      64 </span><span class="lineCov">          6 :         asprintf(&amp;todotxt_config_dir, &quot;%s/%s&quot;, getenv(&quot;HOME&quot;), TODOTXT_FILE_NAME);</span></a>
-<a name="65"><span class="lineNum">      65 </span>            : </a>
-<a name="66"><span class="lineNum">      66 </span><span class="lineCov">          6 :         struct todo *todo = create_todotxt(todotxt_config_dir);</span></a>
-<a name="67"><span class="lineNum">      67 </span><span class="lineCov">          6 :         if (todo == NULL) {</span></a>
-<a name="68"><span class="lineNum">      68 </span><span class="lineCov">          2 :                 fprintf(stderr, &quot;Error: Unable to read %s file.\n&quot;, todotxt_config_dir);</span></a>
-<a name="69"><span class="lineNum">      69 </span><span class="lineCov">          2 :                 ret = -1;</span></a>
-<a name="70"><span class="lineNum">      70 </span><span class="lineCov">          2 :                 goto EXIT_AND_CLEAN;</span></a>
-<a name="71"><span class="lineNum">      71 </span>            :         }</a>
+<a name="62"><span class="lineNum">      62 </span><span class="lineCov">          4 :         if (todo_load_tasks(todo) &lt; 0) {</span></a>
+<a name="63"><span class="lineNum">      63 </span><span class="lineCov">          2 :                 fprintf(stderr, &quot;Error: Unable to load tasks from %s file.\n&quot;, todotxt_filepath);</span></a>
+<a name="64"><span class="lineNum">      64 </span><span class="lineCov">          2 :                 destroy_todotxt(&amp;todo);</span></a>
+<a name="65"><span class="lineNum">      65 </span><span class="lineCov">          2 :                 todo = NULL;</span></a>
+<a name="66"><span class="lineNum">      66 </span>            :         }</a>
+<a name="67"><span class="lineNum">      67 </span>            : </a>
+<a name="68"><span class="lineNum">      68 </span><span class="lineCov">          2 : FREE_AND_EXIT:</span></a>
+<a name="69"><span class="lineNum">      69 </span><span class="lineCov">          6 :         free(todotxt_filepath);</span></a>
+<a name="70"><span class="lineNum">      70 </span><span class="lineCov">          6 :         return todo;</span></a>
+<a name="71"><span class="lineNum">      71 </span>            : }</a>
 <a name="72"><span class="lineNum">      72 </span>            : </a>
-<a name="73"><span class="lineNum">      73 </span><span class="lineCov">          4 :         if (todo_load_tasks(todo) &lt; 0) {</span></a>
-<a name="74"><span class="lineNum">      74 </span><span class="lineCov">          2 :                 fprintf(stderr, &quot;Error: Unable to load tasks from %s file.\n&quot;, todotxt_config_dir);</span></a>
-<a name="75"><span class="lineNum">      75 </span><span class="lineCov">          2 :                 ret = -1;</span></a>
-<a name="76"><span class="lineNum">      76 </span><span class="lineCov">          2 :                 goto EXIT_AND_CLEAN;</span></a>
+<a name="73"><span class="lineNum">      73 </span><span class="lineCov">         22 : int main(int argc, char **argv)</span></a>
+<a name="74"><span class="lineNum">      74 </span>            : {</a>
+<a name="75"><span class="lineNum">      75 </span><span class="lineCov">         22 :         if (argc &lt; 2 || strcmp(argv[1], &quot;help&quot;) == 0) {</span></a>
+<a name="76"><span class="lineNum">      76 </span><span class="lineCov">         14 :                 return help(argv[0]);</span></a>
 <a name="77"><span class="lineNum">      77 </span>            :         }</a>
 <a name="78"><span class="lineNum">      78 </span>            : </a>
-<a name="79"><span class="lineNum">      79 </span><span class="lineCov">          2 :         ret = cmd-&gt;command_handle(todo, argc - 1, argv + 1);</span></a>
-<a name="80"><span class="lineNum">      80 </span><span class="lineCov">          6 : EXIT_AND_CLEAN:</span></a>
-<a name="81"><span class="lineNum">      81 </span><span class="lineCov">          6 :         todo_clean_tasks(todo);</span></a>
-<a name="82"><span class="lineNum">      82 </span><span class="lineCov">          6 :         destroy_todotxt(&amp;todo);</span></a>
-<a name="83"><span class="lineNum">      83 </span><span class="lineCov">          6 :         free(todotxt_config_dir);</span></a>
-<a name="84"><span class="lineNum">      84 </span><span class="lineCov">          6 :         return ret;</span></a>
-<a name="85"><span class="lineNum">      85 </span>            : }</a>
+<a name="79"><span class="lineNum">      79 </span><span class="lineCov">          8 :         const struct command *cmd = NULL;</span></a>
+<a name="80"><span class="lineNum">      80 </span><span class="lineCov">          8 :         struct todo *todo = NULL;</span></a>
+<a name="81"><span class="lineNum">      81 </span><span class="lineCov">          8 :         int ret = 0;</span></a>
+<a name="82"><span class="lineNum">      82 </span>            : </a>
+<a name="83"><span class="lineNum">      83 </span><span class="lineCov">          8 :         cmd = find_command(argv[1]);</span></a>
+<a name="84"><span class="lineNum">      84 </span><span class="lineCov">          8 :         if (cmd == NULL) {</span></a>
+<a name="85"><span class="lineNum">      85 </span><span class="lineCov">          2 :                 fprintf(stderr, &quot;Unknown command: %s\n&quot;, argv[1]);</span></a>
+<a name="86"><span class="lineNum">      86 </span><span class="lineCov">          2 :                 return help(argv[0]);</span></a>
+<a name="87"><span class="lineNum">      87 </span>            :         }</a>
+<a name="88"><span class="lineNum">      88 </span>            : </a>
+<a name="89"><span class="lineNum">      89 </span><span class="lineCov">          6 :         if ((todo = get_todo()) == NULL)</span></a>
+<a name="90"><span class="lineNum">      90 </span><span class="lineCov">          4 :                 return -1;</span></a>
+<a name="91"><span class="lineNum">      91 </span>            : </a>
+<a name="92"><span class="lineNum">      92 </span><span class="lineCov">          2 :         ret = cmd-&gt;command_handle(todo, argc - 1, argv + 1);</span></a>
+<a name="93"><span class="lineNum">      93 </span><span class="lineCov">          2 :         todo_clean_tasks(todo);</span></a>
+<a name="94"><span class="lineNum">      94 </span><span class="lineCov">          2 :         destroy_todotxt(&amp;todo);</span></a>
+<a name="95"><span class="lineNum">      95 </span><span class="lineCov">          2 :         return ret;</span></a>
+<a name="96"><span class="lineNum">      96 </span>            : }</a>
 </pre>
       </td>
     </tr>
