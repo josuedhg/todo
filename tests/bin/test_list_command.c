@@ -14,6 +14,13 @@ struct todo todo = {
 	.task_counter = 0,
 };
 
+static struct command_descriptor desc = {LIST_COMMAND_ID, "list", "list", "List all available commands" };
+
+static struct command command = {
+	.descriptor = &desc,
+	.todo = &todo,
+};
+
 extern int test_main(int, char **);
 
 static void test_list_command_listed_in_help(void **state)
@@ -43,7 +50,7 @@ static void test_list_command_no_tasks(void **state)
 	size_t buffer_size = 0;
 
 	instrument_stdout();
-	assert_int_equal(list_command.command_handle(&todo, 0, NULL), 0);
+	assert_int_equal(command_handle(&command), 0);
 	buffer_size = get_stdout_buffer(&buffer);
 	deinstrument_stdout();
 
@@ -65,7 +72,7 @@ static void test_list_command_one_task(void **state)
 	instrument_stdout();
 
 	// run command
-	assert_int_equal(list_command.command_handle(&todo, 0, NULL), 0);
+	assert_int_equal(command_handle(&command), 0);
 
 	// get stdout
 	buffer_size = get_stdout_buffer(&buffer);
@@ -99,7 +106,7 @@ static void test_list_command_multiple_tasks(void **state)
 	instrument_stdout();
 
 	// run command
-	assert_int_equal(list_command.command_handle(&todo, 0, NULL), 0);
+	assert_int_equal(command_handle(&command), 0);
 
 	// get stdout
 	buffer_size = get_stdout_buffer(&buffer);

@@ -14,6 +14,13 @@ struct todo todo = {
 	.task_counter = 0,
 };
 
+static struct command_descriptor desc = {SHOW_COMMAND_ID, "show", "show [task_id]", "Show task details" };
+
+static struct command command = {
+	.descriptor = &desc,
+	.todo = &todo,
+};
+
 extern int test_main(int, char **);
 
 static void test_show_command_listed_in_help(void **state)
@@ -43,7 +50,7 @@ static void test_show_command_no_param(void **state)
 	size_t buffer_size = 0;
 
 	instrument_stderr();
-	assert_int_equal(show_command.command_handle(&todo, 0, NULL), -1);
+	assert_int_equal(command_handle(&command), -1);
 	buffer_size = get_stderr_buffer(&buffer);
 	deinstrument_stderr();
 
@@ -59,8 +66,11 @@ static void test_show_command_invalid_param(void **state)
 	char *buffer = NULL;
 	size_t buffer_size = 0;
 
+	command.argv = params;
+	command.argc = 2;
+
 	instrument_stderr();
-	assert_int_equal(show_command.command_handle(&todo, 2, params), -1);
+	assert_int_equal(command_handle(&command), -1);
 	buffer_size = get_stderr_buffer(&buffer);
 	deinstrument_stderr();
 
@@ -76,8 +86,11 @@ static void test_show_command_task_not_found(void **state)
 	char *buffer = NULL;
 	size_t buffer_size = 0;
 
+	command.argv = params;
+	command.argc = 2;
+
 	instrument_stderr();
-	assert_int_equal(show_command.command_handle(&todo, 2, params), -1);
+	assert_int_equal(command_handle(&command), -1);
 	buffer_size = get_stderr_buffer(&buffer);
 	deinstrument_stderr();
 
@@ -100,9 +113,12 @@ static void test_show_command_task_found(void **state)
 
 	// setup stdout
 	instrument_stdout();
+	command.argv = params;
+	command.argc = 2;
+
 
 	// run command
-	assert_int_equal(show_command.command_handle(&todo, 2, params), 0);
+	assert_int_equal(command_handle(&command), 0);
 
 	// get stdout
 	buffer_size = get_stdout_buffer(&buffer);

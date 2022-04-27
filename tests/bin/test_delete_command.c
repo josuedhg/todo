@@ -14,6 +14,13 @@ struct todo todo = {
 	.task_counter = 0,
 };
 
+static struct command_descriptor desc = {DELETE_COMMAND_ID, "delete", "delete [task id]", "Delete a task" };
+
+static struct command command = {
+	.descriptor = &desc,
+	.todo = &todo,
+};
+
 extern int test_main(int, char **);
 
 static void test_delete_command_listed_in_help(void **state)
@@ -43,7 +50,7 @@ static void test_delete_command_no_param(void **state)
 	size_t buffer_size = 0;
 
 	instrument_stderr();
-	assert_int_equal(delete_command.command_handle(&todo, 0, NULL), -1);
+	assert_int_equal(command_handle(&command), -1);
 	buffer_size = get_stderr_buffer(&buffer);
 	deinstrument_stderr();
 
@@ -59,8 +66,11 @@ static void test_delete_command_invalid_param(void **state)
 	char *buffer = NULL;
 	size_t buffer_size = 0;
 
+	command.argv = params;
+	command.argc = 2;
+
 	instrument_stderr();
-	assert_int_equal(delete_command.command_handle(&todo, 2, params), -1);
+	assert_int_equal(command_handle(&command), -1);
 	buffer_size = get_stderr_buffer(&buffer);
 	deinstrument_stderr();
 
@@ -76,8 +86,11 @@ static void test_delete_command_task_not_found(void **state)
 	char *buffer = NULL;
 	size_t buffer_size = 0;
 
+	command.argv = params;
+	command.argc = 2;
+
 	instrument_stderr();
-	assert_int_equal(delete_command.command_handle(&todo, 2, params), -1);
+	assert_int_equal(command_handle(&command), -1);
 	buffer_size = get_stderr_buffer(&buffer);
 	deinstrument_stderr();
 
@@ -97,9 +110,12 @@ static void test_delete_command_cannot_save_task(void **state)
 	todo.task_list[0] = task;
 	todo.task_counter = 1;
 
+	command.argv = params;
+	command.argc = 2;
+
 	instrument_stderr();
 	will_return(__wrap_todo_save_tasks, -1);
-	assert_int_equal(delete_command.command_handle(&todo, 2, params), -1);
+	assert_int_equal(command_handle(&command), -1);
 	buffer_size = get_stderr_buffer(&buffer);
 	deinstrument_stderr();
 
@@ -123,10 +139,12 @@ static void test_delete_command_success(void **state)
 	todo.task_list[0] = task;
 	todo.task_counter = 1;
 
+	command.argv = params;
+	command.argc = 2;
 
 	instrument_stderr();
 	will_return(__wrap_todo_save_tasks, 0);
-	assert_int_equal(delete_command.command_handle(&todo, 2, params), 0);
+	assert_int_equal(command_handle(&command), 0);
 	buffer_size = get_stderr_buffer(&buffer);
 	deinstrument_stderr();
 

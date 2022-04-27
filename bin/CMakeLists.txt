@@ -1,8 +1,5 @@
 
-set(todo_src main.c)
-
-# add commands
-file(GLOB commands *_command.c)
+set(todo_src main.c commands.c)
 
 configure_file(configure.h.in configure.h @ONLY)
 add_executable(todocli ${todo_src} ${commands})
