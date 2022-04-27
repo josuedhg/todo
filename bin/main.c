@@ -47,39 +47,50 @@ static int help(char *bin_name)
 	return -1;
 }
 
+static struct todo *get_todo()
+{
+	char *todotxt_filepath = NULL;
+	struct todo *todo = NULL;
+	asprintf(&todotxt_filepath, "%s/%s", getenv("HOME"), TODOTXT_FILE_NAME);
+
+	todo = create_todotxt(todotxt_filepath);
+	if (todo == NULL) {
+		fprintf(stderr, "Error: Unable to read %s file.\n", todotxt_filepath);
+		goto FREE_AND_EXIT;
+	}
+
+	if (todo_load_tasks(todo) < 0) {
+		fprintf(stderr, "Error: Unable to load tasks from %s file.\n", todotxt_filepath);
+		destroy_todotxt(&todo);
+		todo = NULL;
+	}
+
+FREE_AND_EXIT:
+	free(todotxt_filepath);
+	return todo;
+}
+
 int main(int argc, char **argv)
 {
 	if (argc < 2 || strcmp(argv[1], "help") == 0) {
 		return help(argv[0]);
 	}
 
-	const struct command *cmd = find_command(argv[1]);
+	const struct command *cmd = NULL;
+	struct todo *todo = NULL;
+	int ret = 0;
+
+	cmd = find_command(argv[1]);
 	if (cmd == NULL) {
 		fprintf(stderr, "Unknown command: %s\n", argv[1]);
 		return help(argv[0]);
 	}
 
-	int ret = 0;
-	char *todotxt_config_dir = NULL;
-	asprintf(&todotxt_config_dir, "%s/%s", getenv("HOME"), TODOTXT_FILE_NAME);
-
-	struct todo *todo = create_todotxt(todotxt_config_dir);
-	if (todo == NULL) {
-		fprintf(stderr, "Error: Unable to read %s file.\n", todotxt_config_dir);
-		ret = -1;
-		goto EXIT_AND_CLEAN;
-	}
-
-	if (todo_load_tasks(todo) < 0) {
-		fprintf(stderr, "Error: Unable to load tasks from %s file.\n", todotxt_config_dir);
-		ret = -1;
-		goto EXIT_AND_CLEAN;
-	}
+	if ((todo = get_todo()) == NULL)
+		return -1;
 
 	ret = cmd->command_handle(todo, argc - 1, argv + 1);
-EXIT_AND_CLEAN:
 	todo_clean_tasks(todo);
 	destroy_todotxt(&todo);
-	free(todotxt_config_dir);
 	return ret;
 }

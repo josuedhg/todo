@@ -252,6 +252,7 @@ void destroy_todotxt(struct todo **todo)
 	struct todotxt *todotxt = container_of(*todo,
 					       struct todotxt,
 					       todo);
+	free(todotxt->filename);
 	free(todotxt);
 	*todo = NULL;
 }
@@ -269,6 +270,7 @@ struct todo *create_todotxt(char *filename)
 	todo_init(&todotxt->todo);
 	todotxt->todo.driver->load_tasks = load_tasks;
 	todotxt->todo.driver->save_tasks = save_tasks;
-	todotxt->filename = filename;
+	todotxt->filename = calloc(1, strlen(filename) + 1);
+	strcpy(todotxt->filename, filename);
 	return &todotxt->todo;
 }
