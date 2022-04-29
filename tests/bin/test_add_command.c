@@ -22,28 +22,6 @@ static struct command command = {
 	.log = &test_logger,
 };
 
-extern int test_main(int, char **);
-
-static void test_add_command_listed_in_help(void **state)
-{
-	char *argv_no_cmd[] = {
-		"test_main",
-		"help",
-	};
-
-	char *buffer = NULL;
-	size_t buffer_size = 0;
-
-	instrument_stderr();
-	assert_int_equal(test_main(1, argv_no_cmd), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "add: Add a new task"));
-	free(buffer);
-}
-
 static void test_add_command_no_param(void **state)
 {
 	(void)state; /* unused */
@@ -126,7 +104,6 @@ static void test_add_command_success_multi_word(void **state)
 int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
-		cmocka_unit_test(test_add_command_listed_in_help),
 		cmocka_unit_test(test_add_command_no_param),
 		cmocka_unit_test(test_add_command_cannot_create_task),
 		cmocka_unit_test(test_add_command_cannot_save_task),

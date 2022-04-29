@@ -22,28 +22,6 @@ static struct command command = {
 	.log = &test_logger,
 };
 
-extern int test_main(int, char **);
-
-static void test_done_command_listed_in_help(void **state)
-{
-	char *argv_no_cmd[] = {
-		"test_main",
-		"help",
-	};
-
-	char *buffer = NULL;
-	size_t buffer_size = 0;
-
-	instrument_stderr();
-	assert_int_equal(test_main(1, argv_no_cmd), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "done: Set task as done"));
-	free(buffer);
-}
-
 static void test_done_command_no_param(void **state)
 {
 	(void)state; /* unused */
@@ -120,7 +98,6 @@ static void test_done_command_success(void **state)
 int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
-		cmocka_unit_test(test_done_command_listed_in_help),
 		cmocka_unit_test(test_done_command_no_param),
 		cmocka_unit_test(test_done_command_invalid_param),
 		cmocka_unit_test(test_done_command_task_not_found),

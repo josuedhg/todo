@@ -11,11 +11,28 @@
 
 extern int test_main(int, char **);
 
-static void assert_help_output(char *buffer)
+extern struct log logger;
+
+int setup(void **state)
 {
-	assert_non_null(strstr(buffer, "Usage: test_main <command>\n"));
-	assert_non_null(strstr(buffer, "Available commands:\n"));
-	assert_non_null(strstr(buffer, "help: Display this help message\n"));
+	(void)state;
+	logger.error = mock_log_function;
+	logger.notify = mock_log_function;
+	return 0;
+}
+
+
+void check_help(void)
+{
+	expect_string(mock_log_function, report_string, "Usage: test_main <command>\n"
+							"Available commands:\n" \
+							"\thelp: Display this help message\n");
+	expect_string(mock_log_function, report_string, "\tadd: Add a new task\n");
+	expect_string(mock_log_function, report_string, "\tlist: List all available commands\n");
+	expect_string(mock_log_function, report_string, "\tshow: Show task details\n");
+	expect_string(mock_log_function, report_string, "\tdelete: Delete a task\n");
+	expect_string(mock_log_function, report_string, "\tdone: Set task as done\n");
+	expect_string(mock_log_function, report_string, "\treopen: Set task as open\n");
 }
 
 static void test_main_no_command(void **state)
@@ -24,17 +41,8 @@ static void test_main_no_command(void **state)
 		"test_main"
 	};
 
-	char *buffer = NULL;
-	size_t buffer_size = 0;
-
-	instrument_stderr();
+	check_help();
 	assert_int_equal(test_main(1, argv_no_cmd), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_help_output(buffer);
-	free(buffer);
 }
 
 static void test_main_invalid_command(void **state)
@@ -43,18 +51,10 @@ static void test_main_invalid_command(void **state)
 		"test_main",
 		"invalid"
 	};
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 
-	instrument_stderr();
+	expect_string(mock_log_function, report_string, "Unknown command: invalid\n");
+	check_help();
 	assert_int_equal(test_main(2, argv), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "Unknown command: invalid\n"));
-	assert_help_output(buffer);
-	free(buffer);
 }
 
 static void test_main_command_fail_create_todo(void **state)
@@ -63,21 +63,13 @@ static void test_main_command_fail_create_todo(void **state)
 		"test_main",
 		"list"
 	};
-	char *buffer = NULL;
-	size_t buffer_size = 0;
-	struct todo todo;
 
 	// prepare returns
 	will_return(__wrap_create_todotxt, NULL);
 
-	instrument_stderr();
+	char *message = "Error: Unable to read";
+	expect_memory(mock_log_function, report_string, message, strlen(message));
 	assert_int_equal(test_main(2, argv), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "Error: Unable to read"));
-	free(buffer);
 }
 
 static void test_main_command_fail_loading_tasks(void **state)
@@ -86,22 +78,15 @@ static void test_main_command_fail_loading_tasks(void **state)
 		"test_main",
 		"list"
 	};
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 	struct todo todo;
 
 	// prepare returns
 	will_return(__wrap_create_todotxt, &todo);
 	will_return(__wrap_todo_load_tasks, -1);
 
-	instrument_stderr();
+	char *message = "Error: Unable to load tasks from";
+	expect_memory(mock_log_function, report_string, message, strlen(message));
 	assert_int_equal(test_main(2, argv), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "Error: Unable to load tasks from"));
-	free(buffer);
 }
 
 static void test_main_command(void **state)
@@ -110,28 +95,23 @@ static void test_main_command(void **state)
 		"test_main",
 		"list"
 	};
-	char *buffer = NULL;
-	size_t buffer_size = 0;
-	struct todo todo;
-	struct task *task1 = create_task("name1", "project1", TASK_PRIORITY_LOW);
-	struct task *task2 = create_task("name2", "project2", TASK_PRIORITY_LOW);
-
-	// setup todo
-	todo.task_list[0] = task1;
-	todo.task_list[1] = task2;
-	todo.task_counter = 2;
-
+	struct todo todo = { 0 };
 	// prepare returns
 	will_return(__wrap_create_todotxt, &todo);
 	will_return(__wrap_todo_load_tasks, 0);
 
-	instrument_stdout();
 	assert_int_equal(test_main(2, argv), 0);
-	buffer_size = get_stdout_buffer(&buffer);
-	deinstrument_stdout();
+}
 
-	assert_int_not_equal(buffer_size, 0);
-	free(buffer);
+extern void notify(const char *fmt, ...);
+extern void error(const char *fmt, ...);
+static void test_check_log_functions(void **state)
+{
+	expect_string(__wrap_vfprintf, report_string, "test other str");
+	notify("test %s", "other str");
+
+	expect_string(__wrap_vfprintf, report_string, "test other str");
+	error("test %s", "other str");
 }
 
 int main(int argc, char *argv[])
@@ -141,8 +121,9 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_main_invalid_command),
 		cmocka_unit_test(test_main_command_fail_create_todo),
 		cmocka_unit_test(test_main_command_fail_loading_tasks),
-		cmocka_unit_test(test_main_command)
+		cmocka_unit_test(test_main_command),
+		cmocka_unit_test(test_check_log_functions),
 	};
 
-	return cmocka_run_group_tests(tests, NULL, NULL);
+	return cmocka_run_group_tests(tests, setup, NULL);
 }

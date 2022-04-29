@@ -17,7 +17,7 @@
 void notify(const char *fmt, ...);
 void error(const char *fmt, ...);
 
-static struct log logger = {
+struct log logger = {
 	.notify = notify,
 	.error = error,
 };

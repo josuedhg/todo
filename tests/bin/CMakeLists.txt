@@ -9,8 +9,6 @@ configure_file(${CMAKE_SOURCE_DIR}/bin/configure.h.in configure.h @ONLY)
 
 # instrumenting print fuctions
 add_link_options(-Wl,--wrap=vfprintf)
-add_link_options(-Wl,--wrap=fprintf)
-add_link_options(-Wl,--wrap=printf)
 
 # instrumenting libtodo
 add_link_options(-Wl,--wrap=create_todotxt)
