@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-29 03:32:22</td>
+            <td class="headerValue">2022-04-29 03:39:47</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">8</td>
@@ -176,14 +176,14 @@
 <a name="114"><span class="lineNum">     114 </span><span class="lineCov">         10 : static int delete_command_handle(struct command *cmd)</span></a>
 <a name="115"><span class="lineNum">     115 </span>            : {</a>
 <a name="116"><span class="lineNum">     116 </span><span class="lineCov">         10 :         if (cmd-&gt;argc &lt; 2) {</span></a>
-<a name="117"><span class="lineNum">     117 </span><span class="lineCov">          2 :                 fprintf(stderr, &quot;Usage: %s \n&quot;, cmd-&gt;descriptor-&gt;usage);</span></a>
+<a name="117"><span class="lineNum">     117 </span><span class="lineCov">          2 :                 cmd-&gt;log-&gt;error(&quot;Usage: %s \n&quot;, cmd-&gt;descriptor-&gt;usage);</span></a>
 <a name="118"><span class="lineNum">     118 </span><span class="lineCov">          2 :                 return -1;</span></a>
 <a name="119"><span class="lineNum">     119 </span>            :         }</a>
 <a name="120"><span class="lineNum">     120 </span><span class="lineCov">          8 :         int task_id = 0;</span></a>
 <a name="121"><span class="lineNum">     121 </span><span class="lineCov">          8 :         sscanf(cmd-&gt;argv[1], &quot;%d&quot;, &amp;task_id);</span></a>
 <a name="122"><span class="lineNum">     122 </span>            : </a>
 <a name="123"><span class="lineNum">     123 </span><span class="lineCov">          8 :         if (task_id &lt; 1) {</span></a>
-<a name="124"><span class="lineNum">     124 </span><span class="lineCov">          2 :                 fprintf(stderr, &quot;Invalid task id format: %s\n&quot;, cmd-&gt;argv[1]);</span></a>
+<a name="124"><span class="lineNum">     124 </span><span class="lineCov">          2 :                 cmd-&gt;log-&gt;error(&quot;Invalid task id format: %s\n&quot;, cmd-&gt;argv[1]);</span></a>
 <a name="125"><span class="lineNum">     125 </span><span class="lineCov">          2 :                 return -1;</span></a>
 <a name="126"><span class="lineNum">     126 </span>            :         }</a>
 <a name="127"><span class="lineNum">     127 </span>            : </a>
@@ -196,14 +196,14 @@
 <a name="134"><span class="lineNum">     134 </span>            :         }</a>
 <a name="135"><span class="lineNum">     135 </span>            : </a>
 <a name="136"><span class="lineNum">     136 </span><span class="lineCov">          6 :         if (task == NULL) {</span></a>
-<a name="137"><span class="lineNum">     137 </span><span class="lineCov">          2 :                 fprintf(stderr, &quot;Error: Unable to find task with id %d.\n&quot;, task_id);</span></a>
+<a name="137"><span class="lineNum">     137 </span><span class="lineCov">          2 :                 cmd-&gt;log-&gt;error(&quot;Error: Unable to find task with id %d.\n&quot;, task_id);</span></a>
 <a name="138"><span class="lineNum">     138 </span><span class="lineCov">          2 :                 return -1;</span></a>
 <a name="139"><span class="lineNum">     139 </span>            :         }</a>
 <a name="140"><span class="lineNum">     140 </span>            : </a>
 <a name="141"><span class="lineNum">     141 </span><span class="lineCov">          4 :         todo_remove_task(cmd-&gt;todo, task);</span></a>
 <a name="142"><span class="lineNum">     142 </span>            : </a>
 <a name="143"><span class="lineNum">     143 </span><span class="lineCov">          4 :         if (todo_save_tasks(cmd-&gt;todo) &lt; 0) {</span></a>
-<a name="144"><span class="lineNum">     144 </span><span class="lineCov">          2 :                 fprintf(stderr, &quot;Error: Unable to save task \&quot;%s\&quot;.\n&quot;, task-&gt;name);</span></a>
+<a name="144"><span class="lineNum">     144 </span><span class="lineCov">          2 :                 cmd-&gt;log-&gt;error(&quot;Error: Unable to save tasks\n&quot;);</span></a>
 <a name="145"><span class="lineNum">     145 </span><span class="lineCov">          2 :                 return -1;</span></a>
 <a name="146"><span class="lineNum">     146 </span>            :         }</a>
 <a name="147"><span class="lineNum">     147 </span>            : </a>
