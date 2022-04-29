@@ -19,6 +19,7 @@ static struct command_descriptor desc = {ADD_COMMAND_ID, "add", "add <task descr
 static struct command command = {
 	.descriptor = &desc,
 	.todo = &todo,
+	.log = &logger,
 };
 
 extern int test_main(int, char **);
@@ -46,38 +47,22 @@ static void test_add_command_listed_in_help(void **state)
 static void test_add_command_no_param(void **state)
 {
 	(void)state; /* unused */
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 
-	instrument_stderr();
+	expect_string(mock_log_function, report_string, "Usage: add <task description> \n");
 	assert_int_equal(command_handle(&command), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "Usage: add <task description> \n"));
-	free(buffer);
 }
 
 static void test_add_command_cannot_create_task(void **state)
 {
 	(void)state; /* unused */
 	char *params[] = {"add", "task"};
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 
 	command.argv = params;
 	command.argc = 2;
 
-	instrument_stderr();
 	will_return(__wrap_create_new_task, NULL);
+	expect_string(mock_log_function, report_string, "Error: Unable to create new task: task\n");
 	assert_int_equal(command_handle(&command), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "Error: Unable to create new task: task\n"));
-	free(buffer);
 }
 
 extern struct task *__real_create_new_task(const char *, const char *, int);
@@ -87,26 +72,17 @@ static void test_add_command_cannot_save_task(void **state)
 	(void)state; /* unused */
 	char *params[] = {"add", "task"};
 	struct task *task = __real_create_new_task("name", "project", TASK_PRIORITY_LOW);
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 
 	command.argv = params;
 	command.argc = 2;
 
-	instrument_stderr();
 	will_return(__wrap_create_new_task, task);
 	expect_string(__wrap_create_new_task, desc, "task");
 	expect_value(__wrap_create_new_task, project, NULL);
 	expect_value(__wrap_create_new_task, priority, TASK_PRIORITY_LOW);
 	will_return(__wrap_todo_save_tasks, -1);
+	expect_string(mock_log_function, report_string, "Error: Unable to save tasks\n");
 	assert_int_equal(command_handle(&command), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "Error: Unable to save task"));
-	free(buffer);
-	destroy_task(&task);
 }
 
 static void test_add_command_success(void **state)
@@ -114,24 +90,17 @@ static void test_add_command_success(void **state)
 	(void)state; /* unused */
 	char *params[] = {"add", "task"};
 	struct task *task = __real_create_new_task("name", "project", TASK_PRIORITY_LOW);
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 
 	command.argv = params;
 	command.argc = 2;
 
-	instrument_stderr();
 	will_return(__wrap_create_new_task, (struct task *)&task);
 	expect_string(__wrap_create_new_task, desc, "task");
 	expect_value(__wrap_create_new_task, project, NULL);
 	expect_value(__wrap_create_new_task, priority, TASK_PRIORITY_LOW);
 	will_return(__wrap_todo_save_tasks, 0);
 	assert_int_equal(command_handle(&command), 0);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
 
-	assert_int_equal(buffer_size, 0);
-	free(buffer);
 	destroy_task(&task);
 }
 
@@ -146,18 +115,12 @@ static void test_add_command_success_multi_word(void **state)
 	command.argv = params;
 	command.argc = 4;
 
-	instrument_stderr();
 	will_return(__wrap_create_new_task, (struct task *)&fake_task);
 	expect_string(__wrap_create_new_task, desc, "task with spaces");
 	expect_value(__wrap_create_new_task, project, NULL);
 	expect_value(__wrap_create_new_task, priority, TASK_PRIORITY_LOW);
 	will_return(__wrap_todo_save_tasks, 0);
 	assert_int_equal(command_handle(&command), 0);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_equal(buffer_size, 0);
-	free(buffer);
 }
 
 int main(int argc, char *argv[])

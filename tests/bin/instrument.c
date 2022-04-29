@@ -99,6 +99,19 @@ void deinstrument_stderr()
 	entry_head_deinit(&entries[STDERR_FILENO]);
 }
 
+void mock_log_function(const char *fmt, ...)
+{
+	va_list args;
+	char *report_string = NULL;
+
+	va_start(args, fmt);
+	vasprintf(&report_string, fmt, args);
+	check_expected(report_string);
+
+	free(report_string);
+	va_end(args);
+}
+
 // instrument output
 int __wrap_printf(const char *format, ...)
 {

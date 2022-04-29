@@ -2,6 +2,7 @@
 #define __COMMANDS_H__
 
 #include "todo.h"
+#include "log.h"
 
 #define ADD_COMMAND_ID 0
 #define LIST_COMMAND_ID 1
@@ -20,6 +21,7 @@ struct command_descriptor {
 struct command {
 	const struct command_descriptor *descriptor;
 	struct todo *todo;
+	struct log *log;
 	int argc;
 	char **argv;
 };

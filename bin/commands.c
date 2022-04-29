@@ -40,14 +40,14 @@ static int add_command_handle(struct command *cmd)
 
 	if (cmd->argc < 2)
 	{
-		fprintf(stderr, "Usage: %s \n", cmd->descriptor->usage);
+		cmd->log->error("Usage: %s \n", cmd->descriptor->usage);
 		return -1;
 	}
 
 	task_description = join_params(cmd->argc - 1, cmd->argv + 1, " ");
 	task = create_new_task(task_description, NULL, TASK_PRIORITY_LOW);
 	if (task == NULL) {
-		fprintf(stderr, "Error: Unable to create new task: %s\n", task_description);
+		cmd->log->error("Error: Unable to create new task: %s\n", task_description);
 		ret = -1;
 		goto FREE_AND_EXIT;
 	}
@@ -55,7 +55,7 @@ static int add_command_handle(struct command *cmd)
 	todo_add_task(cmd->todo, task);
 
 	if (todo_save_tasks(cmd->todo) < 0) {
-		fprintf(stderr, "Error: Unable to save task \"%s\".\n", task->name);
+		cmd->log->error("Error: Unable to save tasks\n");
 		ret = -1;
 	}
 

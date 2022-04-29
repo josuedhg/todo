@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 		return -1;
 
 	struct command command = {
-		.todo = todo, .argc = argc - 1,
+		.todo = todo, .log = &logger, .argc = argc - 1,
 		.argv = argv + 1, .descriptor = desc };
 
 	ret = command_handle(&command);
