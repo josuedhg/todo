@@ -2,15 +2,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "commands.h"
 #include "configure.h"
 #include "todotxt.h"
 #include "task.h"
+#include "log.h"
 
 #ifdef TESTING_MODE
 #define main test_main
 #endif
+
+void notify(const char *fmt, ...);
+void error(const char *fmt, ...);
+
+static struct log logger = {
+	.notify = notify,
+	.error = error,
+};
 
 static const struct command_descriptor commands[] = {
 	{ADD_COMMAND_ID, "add", "add <task description>", "Add a new task" },
@@ -36,12 +46,12 @@ const struct command_descriptor *find_command(char *name)
 static int help(char *bin_name)
 {
 	int i;
-	fprintf(stderr, "Usage: %s <command>\n"
+	logger.error("Usage: %s <command>\n"
 			"Available commands:\n"
 			"\thelp: Display this help message\n",
 			bin_name);
 	for (i = 0; commands[i].name != NULL; i++) {
-		fprintf(stderr, "\t%s: %s\n", commands[i].name, commands[i].description);
+		logger.error("\t%s: %s\n", commands[i].name, commands[i].description);
 	}
 	return -1;
 }
@@ -54,12 +64,12 @@ static struct todo *get_todo()
 
 	todo = create_todotxt(todotxt_filepath);
 	if (todo == NULL) {
-		fprintf(stderr, "Error: Unable to read %s file.\n", todotxt_filepath);
+		logger.error("Error: Unable to read %s file.\n", todotxt_filepath);
 		goto FREE_AND_EXIT;
 	}
 
 	if (todo_load_tasks(todo) < 0) {
-		fprintf(stderr, "Error: Unable to load tasks from %s file.\n", todotxt_filepath);
+		logger.error("Error: Unable to load tasks from %s file.\n", todotxt_filepath);
 		destroy_todotxt(&todo);
 		todo = NULL;
 	}
@@ -67,6 +77,24 @@ static struct todo *get_todo()
 FREE_AND_EXIT:
 	free(todotxt_filepath);
 	return todo;
+}
+
+void notify(const char *fmt, ...)
+{
+	va_list args;
+
+	va_start(args, fmt);
+	vfprintf(stdout, fmt, args);
+	va_end(args);
+}
+
+void error(const char *fmt, ...)
+{
+	va_list args;
+
+	va_start(args, fmt);
+	vfprintf(stderr, fmt, args);
+	va_end(args);
 }
 
 int main(int argc, char **argv)
@@ -81,7 +109,7 @@ int main(int argc, char **argv)
 
 	desc = find_command(argv[1]);
 	if (desc == NULL) {
-		fprintf(stderr, "Unknown command: %s\n", argv[1]);
+		logger.error("Unknown command: %s\n", argv[1]);
 		return help(argv[0]);
 	}
 

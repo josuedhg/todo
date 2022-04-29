@@ -123,6 +123,26 @@ int __wrap_printf(const char *format, ...)
 	return ret;
 }
 
+extern int __real_vfprintf(FILE *stream, const char *format, va_list args);
+int __wrap_vfprintf(FILE *stream, const char *format, va_list args)
+{
+	int ret = 0;
+	int fd = fileno(stream);
+	char *buffer = NULL;
+	struct entry *entry = NULL;
+
+	if (!instrument_output[fd]) {
+		ret = __real_vfprintf(stream, format, args);
+	} else {
+		ret = vasprintf(&buffer, format, args);
+		entry = calloc(1, sizeof(*entry));
+		entry->data = buffer;
+		entry->data_len = ret;
+		TAILQ_INSERT_TAIL(&entries[fd], entry, entries);
+	}
+	return ret;
+}
+
 int __wrap_fprintf(FILE *stream, const char *format, ...)
 {
 	int ret = 0;
@@ -133,7 +153,7 @@ int __wrap_fprintf(FILE *stream, const char *format, ...)
 	va_start(args, format);
 
 	if (!instrument_output[fd]) {
-		ret = vfprintf(stream, format, args);
+		ret = __real_vfprintf(stream, format, args);
 	} else {
 		ret = vasprintf(&buffer, format, args);
 		entry = calloc(1, sizeof(*entry));
