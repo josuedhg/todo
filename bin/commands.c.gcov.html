@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-29 03:54:44</td>
+            <td class="headerValue">2022-04-29 05:02:46</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">8</td>
@@ -128,8 +128,8 @@
 <a name="66"><span class="lineNum">      66 </span>            : </a>
 <a name="67"><span class="lineNum">      67 </span><span class="lineCov">          8 : static int list_command_handle(struct command *cmd)</span></a>
 <a name="68"><span class="lineNum">      68 </span>            : {</a>
-<a name="69"><span class="lineNum">      69 </span><span class="lineCov">         18 :         for (int i = 0; i &lt; cmd-&gt;todo-&gt;task_counter; i++) {</span></a>
-<a name="70"><span class="lineNum">      70 </span><span class="lineCov">         10 :                 cmd-&gt;log-&gt;notify(&quot;%d. %s\n&quot;, i + 1, cmd-&gt;todo-&gt;task_list[i]-&gt;name);</span></a>
+<a name="69"><span class="lineNum">      69 </span><span class="lineCov">         14 :         for (int i = 0; i &lt; cmd-&gt;todo-&gt;task_counter; i++) {</span></a>
+<a name="70"><span class="lineNum">      70 </span><span class="lineCov">          6 :                 cmd-&gt;log-&gt;notify(&quot;%d. %s\n&quot;, i + 1, cmd-&gt;todo-&gt;task_list[i]-&gt;name);</span></a>
 <a name="71"><span class="lineNum">      71 </span>            :         }</a>
 <a name="72"><span class="lineNum">      72 </span>            : </a>
 <a name="73"><span class="lineNum">      73 </span><span class="lineCov">          8 :         return 0;</span></a>
