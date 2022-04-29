@@ -67,7 +67,7 @@ FREE_AND_EXIT:
 static int list_command_handle(struct command *cmd)
 {
 	for (int i = 0; i < cmd->todo->task_counter; i++) {
-		printf("%d. %s\n", i + 1, cmd->todo->task_list[i]->name);
+		cmd->log->notify("%d. %s\n", i + 1, cmd->todo->task_list[i]->name);
 	}
 
 	return 0;

@@ -19,6 +19,7 @@ static struct command_descriptor desc = {LIST_COMMAND_ID, "list", "list", "List 
 static struct command command = {
 	.descriptor = &desc,
 	.todo = &todo,
+	.log = &logger,
 };
 
 extern int test_main(int, char **);
@@ -46,22 +47,13 @@ static void test_list_command_listed_in_help(void **state)
 static void test_list_command_no_tasks(void **state)
 {
 	(void)state; /* unused */
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 
-	instrument_stdout();
 	assert_int_equal(command_handle(&command), 0);
-	buffer_size = get_stdout_buffer(&buffer);
-	deinstrument_stdout();
-
-	assert_int_equal(buffer_size, 0);
 }
 
 static void test_list_command_one_task(void **state)
 {
 	(void)state; /* unused */
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 
 	// setup todo
@@ -69,31 +61,20 @@ static void test_list_command_one_task(void **state)
 	todo.task_counter = 1;
 
 	// setup stdout
-	instrument_stdout();
+	expect_string(mock_log_function, report_string, "1. name\n");
 
 	// run command
 	assert_int_equal(command_handle(&command), 0);
-
-	// get stdout
-	buffer_size = get_stdout_buffer(&buffer);
-	deinstrument_stdout();
-
-	// check results
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "1. name\n"));
 
 	// cleanup
 	todo.task_list[0] = NULL;
 	todo.task_counter = 0;
 	destroy_task(&task);
-	free(buffer);
 }
 
 static void test_list_command_multiple_tasks(void **state)
 {
 	(void)state; /* unused */
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 	struct task *task1 = create_task("name1", "project1", TASK_PRIORITY_LOW);
 	struct task *task2 = create_task("name2", "project2", TASK_PRIORITY_LOW);
 
@@ -103,19 +84,11 @@ static void test_list_command_multiple_tasks(void **state)
 	todo.task_counter = 2;
 
 	// setup stdout
-	instrument_stdout();
+	expect_string(mock_log_function, report_string, "1. name1\n");
+	expect_string(mock_log_function, report_string, "2. name2\n");
 
 	// run command
 	assert_int_equal(command_handle(&command), 0);
-
-	// get stdout
-	buffer_size = get_stdout_buffer(&buffer);
-	deinstrument_stdout();
-
-	// check results
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "1. name1\n"));
-	assert_non_null(strstr(buffer, "2. name2\n"));
 
 	// cleanup
 	todo.task_list[0] = NULL;
@@ -123,7 +96,6 @@ static void test_list_command_multiple_tasks(void **state)
 	todo.task_counter = 0;
 	destroy_task(&task1);
 	destroy_task(&task2);
-	free(buffer);
 }
 
 
