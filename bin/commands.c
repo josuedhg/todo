@@ -114,14 +114,14 @@ static int show_command_handle(struct command *cmd)
 static int delete_command_handle(struct command *cmd)
 {
 	if (cmd->argc < 2) {
-		fprintf(stderr, "Usage: %s \n", cmd->descriptor->usage);
+		cmd->log->error("Usage: %s \n", cmd->descriptor->usage);
 		return -1;
 	}
 	int task_id = 0;
 	sscanf(cmd->argv[1], "%d", &task_id);
 
 	if (task_id < 1) {
-		fprintf(stderr, "Invalid task id format: %s\n", cmd->argv[1]);
+		cmd->log->error("Invalid task id format: %s\n", cmd->argv[1]);
 		return -1;
 	}
 
@@ -134,14 +134,14 @@ static int delete_command_handle(struct command *cmd)
 	}
 
 	if (task == NULL) {
-		fprintf(stderr, "Error: Unable to find task with id %d.\n", task_id);
+		cmd->log->error("Error: Unable to find task with id %d.\n", task_id);
 		return -1;
 	}
 
 	todo_remove_task(cmd->todo, task);
 
 	if (todo_save_tasks(cmd->todo) < 0) {
-		fprintf(stderr, "Error: Unable to save task \"%s\".\n", task->name);
+		cmd->log->error("Error: Unable to save tasks\n");
 		return -1;
 	}
 
