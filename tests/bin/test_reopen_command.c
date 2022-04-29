@@ -19,6 +19,7 @@ static struct command_descriptor desc = {REOPEN_COMMAND_ID, "reopen", "reopen [t
 static struct command command = {
 	.descriptor = &desc,
 	.todo = &todo,
+	.log = &logger,
 };
 
 extern int test_main(int, char **);
@@ -46,65 +47,39 @@ static void test_reopen_command_listed_in_help(void **state)
 static void test_reopen_command_no_param(void **state)
 {
 	(void)state; /* unused */
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 
-	instrument_stderr();
+	expect_string(mock_log_function, report_string, "Usage: reopen [task id] \n");
 	assert_int_equal(command_handle(&command), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "Usage: reopen [task id] \n"));
-	free(buffer);
 }
 
 static void test_reopen_command_invalid_param(void **state)
 {
 	(void)state; /* unused */
 	char *params[] = {"reopen", "invalid"};
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 
 	command.argv = params;
 	command.argc = 2;
 
-	instrument_stderr();
+	expect_string(mock_log_function, report_string, "Invalid task id format: invalid\n");
 	assert_int_equal(command_handle(&command), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "Invalid task id format: invalid\n"));
-	free(buffer);
 }
 
 static void test_reopen_command_task_not_found(void **state)
 {
 	(void)state; /* unused */
 	char *params[] = {"reopen", "1"};
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 
 	command.argv = params;
 	command.argc = 2;
 
-	instrument_stderr();
+	expect_string(mock_log_function, report_string, "Error: Unable to find task with id 1.\n");
 	assert_int_equal(command_handle(&command), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "Error: Unable to find task with id 1.\n"));
-	free(buffer);
 }
 
 static void test_reopen_command_cannot_save_task(void **state)
 {
 	(void)state; /* unused */
 	char *params[] = {"reopen", "1"};
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 
 	todo.task_list[0] = task;
@@ -113,27 +88,19 @@ static void test_reopen_command_cannot_save_task(void **state)
 	command.argv = params;
 	command.argc = 2;
 
-	instrument_stderr();
 	will_return(__wrap_todo_save_tasks, -1);
+	expect_string(mock_log_function, report_string, "Error: Unable to save tasks\n");
 	assert_int_equal(command_handle(&command), -1);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
-
-	assert_int_not_equal(buffer_size, 0);
-	assert_non_null(strstr(buffer, "Error: Unable to save task"));
 
 	todo.task_list[0] = NULL;
 	todo.task_counter = 0;
 	destroy_task(&task);
-	free(buffer);
 }
 
 static void test_reopen_command_success(void **state)
 {
 	(void)state; /* unused */
 	char *params[] = {"reopen", "1"};
-	char *buffer = NULL;
-	size_t buffer_size = 0;
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 
 	todo.task_list[0] = task;
@@ -143,18 +110,13 @@ static void test_reopen_command_success(void **state)
 	command.argv = params;
 	command.argc = 2;
 
-	instrument_stderr();
 	will_return(__wrap_todo_save_tasks, 0);
 	assert_int_equal(command_handle(&command), 0);
-	buffer_size = get_stderr_buffer(&buffer);
-	deinstrument_stderr();
 
-	assert_int_equal(buffer_size, 0);
 	assert_int_equal(task->status, TASK_STATUS_OPEN);
 	todo.task_list[0] = NULL;
 	todo.task_counter = 0;
 	destroy_task(&task);
-	free(buffer);
 }
 
 int main(int argc, char *argv[])
