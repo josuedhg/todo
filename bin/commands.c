@@ -76,7 +76,7 @@ static int list_command_handle(struct command *cmd)
 static int show_command_handle(struct command *cmd)
 {
 	if (cmd->argc < 2) {
-		fprintf(stderr, "Usage: %s \n", cmd->descriptor->usage);
+		cmd->log->error("Usage: %s \n", cmd->descriptor->usage);
 		return -1;
 	}
 
@@ -84,7 +84,7 @@ static int show_command_handle(struct command *cmd)
 	sscanf(cmd->argv[1], "%d", &task_id);
 
 	if (task_id < 1) {
-		fprintf(stderr, "Invalid task id format: %s\n", cmd->argv[1]);
+		cmd->log->error("Invalid task id format: %s\n", cmd->argv[1]);
 		return -1;
 	}
 
@@ -97,16 +97,16 @@ static int show_command_handle(struct command *cmd)
 	}
 
 	if (task == NULL) {
-		fprintf(stderr, "Error: Unable to find task with id %d.\n", task_id);
+		cmd->log->error("Error: Unable to find task with id %d.\n", task_id);
 		return -1;
 	}
 
-	printf( "Task %d: %s\n"
-		"Project %s\n"
-		"Status %s\n",
-		task_id, task->name,
-		(task->project_name)? task->project_name : "-",
-		(task->status) ? "done" : "open");
+	cmd->log->notify("Task %d: %s\n"
+			 "Project %s\n"
+			 "Status %s\n",
+			 task_id, task->name,
+			 (task->project_name)? task->project_name : "-",
+			 (task->status) ? "done" : "open");
 
 	return 0;
 }
