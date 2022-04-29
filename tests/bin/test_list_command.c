@@ -19,7 +19,7 @@ static struct command_descriptor desc = {LIST_COMMAND_ID, "list", "list", "List 
 static struct command command = {
 	.descriptor = &desc,
 	.todo = &todo,
-	.log = &logger,
+	.log = &test_logger,
 };
 
 extern int test_main(int, char **);

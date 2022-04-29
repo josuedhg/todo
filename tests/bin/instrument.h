@@ -14,7 +14,7 @@ void deinstrument_stderr();
 
 void mock_log_function(const char *, ...);
 
-struct log logger = {
+struct log test_logger = {
 	.notify = mock_log_function,
 	.error = mock_log_function,
 };

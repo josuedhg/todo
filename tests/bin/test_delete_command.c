@@ -19,7 +19,7 @@ static struct command_descriptor desc = {DELETE_COMMAND_ID, "delete", "delete [t
 static struct command command = {
 	.descriptor = &desc,
 	.todo = &todo,
-	.log = &logger,
+	.log = &test_logger,
 };
 
 extern int test_main(int, char **);

@@ -19,7 +19,7 @@ static struct command_descriptor desc = {REOPEN_COMMAND_ID, "reopen", "reopen [t
 static struct command command = {
 	.descriptor = &desc,
 	.todo = &todo,
-	.log = &logger,
+	.log = &test_logger,
 };
 
 extern int test_main(int, char **);
