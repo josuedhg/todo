@@ -5,6 +5,7 @@
 #include <cmocka.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "instrument.h"
 #include "todotxt.h"
@@ -107,11 +108,15 @@ extern void notify(const char *fmt, ...);
 extern void error(const char *fmt, ...);
 static void test_check_log_functions(void **state)
 {
+	instrument_output(true);
+	expect_value(__wrap_vfprintf, stream, stdout);
 	expect_string(__wrap_vfprintf, report_string, "test other str");
 	notify("test %s", "other str");
 
+	expect_value(__wrap_vfprintf, stream, stderr);
 	expect_string(__wrap_vfprintf, report_string, "test other str");
 	error("test %s", "other str");
+	instrument_output(false);
 }
 
 int main(int argc, char *argv[])

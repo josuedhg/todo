@@ -15,6 +15,13 @@
 
 #include "todo.h"
 
+static bool is_instrumented = false;
+
+void instrument_output(bool instrument)
+{
+	is_instrumented = instrument;
+}
+
 void mock_log_function(const char *fmt, ...)
 {
 	va_list args;
@@ -28,12 +35,16 @@ void mock_log_function(const char *fmt, ...)
 	va_end(args);
 }
 
+extern int __real_vfprintf(FILE *stream, const char *fmt, va_list args);
 int __wrap_vfprintf(FILE *stream, const char *fmt, va_list args)
 {
+	if (!is_instrumented)
+		return __real_vfprintf(stream, fmt, args);
 	char *report_string = NULL;
 	int ret = 0;
 
 	ret = vasprintf(&report_string, fmt, args);
+	check_expected(stream);
 	check_expected(report_string);
 	free(report_string);
 	return ret;
