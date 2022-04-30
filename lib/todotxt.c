@@ -203,6 +203,7 @@ static int load_tasks(struct todo *todo)
 	struct todotxt *todotxt = container_of(todo, struct todotxt, todo);
 	FILE *file = fopen(todotxt->filename, "r");
 	int ret = 0;
+	int index = 1;
 	if (file == NULL)
 		return -1;
 	size_t lines_len = 0;
@@ -212,6 +213,7 @@ static int load_tasks(struct todo *todo)
 		if (line[line_size - 1] == '\n')
 			line[line_size - 1] = '\0';
 		struct task *task = create_task_from_todotxt(line);
+		task->id = index++;
 		todo_add_task(todo, task);
 	}
 	free(line);

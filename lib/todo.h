@@ -14,6 +14,7 @@ struct todo_driver {
 	int (*save_tasks)(struct todo*);
 	void (*clean_tasks)(struct todo*);
 	void (*add_task)(struct todo*, struct task*);
+	struct task *(*get_task)(struct todo*, int);
 	void (*remove_task)(struct todo*, struct task*);
 };
 
@@ -28,6 +29,7 @@ void todo_init(struct todo *);
 int todo_load_tasks(struct todo*);
 int todo_save_tasks(struct todo*);
 void todo_add_task(struct todo*, struct task*);
+struct task *todo_get_task(struct todo*, int);
 void todo_remove_task(struct todo*, struct task*);
 void todo_clean_tasks(struct todo*);
 

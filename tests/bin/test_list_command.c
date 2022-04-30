@@ -33,6 +33,7 @@ static void test_list_command_one_task(void **state)
 {
 	(void)state; /* unused */
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
+	task->id = 1;
 
 	// setup todo
 	todo.task_list[0] = task;
@@ -55,6 +56,8 @@ static void test_list_command_multiple_tasks(void **state)
 	(void)state; /* unused */
 	struct task *task1 = create_task("name1", "project1", TASK_PRIORITY_LOW);
 	struct task *task2 = create_task("name2", "project2", TASK_PRIORITY_LOW);
+	task1->id = 1;
+	task2->id = 2;
 
 	// setup todo
 	todo.task_list[0] = task1;

@@ -19,6 +19,7 @@ add_link_options(-Wl,--wrap=create_new_task)
 add_link_options(-Wl,--wrap=todo_add_task)
 add_link_options(-Wl,--wrap=todo_remove_task)
 add_link_options(-Wl,--wrap=todo_save_tasks)
+add_link_options(-Wl,--wrap=todo_get_task)
 
 foreach(file ${c_tests})
 	get_filename_component(test_name ${file} NAME_WE)

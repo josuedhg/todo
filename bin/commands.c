@@ -67,7 +67,8 @@ FREE_AND_EXIT:
 static int list_command_handle(struct command *cmd)
 {
 	for (int i = 0; i < cmd->todo->task_counter; i++) {
-		cmd->log->notify("%d. %s\n", i + 1, cmd->todo->task_list[i]->name);
+		struct task *task = cmd->todo->task_list[i];
+		cmd->log->notify("%d. %s\n", task->id, task->name);
 	}
 
 	return 0;
@@ -88,14 +89,7 @@ static int show_command_handle(struct command *cmd)
 		return -1;
 	}
 
-	struct task *task = NULL;
-	for (int i = 0; i < cmd->todo->task_counter; i++) {
-		if (i + 1 == task_id) {
-			task = cmd->todo->task_list[i];
-			break;
-		}
-	}
-
+	struct task *task = todo_get_task(cmd->todo, task_id);
 	if (task == NULL) {
 		cmd->log->error("Error: Unable to find task with id %d.\n", task_id);
 		return -1;
@@ -125,14 +119,7 @@ static int delete_command_handle(struct command *cmd)
 		return -1;
 	}
 
-	struct task *task = NULL;
-	for (int i = 0; i < cmd->todo->task_counter; i++) {
-		if (i + 1 == task_id) {
-			task = cmd->todo->task_list[i];
-			break;
-		}
-	}
-
+	struct task *task = todo_get_task(cmd->todo, task_id);
 	if (task == NULL) {
 		cmd->log->error("Error: Unable to find task with id %d.\n", task_id);
 		return -1;
@@ -162,14 +149,7 @@ static int done_command_handle(struct command *cmd)
 		return -1;
 	}
 
-	struct task *task = NULL;
-	for (int i = 0; i < cmd->todo->task_counter; i++) {
-		if (i + 1 == task_id) {
-			task = cmd->todo->task_list[i];
-			break;
-		}
-	}
-
+	struct task *task = todo_get_task(cmd->todo, task_id);
 	if (task == NULL) {
 		cmd->log->error("Error: Unable to find task with id %d.\n", task_id);
 		return -1;
@@ -199,14 +179,7 @@ static int reopen_command_handle(struct command *cmd)
 		return -1;
 	}
 
-	struct task *task = NULL;
-	for (int i = 0; i < cmd->todo->task_counter; i++) {
-		if (i + 1 == task_id) {
-			task = cmd->todo->task_list[i];
-			break;
-		}
-	}
-
+	struct task *task = todo_get_task(cmd->todo, task_id);
 	if (task == NULL) {
 		cmd->log->error("Error: Unable to find task with id %d.\n", task_id);
 		return -1;

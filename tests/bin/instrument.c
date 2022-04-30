@@ -51,6 +51,11 @@ int __wrap_vfprintf(FILE *stream, const char *fmt, va_list args)
 }
 
 // libtodo instrument functions
+struct task *__wrap_todo_get_task(struct todo *todo, int id)
+{
+	return mock_ptr_type(struct task *);
+}
+
 int __wrap_todo_save_tasks(struct todo *todo)
 {
 	return mock_type(int);

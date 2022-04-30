@@ -50,6 +50,7 @@ static void test_reopen_command_task_not_found(void **state)
 	command.argv = params;
 	command.argc = 2;
 
+	will_return(__wrap_todo_get_task, NULL);
 	expect_string(mock_log_function, report_string, "Error: Unable to find task with id 1.\n");
 	assert_int_equal(command_handle(&command), -1);
 }
@@ -60,12 +61,10 @@ static void test_reopen_command_cannot_save_task(void **state)
 	char *params[] = {"reopen", "1"};
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 
-	todo.task_list[0] = task;
-	todo.task_counter = 1;
-
 	command.argv = params;
 	command.argc = 2;
 
+	will_return(__wrap_todo_get_task, task);
 	will_return(__wrap_todo_save_tasks, -1);
 	expect_string(mock_log_function, report_string, "Error: Unable to save tasks\n");
 	assert_int_equal(command_handle(&command), -1);
@@ -80,14 +79,12 @@ static void test_reopen_command_success(void **state)
 	(void)state; /* unused */
 	char *params[] = {"reopen", "1"};
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
-
-	todo.task_list[0] = task;
-	todo.task_counter = 1;
 	task_set_completed(task);
 
 	command.argv = params;
 	command.argc = 2;
 
+	will_return(__wrap_todo_get_task, task);
 	will_return(__wrap_todo_save_tasks, 0);
 	assert_int_equal(command_handle(&command), 0);
 

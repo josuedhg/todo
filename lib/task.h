@@ -4,6 +4,7 @@
 #include <time.h>
 
 struct task {
+	int id;
 	char *name;
 	char *project_name;
 #define TASK_STATUS_OPEN 0

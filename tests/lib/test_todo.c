@@ -185,6 +185,51 @@ void test_todo_clean_tasks(void **state)
 	assert_null(todo.task_list[1]);
 }
 
+void test_negative_todo_get_task_null(void **state)
+{
+	expect_assert_failure(todo_get_task(NULL, 0));
+}
+
+void test_negative_todo_get_task_empty(void **state)
+{
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	todo_init(&todo);
+	assert_null(todo_get_task(&todo, 1));
+}
+
+void test_negative_todo_get_task_not_found(void **state)
+{
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	todo_init(&todo);
+	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);
+	task->id = 1;
+	struct task *task2 = create_new_task("name", "project", TASK_PRIORITY_LOW);
+	task2->id = 2;
+	todo_add_task(&todo, task);
+	todo_add_task(&todo, task2);
+	assert_null(todo_get_task(&todo, 4));
+	todo_clean_tasks(&todo);
+}
+
+void test_negative_todo_get_task_found(void **state)
+{
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	todo_init(&todo);
+	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);
+	task->id = 1;
+	struct task *task2 = create_new_task("name", "project", TASK_PRIORITY_LOW);
+	task2->id = 2;
+	todo_add_task(&todo, task);
+	todo_add_task(&todo, task2);
+	assert_non_null(todo_get_task(&todo, 2));
+	todo_clean_tasks(&todo);
+}
 
 int main(int argc, char *argv[])
 {
@@ -204,6 +249,10 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_negative_todo_clean_tasks_null),
 		cmocka_unit_test(test_negative_todo_clean_tasks_empty),
 		cmocka_unit_test(test_todo_clean_tasks),
+		cmocka_unit_test(test_negative_todo_get_task_null),
+		cmocka_unit_test(test_negative_todo_get_task_empty),
+		cmocka_unit_test(test_negative_todo_get_task_not_found),
+		cmocka_unit_test(test_negative_todo_get_task_found),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);
