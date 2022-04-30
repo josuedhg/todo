@@ -31,13 +31,13 @@
             <td class="headerValue">coverage.info</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">182</td>
-            <td class="headerCovTableEntry">182</td>
+            <td class="headerCovTableEntry">184</td>
+            <td class="headerCovTableEntry">184</td>
             <td class="headerCovTableEntryHi">100.0 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-04-30 19:18:30</td>
+            <td class="headerValue">2022-04-30 20:52:51</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">11</td>
@@ -265,77 +265,79 @@
 <a name="203"><span class="lineNum">     203 </span><span class="lineCov">          6 :         struct todotxt *todotxt = container_of(todo, struct todotxt, todo);</span></a>
 <a name="204"><span class="lineNum">     204 </span><span class="lineCov">          6 :         FILE *file = fopen(todotxt-&gt;filename, &quot;r&quot;);</span></a>
 <a name="205"><span class="lineNum">     205 </span><span class="lineCov">          6 :         int ret = 0;</span></a>
-<a name="206"><span class="lineNum">     206 </span><span class="lineCov">          6 :         if (file == NULL)</span></a>
-<a name="207"><span class="lineNum">     207 </span><span class="lineCov">          2 :                 return -1;</span></a>
-<a name="208"><span class="lineNum">     208 </span><span class="lineCov">          4 :         size_t lines_len = 0;</span></a>
-<a name="209"><span class="lineNum">     209 </span><span class="lineCov">          4 :         char *line = NULL;</span></a>
-<a name="210"><span class="lineNum">     210 </span><span class="lineCov">          4 :         ssize_t line_size = 0;</span></a>
-<a name="211"><span class="lineNum">     211 </span><span class="lineCov">          6 :         while ((line_size = getline(&amp;line, &amp;lines_len, file)) != -1) {</span></a>
-<a name="212"><span class="lineNum">     212 </span><span class="lineCov">          2 :                 if (line[line_size - 1] == '\n')</span></a>
-<a name="213"><span class="lineNum">     213 </span><span class="lineCov">          2 :                         line[line_size - 1] = '\0';</span></a>
-<a name="214"><span class="lineNum">     214 </span><span class="lineCov">          2 :                 struct task *task = create_task_from_todotxt(line);</span></a>
-<a name="215"><span class="lineNum">     215 </span><span class="lineCov">          2 :                 todo_add_task(todo, task);</span></a>
-<a name="216"><span class="lineNum">     216 </span>            :         }</a>
-<a name="217"><span class="lineNum">     217 </span><span class="lineCov">          4 :         free(line);</span></a>
-<a name="218"><span class="lineNum">     218 </span><span class="lineCov">          4 :         if (errno == EINVAL)</span></a>
-<a name="219"><span class="lineNum">     219 </span><span class="lineCov">          2 :                 ret = -1;</span></a>
-<a name="220"><span class="lineNum">     220 </span><span class="lineCov">          4 :         fclose(file);</span></a>
-<a name="221"><span class="lineNum">     221 </span><span class="lineCov">          4 :         return ret;</span></a>
-<a name="222"><span class="lineNum">     222 </span>            : }</a>
-<a name="223"><span class="lineNum">     223 </span>            : </a>
-<a name="224"><span class="lineNum">     224 </span><span class="lineCov">          8 : static int save_tasks(struct todo *todo)</span></a>
-<a name="225"><span class="lineNum">     225 </span>            : {</a>
-<a name="226"><span class="lineNum">     226 </span><span class="lineCov">          8 :         struct todotxt *todotxt = container_of(todo, struct todotxt, todo);</span></a>
-<a name="227"><span class="lineNum">     227 </span><span class="lineCov">          8 :         FILE *file = fopen(todotxt-&gt;filename, &quot;w&quot;);</span></a>
-<a name="228"><span class="lineNum">     228 </span><span class="lineCov">          8 :         if (file == NULL)</span></a>
-<a name="229"><span class="lineNum">     229 </span><span class="lineCov">          2 :                 return -1;</span></a>
-<a name="230"><span class="lineNum">     230 </span><span class="lineCov">          6 :         struct task **task = todo-&gt;task_list;</span></a>
-<a name="231"><span class="lineNum">     231 </span><span class="lineCov">         12 :         for (int i = 0; i &lt; todo-&gt;task_counter; i++) {</span></a>
-<a name="232"><span class="lineNum">     232 </span><span class="lineCov">          8 :                 char *line = NULL;</span></a>
-<a name="233"><span class="lineNum">     233 </span><span class="lineCov">          8 :                 int line_length = create_todotxt_line_from_task(task[i], &amp;line);</span></a>
-<a name="234"><span class="lineNum">     234 </span><span class="lineCov">          8 :                 if (i &lt; todo-&gt;task_counter - 1) {</span></a>
-<a name="235"><span class="lineNum">     235 </span><span class="lineCov">          2 :                         line_length = line_length + 1;</span></a>
-<a name="236"><span class="lineNum">     236 </span><span class="lineCov">          2 :                         line = realloc(line, line_length);</span></a>
-<a name="237"><span class="lineNum">     237 </span><span class="lineCov">          2 :                         line[line_length - 1] = '\n';</span></a>
-<a name="238"><span class="lineNum">     238 </span>            :                 }</a>
-<a name="239"><span class="lineNum">     239 </span><span class="lineCov">          8 :                 if (fwrite(line, line_length, 1, file) != 1) {</span></a>
-<a name="240"><span class="lineNum">     240 </span><span class="lineCov">          2 :                         free(line);</span></a>
-<a name="241"><span class="lineNum">     241 </span><span class="lineCov">          2 :                         fclose(file);</span></a>
-<a name="242"><span class="lineNum">     242 </span><span class="lineCov">          2 :                         return -1;</span></a>
-<a name="243"><span class="lineNum">     243 </span>            :                 }</a>
-<a name="244"><span class="lineNum">     244 </span><span class="lineCov">          6 :                 free(line);</span></a>
-<a name="245"><span class="lineNum">     245 </span>            :         }</a>
-<a name="246"><span class="lineNum">     246 </span><span class="lineCov">          4 :         fclose(file);</span></a>
-<a name="247"><span class="lineNum">     247 </span><span class="lineCov">          4 :         return 0;</span></a>
-<a name="248"><span class="lineNum">     248 </span>            : }</a>
-<a name="249"><span class="lineNum">     249 </span>            : </a>
-<a name="250"><span class="lineNum">     250 </span><span class="lineCov">         16 : void destroy_todotxt(struct todo **todo)</span></a>
-<a name="251"><span class="lineNum">     251 </span>            : {</a>
-<a name="252"><span class="lineNum">     252 </span><span class="lineCov">         16 :         struct todotxt *todotxt = container_of(*todo,</span></a>
-<a name="253"><span class="lineNum">     253 </span>            :                                                struct todotxt,</a>
-<a name="254"><span class="lineNum">     254 </span>            :                                                todo);</a>
-<a name="255"><span class="lineNum">     255 </span><span class="lineCov">         16 :         free(todotxt-&gt;filename);</span></a>
-<a name="256"><span class="lineNum">     256 </span><span class="lineCov">         16 :         free(todotxt);</span></a>
-<a name="257"><span class="lineNum">     257 </span><span class="lineCov">         16 :         *todo = NULL;</span></a>
-<a name="258"><span class="lineNum">     258 </span><span class="lineCov">         16 : }</span></a>
-<a name="259"><span class="lineNum">     259 </span>            : </a>
-<a name="260"><span class="lineNum">     260 </span>            : struct todo_driver todotxt_driver;</a>
+<a name="206"><span class="lineNum">     206 </span><span class="lineCov">          6 :         int index = 1;</span></a>
+<a name="207"><span class="lineNum">     207 </span><span class="lineCov">          6 :         if (file == NULL)</span></a>
+<a name="208"><span class="lineNum">     208 </span><span class="lineCov">          2 :                 return -1;</span></a>
+<a name="209"><span class="lineNum">     209 </span><span class="lineCov">          4 :         size_t lines_len = 0;</span></a>
+<a name="210"><span class="lineNum">     210 </span><span class="lineCov">          4 :         char *line = NULL;</span></a>
+<a name="211"><span class="lineNum">     211 </span><span class="lineCov">          4 :         ssize_t line_size = 0;</span></a>
+<a name="212"><span class="lineNum">     212 </span><span class="lineCov">          6 :         while ((line_size = getline(&amp;line, &amp;lines_len, file)) != -1) {</span></a>
+<a name="213"><span class="lineNum">     213 </span><span class="lineCov">          2 :                 if (line[line_size - 1] == '\n')</span></a>
+<a name="214"><span class="lineNum">     214 </span><span class="lineCov">          2 :                         line[line_size - 1] = '\0';</span></a>
+<a name="215"><span class="lineNum">     215 </span><span class="lineCov">          2 :                 struct task *task = create_task_from_todotxt(line);</span></a>
+<a name="216"><span class="lineNum">     216 </span><span class="lineCov">          2 :                 task-&gt;id = index++;</span></a>
+<a name="217"><span class="lineNum">     217 </span><span class="lineCov">          2 :                 todo_add_task(todo, task);</span></a>
+<a name="218"><span class="lineNum">     218 </span>            :         }</a>
+<a name="219"><span class="lineNum">     219 </span><span class="lineCov">          4 :         free(line);</span></a>
+<a name="220"><span class="lineNum">     220 </span><span class="lineCov">          4 :         if (errno == EINVAL)</span></a>
+<a name="221"><span class="lineNum">     221 </span><span class="lineCov">          2 :                 ret = -1;</span></a>
+<a name="222"><span class="lineNum">     222 </span><span class="lineCov">          4 :         fclose(file);</span></a>
+<a name="223"><span class="lineNum">     223 </span><span class="lineCov">          4 :         return ret;</span></a>
+<a name="224"><span class="lineNum">     224 </span>            : }</a>
+<a name="225"><span class="lineNum">     225 </span>            : </a>
+<a name="226"><span class="lineNum">     226 </span><span class="lineCov">          8 : static int save_tasks(struct todo *todo)</span></a>
+<a name="227"><span class="lineNum">     227 </span>            : {</a>
+<a name="228"><span class="lineNum">     228 </span><span class="lineCov">          8 :         struct todotxt *todotxt = container_of(todo, struct todotxt, todo);</span></a>
+<a name="229"><span class="lineNum">     229 </span><span class="lineCov">          8 :         FILE *file = fopen(todotxt-&gt;filename, &quot;w&quot;);</span></a>
+<a name="230"><span class="lineNum">     230 </span><span class="lineCov">          8 :         if (file == NULL)</span></a>
+<a name="231"><span class="lineNum">     231 </span><span class="lineCov">          2 :                 return -1;</span></a>
+<a name="232"><span class="lineNum">     232 </span><span class="lineCov">          6 :         struct task **task = todo-&gt;task_list;</span></a>
+<a name="233"><span class="lineNum">     233 </span><span class="lineCov">         12 :         for (int i = 0; i &lt; todo-&gt;task_counter; i++) {</span></a>
+<a name="234"><span class="lineNum">     234 </span><span class="lineCov">          8 :                 char *line = NULL;</span></a>
+<a name="235"><span class="lineNum">     235 </span><span class="lineCov">          8 :                 int line_length = create_todotxt_line_from_task(task[i], &amp;line);</span></a>
+<a name="236"><span class="lineNum">     236 </span><span class="lineCov">          8 :                 if (i &lt; todo-&gt;task_counter - 1) {</span></a>
+<a name="237"><span class="lineNum">     237 </span><span class="lineCov">          2 :                         line_length = line_length + 1;</span></a>
+<a name="238"><span class="lineNum">     238 </span><span class="lineCov">          2 :                         line = realloc(line, line_length);</span></a>
+<a name="239"><span class="lineNum">     239 </span><span class="lineCov">          2 :                         line[line_length - 1] = '\n';</span></a>
+<a name="240"><span class="lineNum">     240 </span>            :                 }</a>
+<a name="241"><span class="lineNum">     241 </span><span class="lineCov">          8 :                 if (fwrite(line, line_length, 1, file) != 1) {</span></a>
+<a name="242"><span class="lineNum">     242 </span><span class="lineCov">          2 :                         free(line);</span></a>
+<a name="243"><span class="lineNum">     243 </span><span class="lineCov">          2 :                         fclose(file);</span></a>
+<a name="244"><span class="lineNum">     244 </span><span class="lineCov">          2 :                         return -1;</span></a>
+<a name="245"><span class="lineNum">     245 </span>            :                 }</a>
+<a name="246"><span class="lineNum">     246 </span><span class="lineCov">          6 :                 free(line);</span></a>
+<a name="247"><span class="lineNum">     247 </span>            :         }</a>
+<a name="248"><span class="lineNum">     248 </span><span class="lineCov">          4 :         fclose(file);</span></a>
+<a name="249"><span class="lineNum">     249 </span><span class="lineCov">          4 :         return 0;</span></a>
+<a name="250"><span class="lineNum">     250 </span>            : }</a>
+<a name="251"><span class="lineNum">     251 </span>            : </a>
+<a name="252"><span class="lineNum">     252 </span><span class="lineCov">         16 : void destroy_todotxt(struct todo **todo)</span></a>
+<a name="253"><span class="lineNum">     253 </span>            : {</a>
+<a name="254"><span class="lineNum">     254 </span><span class="lineCov">         16 :         struct todotxt *todotxt = container_of(*todo,</span></a>
+<a name="255"><span class="lineNum">     255 </span>            :                                                struct todotxt,</a>
+<a name="256"><span class="lineNum">     256 </span>            :                                                todo);</a>
+<a name="257"><span class="lineNum">     257 </span><span class="lineCov">         16 :         free(todotxt-&gt;filename);</span></a>
+<a name="258"><span class="lineNum">     258 </span><span class="lineCov">         16 :         free(todotxt);</span></a>
+<a name="259"><span class="lineNum">     259 </span><span class="lineCov">         16 :         *todo = NULL;</span></a>
+<a name="260"><span class="lineNum">     260 </span><span class="lineCov">         16 : }</span></a>
 <a name="261"><span class="lineNum">     261 </span>            : </a>
-<a name="262"><span class="lineNum">     262 </span><span class="lineCov">         20 : struct todo *create_todotxt(char *filename)</span></a>
-<a name="263"><span class="lineNum">     263 </span>            : {</a>
-<a name="264"><span class="lineNum">     264 </span><span class="lineCov">         20 :         if (filename == NULL)</span></a>
-<a name="265"><span class="lineNum">     265 </span><span class="lineCov">          2 :                 return NULL;</span></a>
-<a name="266"><span class="lineNum">     266 </span><span class="lineCov">         18 :         if (access(filename, R_OK | W_OK) != 0)</span></a>
+<a name="262"><span class="lineNum">     262 </span>            : struct todo_driver todotxt_driver;</a>
+<a name="263"><span class="lineNum">     263 </span>            : </a>
+<a name="264"><span class="lineNum">     264 </span><span class="lineCov">         20 : struct todo *create_todotxt(char *filename)</span></a>
+<a name="265"><span class="lineNum">     265 </span>            : {</a>
+<a name="266"><span class="lineNum">     266 </span><span class="lineCov">         20 :         if (filename == NULL)</span></a>
 <a name="267"><span class="lineNum">     267 </span><span class="lineCov">          2 :                 return NULL;</span></a>
-<a name="268"><span class="lineNum">     268 </span><span class="lineCov">         16 :         struct todotxt *todotxt = calloc(1, sizeof(struct todotxt));</span></a>
-<a name="269"><span class="lineNum">     269 </span><span class="lineCov">         16 :         todotxt-&gt;todo.driver = &amp;todotxt_driver;</span></a>
-<a name="270"><span class="lineNum">     270 </span><span class="lineCov">         16 :         todo_init(&amp;todotxt-&gt;todo);</span></a>
-<a name="271"><span class="lineNum">     271 </span><span class="lineCov">         16 :         todotxt-&gt;todo.driver-&gt;load_tasks = load_tasks;</span></a>
-<a name="272"><span class="lineNum">     272 </span><span class="lineCov">         16 :         todotxt-&gt;todo.driver-&gt;save_tasks = save_tasks;</span></a>
-<a name="273"><span class="lineNum">     273 </span><span class="lineCov">         16 :         todotxt-&gt;filename = calloc(1, strlen(filename) + 1);</span></a>
-<a name="274"><span class="lineNum">     274 </span><span class="lineCov">         16 :         strcpy(todotxt-&gt;filename, filename);</span></a>
-<a name="275"><span class="lineNum">     275 </span><span class="lineCov">         16 :         return &amp;todotxt-&gt;todo;</span></a>
-<a name="276"><span class="lineNum">     276 </span>            : }</a>
+<a name="268"><span class="lineNum">     268 </span><span class="lineCov">         18 :         if (access(filename, R_OK | W_OK) != 0)</span></a>
+<a name="269"><span class="lineNum">     269 </span><span class="lineCov">          2 :                 return NULL;</span></a>
+<a name="270"><span class="lineNum">     270 </span><span class="lineCov">         16 :         struct todotxt *todotxt = calloc(1, sizeof(struct todotxt));</span></a>
+<a name="271"><span class="lineNum">     271 </span><span class="lineCov">         16 :         todotxt-&gt;todo.driver = &amp;todotxt_driver;</span></a>
+<a name="272"><span class="lineNum">     272 </span><span class="lineCov">         16 :         todo_init(&amp;todotxt-&gt;todo);</span></a>
+<a name="273"><span class="lineNum">     273 </span><span class="lineCov">         16 :         todotxt-&gt;todo.driver-&gt;load_tasks = load_tasks;</span></a>
+<a name="274"><span class="lineNum">     274 </span><span class="lineCov">         16 :         todotxt-&gt;todo.driver-&gt;save_tasks = save_tasks;</span></a>
+<a name="275"><span class="lineNum">     275 </span><span class="lineCov">         16 :         todotxt-&gt;filename = calloc(1, strlen(filename) + 1);</span></a>
+<a name="276"><span class="lineNum">     276 </span><span class="lineCov">         16 :         strcpy(todotxt-&gt;filename, filename);</span></a>
+<a name="277"><span class="lineNum">     277 </span><span class="lineCov">         16 :         return &amp;todotxt-&gt;todo;</span></a>
+<a name="278"><span class="lineNum">     278 </span>            : }</a>
 </pre>
       </td>
     </tr>
