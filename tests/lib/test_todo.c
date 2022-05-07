@@ -231,6 +231,92 @@ void test_negative_todo_get_task_found(void **state)
 	todo_clean_tasks(&todo);
 }
 
+bool iterator_callback(struct task *task, void *data)
+{
+	check_expected(task);
+	check_expected(data);
+	return mock_type(bool);
+}
+
+void test_negative_todo_iterator_next_null_param(void **state)
+{
+	expect_assert_failure(todo_iterator_next(NULL));
+}
+
+void test_todo_iterator_next_no_filter_no_tasks(void **state)
+{
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	todo_init(&todo);
+	struct todo_iterator iterator = { .todo = &todo, .filter = NULL, .data = NULL, .index = 0 };
+	struct task *task = todo_iterator_next(&iterator);
+	assert_null(task);
+}
+
+void test_todo_iterator_next_no_filter_with_tasks(void **state)
+{
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	todo_init(&todo);
+	todo_add_task(&todo, create_new_task("my task", "myproject", TASK_PRIORITY_HIGH));
+	struct todo_iterator iterator = { .todo = &todo, .filter = NULL, .data = NULL, .index = 0 };
+	struct task *task = todo_iterator_next(&iterator);
+	assert_non_null(task);
+	task = todo_iterator_next(&iterator);
+	assert_null(task);
+}
+
+void test_todo_iterator_next_filter_no_tasks(void **state)
+{
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	todo_init(&todo);
+	struct todo_iterator iterator = {.todo = &todo, .filter = iterator_callback, .data = NULL, .index = 0};
+	struct task *task = todo_iterator_next(&iterator);
+	assert_null(task);
+}
+
+void test_todo_iterator_next_filter_with_tasks(void **state)
+{
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	todo_init(&todo);
+	int data = 0xDEADBEEF;
+	struct task *created_task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	todo_add_task(&todo, created_task);
+	struct todo_iterator iterator = { .todo = &todo, .filter = iterator_callback, .data = &data, .index = 0 };
+
+	expect_value(iterator_callback, task, created_task);
+	expect_value(iterator_callback, data, &data);
+	will_return(iterator_callback, true);
+	struct task *task = todo_iterator_next(&iterator);
+	assert_non_null(task);
+	task = todo_iterator_next(&iterator);
+	assert_null(task);
+}
+
+void test_todo_iterator_next_filter_with_tasks_and_filter_false(void **state)
+{
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	todo_init(&todo);
+	int data = 0xDEADBEEF;
+	struct task *created_task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	todo_add_task(&todo, created_task);
+	struct todo_iterator iterator = { .todo = &todo, .filter = iterator_callback, .data = &data, .index = 0 };
+
+	expect_value(iterator_callback, task, created_task);
+	expect_value(iterator_callback, data, &data);
+	will_return(iterator_callback, false);
+	struct task *task = todo_iterator_next(&iterator);
+	assert_null(task);
+}
+
 int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
@@ -253,6 +339,12 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_negative_todo_get_task_empty),
 		cmocka_unit_test(test_negative_todo_get_task_not_found),
 		cmocka_unit_test(test_negative_todo_get_task_found),
+		cmocka_unit_test(test_negative_todo_iterator_next_null_param),
+		cmocka_unit_test(test_todo_iterator_next_no_filter_no_tasks),
+		cmocka_unit_test(test_todo_iterator_next_no_filter_with_tasks),
+		cmocka_unit_test(test_todo_iterator_next_filter_no_tasks),
+		cmocka_unit_test(test_todo_iterator_next_filter_with_tasks),
+		cmocka_unit_test(test_todo_iterator_next_filter_with_tasks_and_filter_false),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

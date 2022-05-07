@@ -66,10 +66,10 @@ FREE_AND_EXIT:
 
 static int list_command_handle(struct command *cmd)
 {
-	for (int i = 0; i < cmd->todo->task_counter; i++) {
-		struct task *task = cmd->todo->task_list[i];
+	struct todo_iterator iterator = { .todo = cmd->todo, .index = 0, .filter = NULL, .data = NULL };
+	struct task *task = NULL;
+	while ((task = todo_iterator_next(&iterator)) != NULL)
 		cmd->log->notify("%d. %s\n", task->id, task->name);
-	}
 
 	return 0;
 }
