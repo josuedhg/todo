@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-05-07 03:26:29</td>
+            <td class="headerValue">2022-05-07 14:10:14</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">5</td>
@@ -67,24 +67,24 @@
 <a name="5"><span class="lineNum">       5 </span>            : #include &quot;task.h&quot;</a>
 <a name="6"><span class="lineNum">       6 </span>            : #include &quot;debug_i.h&quot;</a>
 <a name="7"><span class="lineNum">       7 </span>            : </a>
-<a name="8"><span class="lineNum">       8 </span><span class="lineCov">        194 : struct task *create_task(const char *name, const char *project_name, int priority)</span></a>
+<a name="8"><span class="lineNum">       8 </span><span class="lineCov">        192 : struct task *create_task(const char *name, const char *project_name, int priority)</span></a>
 <a name="9"><span class="lineNum">       9 </span>            : {</a>
-<a name="10"><span class="lineNum">      10 </span><span class="lineCov">        194 :         if (name == NULL)</span></a>
+<a name="10"><span class="lineNum">      10 </span><span class="lineCov">        192 :         if (name == NULL)</span></a>
 <a name="11"><span class="lineNum">      11 </span><span class="lineCov">          4 :                 return NULL;</span></a>
 <a name="12"><span class="lineNum">      12 </span>            : </a>
-<a name="13"><span class="lineNum">      13 </span><span class="lineCov">        190 :         int namelen = strlen(name);</span></a>
-<a name="14"><span class="lineNum">      14 </span><span class="lineCov">        190 :         int pnamelen = (project_name == NULL) ? 0 : strlen(project_name);</span></a>
+<a name="13"><span class="lineNum">      13 </span><span class="lineCov">        188 :         int namelen = strlen(name);</span></a>
+<a name="14"><span class="lineNum">      14 </span><span class="lineCov">        188 :         int pnamelen = (project_name == NULL) ? 0 : strlen(project_name);</span></a>
 <a name="15"><span class="lineNum">      15 </span>            : </a>
-<a name="16"><span class="lineNum">      16 </span><span class="lineCov">        190 :         struct task *task = calloc(1, sizeof(struct task));</span></a>
-<a name="17"><span class="lineNum">      17 </span><span class="lineCov">        190 :         task-&gt;name = calloc(1, namelen + 1);</span></a>
+<a name="16"><span class="lineNum">      16 </span><span class="lineCov">        188 :         struct task *task = calloc(1, sizeof(struct task));</span></a>
+<a name="17"><span class="lineNum">      17 </span><span class="lineCov">        188 :         task-&gt;name = calloc(1, namelen + 1);</span></a>
 <a name="18"><span class="lineNum">      18 </span>            : </a>
-<a name="19"><span class="lineNum">      19 </span><span class="lineCov">        190 :         strncpy(task-&gt;name, name, namelen);</span></a>
-<a name="20"><span class="lineNum">      20 </span><span class="lineCov">        190 :         if (project_name != NULL) {</span></a>
-<a name="21"><span class="lineNum">      21 </span><span class="lineCov">        188 :                 task-&gt;project_name = calloc(1, pnamelen + 1);</span></a>
-<a name="22"><span class="lineNum">      22 </span><span class="lineCov">        188 :                 strncpy(task-&gt;project_name, project_name, pnamelen);</span></a>
+<a name="19"><span class="lineNum">      19 </span><span class="lineCov">        188 :         strncpy(task-&gt;name, name, namelen);</span></a>
+<a name="20"><span class="lineNum">      20 </span><span class="lineCov">        188 :         if (project_name != NULL) {</span></a>
+<a name="21"><span class="lineNum">      21 </span><span class="lineCov">        186 :                 task-&gt;project_name = calloc(1, pnamelen + 1);</span></a>
+<a name="22"><span class="lineNum">      22 </span><span class="lineCov">        186 :                 strncpy(task-&gt;project_name, project_name, pnamelen);</span></a>
 <a name="23"><span class="lineNum">      23 </span>            :         }</a>
-<a name="24"><span class="lineNum">      24 </span><span class="lineCov">        190 :         task-&gt;priority = priority;</span></a>
-<a name="25"><span class="lineNum">      25 </span><span class="lineCov">        190 :         return task;</span></a>
+<a name="24"><span class="lineNum">      24 </span><span class="lineCov">        188 :         task-&gt;priority = priority;</span></a>
+<a name="25"><span class="lineNum">      25 </span><span class="lineCov">        188 :         return task;</span></a>
 <a name="26"><span class="lineNum">      26 </span>            : }</a>
 <a name="27"><span class="lineNum">      27 </span>            : </a>
 <a name="28"><span class="lineNum">      28 </span><span class="lineCov">         16 : void task_set_completed(struct task *task)</span></a>
@@ -101,13 +101,13 @@
 <a name="39"><span class="lineNum">      39 </span><span class="lineCov">          6 :         task-&gt;completion_date = 0;</span></a>
 <a name="40"><span class="lineNum">      40 </span><span class="lineCov">          6 : }</span></a>
 <a name="41"><span class="lineNum">      41 </span>            : </a>
-<a name="42"><span class="lineNum">      42 </span><span class="lineCov">         46 : struct task *create_new_task(const char *name, const char *project_name, int priority)</span></a>
+<a name="42"><span class="lineNum">      42 </span><span class="lineCov">         44 : struct task *create_new_task(const char *name, const char *project_name, int priority)</span></a>
 <a name="43"><span class="lineNum">      43 </span>            : {</a>
-<a name="44"><span class="lineNum">      44 </span><span class="lineCov">         46 :         struct task *task = create_task(name, project_name, priority);</span></a>
-<a name="45"><span class="lineNum">      45 </span><span class="lineCov">         46 :         if (task == NULL)</span></a>
+<a name="44"><span class="lineNum">      44 </span><span class="lineCov">         44 :         struct task *task = create_task(name, project_name, priority);</span></a>
+<a name="45"><span class="lineNum">      45 </span><span class="lineCov">         44 :         if (task == NULL)</span></a>
 <a name="46"><span class="lineNum">      46 </span><span class="lineCov">          2 :                 return NULL;</span></a>
-<a name="47"><span class="lineNum">      47 </span><span class="lineCov">         44 :         task-&gt;creation_date = time(NULL);</span></a>
-<a name="48"><span class="lineNum">      48 </span><span class="lineCov">         44 :         return task;</span></a>
+<a name="47"><span class="lineNum">      47 </span><span class="lineCov">         42 :         task-&gt;creation_date = time(NULL);</span></a>
+<a name="48"><span class="lineNum">      48 </span><span class="lineCov">         42 :         return task;</span></a>
 <a name="49"><span class="lineNum">      49 </span>            : }</a>
 <a name="50"><span class="lineNum">      50 </span>            : </a>
 <a name="51"><span class="lineNum">      51 </span><span class="lineCov">        186 : void destroy_task(struct task **task)</span></a>

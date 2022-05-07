@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-05-07 03:26:29</td>
+            <td class="headerValue">2022-05-07 14:10:14</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">8</td>
@@ -128,9 +128,9 @@
 <a name="66"><span class="lineNum">      66 </span>            : </a>
 <a name="67"><span class="lineNum">      67 </span><span class="lineCov">          8 : static int list_command_handle(struct command *cmd)</span></a>
 <a name="68"><span class="lineNum">      68 </span>            : {</a>
-<a name="69"><span class="lineNum">      69 </span><span class="lineCov">          8 :         struct todo_iterator *iterator = todo_get_iterator(cmd-&gt;todo, NULL, NULL);</span></a>
+<a name="69"><span class="lineNum">      69 </span><span class="lineCov">          8 :         struct todo_iterator iterator = { .todo = cmd-&gt;todo, .index = 0, .filter = NULL, .data = NULL };</span></a>
 <a name="70"><span class="lineNum">      70 </span><span class="lineCov">          8 :         struct task *task = NULL;</span></a>
-<a name="71"><span class="lineNum">      71 </span><span class="lineCov">         14 :         while ((task = todo_iterator_next(iterator)) != NULL)</span></a>
+<a name="71"><span class="lineNum">      71 </span><span class="lineCov">         14 :         while ((task = todo_iterator_next(&amp;iterator)) != NULL)</span></a>
 <a name="72"><span class="lineNum">      72 </span><span class="lineCov">          6 :                 cmd-&gt;log-&gt;notify(&quot;%d. %s\n&quot;, task-&gt;id, task-&gt;name);</span></a>
 <a name="73"><span class="lineNum">      73 </span>            : </a>
 <a name="74"><span class="lineNum">      74 </span><span class="lineCov">          8 :         return 0;</span></a>
