@@ -520,6 +520,136 @@ void test_todo_save_tasks_multiline(void **state)
 	assert_int_equal(res, 0);
 }
 
+void test_negative_todo_get_iterator_null_param(void **state)
+{
+	assert_null(todo_get_iterator(NULL, NULL, NULL));
+}
+
+bool iterator_callback(struct task *task, void *data)
+{
+	check_expected(task);
+	check_expected(data);
+	return mock_type(bool);
+}
+
+void test_todo_get_iterator_no_filter(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	struct todo_iterator *iterator = todo_get_iterator(todo, NULL, NULL);
+	assert_non_null(iterator);
+	todo_iterator_free(&iterator);
+}
+
+void test_todo_get_iterator_filter(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	struct todo_iterator *iterator = todo_get_iterator(todo, iterator_callback, NULL);
+	assert_non_null(iterator);
+	todo_iterator_free(&iterator);
+}
+
+void test_negative_todo_iterator_next_null_param(void **state)
+{
+	expect_assert_failure(todo_iterator_next(NULL));
+}
+
+void test_todo_iterator_next_no_filter_no_tasks(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	struct todo_iterator *iterator = todo_get_iterator(todo, NULL, NULL);
+	assert_non_null(iterator);
+	struct task *task = todo_iterator_next(iterator);
+	assert_null(task);
+	todo_iterator_free(&iterator);
+}
+
+void test_todo_iterator_next_no_filter_with_tasks(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	todo_add_task(todo, create_new_task("my task", "myproject", TASK_PRIORITY_HIGH));
+	struct todo_iterator *iterator = todo_get_iterator(todo, NULL, NULL);
+	assert_non_null(iterator);
+	struct task *task = todo_iterator_next(iterator);
+	assert_non_null(task);
+	task = todo_iterator_next(iterator);
+	assert_null(task);
+	todo_iterator_free(&iterator);
+}
+
+void test_todo_iterator_next_filter_no_tasks(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	struct todo_iterator *iterator = todo_get_iterator(todo, iterator_callback, NULL);
+	assert_non_null(iterator);
+	struct task *task = todo_iterator_next(iterator);
+	assert_null(task);
+	todo_iterator_free(&iterator);
+}
+
+void test_todo_iterator_next_filter_with_tasks(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	int data = 0xDEADBEEF;
+	struct task *created_task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	todo_add_task(todo, created_task);
+	struct todo_iterator *iterator = todo_get_iterator(todo, iterator_callback, &data);
+	assert_non_null(iterator);
+
+	expect_value(iterator_callback, task, created_task);
+	expect_value(iterator_callback, data, &data);
+	will_return(iterator_callback, true);
+	struct task *task = todo_iterator_next(iterator);
+	assert_non_null(task);
+	task = todo_iterator_next(iterator);
+	assert_null(task);
+	todo_iterator_free(&iterator);
+}
+
+void test_todo_iterator_next_filter_with_tasks_and_filter_false(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	int data = 0xDEADBEEF;
+	struct task *created_task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	todo_add_task(todo, created_task);
+	struct todo_iterator *iterator = todo_get_iterator(todo, iterator_callback, &data);
+	assert_non_null(iterator);
+
+	expect_value(iterator_callback, task, created_task);
+	expect_value(iterator_callback, data, &data);
+	will_return(iterator_callback, false);
+	struct task *task = todo_iterator_next(iterator);
+	assert_null(task);
+	todo_iterator_free(&iterator);
+}
+
+void test_todo_iterator_next_with_reset_iterator(void **state)
+{
+	struct todo *todo = (struct todo *)*state;
+	int data = 0xDEADBEEF;
+	struct task *created_task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	todo_add_task(todo, created_task);
+	struct todo_iterator *iterator = todo_get_iterator(todo, iterator_callback, &data);
+	assert_non_null(iterator);
+
+	expect_value(iterator_callback, task, created_task);
+	expect_value(iterator_callback, data, &data);
+	will_return(iterator_callback, true);
+	struct task *task = todo_iterator_next(iterator);
+	assert_non_null(task);
+	task = todo_iterator_next(iterator);
+	assert_null(task);
+	todo_iterator_reset(iterator);
+
+	expect_value(iterator_callback, task, created_task);
+	expect_value(iterator_callback, data, &data);
+	will_return(iterator_callback, true);
+	task = todo_iterator_next(iterator);
+	assert_non_null(task);
+	task = todo_iterator_next(iterator);
+	assert_null(task);
+	todo_iterator_free(&iterator);
+}
+
 int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
@@ -556,6 +686,16 @@ int main(int argc, char *argv[])
 		cmocka_unit_test_setup_teardown(test_negative_todo_save_tasks_bad_write, setup, teardown),
 		cmocka_unit_test_setup_teardown(test_todo_save_tasks, setup, teardown),
 		cmocka_unit_test_setup_teardown(test_todo_save_tasks_multiline, setup, teardown),
+		cmocka_unit_test(test_negative_todo_get_iterator_null_param),
+		cmocka_unit_test_setup_teardown(test_todo_get_iterator_no_filter, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_todo_get_iterator_filter, setup, teardown),
+		cmocka_unit_test(test_negative_todo_iterator_next_null_param),
+		cmocka_unit_test_setup_teardown(test_todo_iterator_next_no_filter_no_tasks, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_todo_iterator_next_no_filter_with_tasks, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_todo_iterator_next_filter_no_tasks, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_todo_iterator_next_filter_with_tasks, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_todo_iterator_next_filter_with_tasks_and_filter_false, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_todo_iterator_next_with_reset_iterator, setup, teardown),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

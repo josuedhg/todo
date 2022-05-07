@@ -5,6 +5,13 @@
 
 #include "debug_i.h"
 
+struct todo_iterator {
+	iterator_filter filter;
+	struct todo *todo;
+	int index;
+	void *data;
+};
+
 static int load_tasks(struct todo *todo)
 {
 	return 0;
@@ -116,4 +123,44 @@ struct task *todo_get_task(struct todo *todo, int id)
 	if (todo->task_counter == 0)
 		return NULL;
 	return todo->driver->get_task(todo, id);
+}
+
+struct todo_iterator *todo_get_iterator(struct todo *todo, iterator_filter filter, void *data)
+{
+	if (todo == NULL)
+		return NULL;
+	struct todo_iterator *iterator = calloc(1, sizeof(struct todo_iterator));
+	iterator->filter = filter;
+	iterator->todo = todo;
+	iterator->index = 0;
+	iterator->data = data;
+	return iterator;
+}
+
+struct task *todo_iterator_next(struct todo_iterator *iterator)
+{
+	assert(iterator != NULL);
+	struct task *task = NULL;
+	while (iterator->index < iterator->todo->task_counter) {
+		struct task *tmp = iterator->todo->task_list[iterator->index];
+		iterator->index++;
+		if (iterator->filter == NULL || iterator->filter(tmp, iterator->data)) {
+			task = tmp;
+			break;
+		}
+	}
+	return task;
+}
+
+void todo_iterator_reset(struct todo_iterator *iterator)
+{
+	assert(iterator != NULL);
+	iterator->index = 0;
+}
+
+void todo_iterator_free(struct todo_iterator **iterator)
+{
+	assert(iterator != NULL);
+	free(*iterator);
+	*iterator = NULL;
 }
