@@ -1,25 +1,14 @@
-
-struct Task {
-    name: String,
-    project: String,
-    completed: bool,
-    priority: char,
-}
+use todo::Task;
 
 fn main() {
-    let task = Task {
-        name: String::from("Learn Rust"),
-        project: String::from("Learn Rust"),
-        completed: false,
-        priority: 'A',
-    };
+    let task = Task::new(String::from("Learn Rust"), String::from("Learn Rust"), 'A');
     println!("{}", task.name);
     println!("{}", task.project);
-    let completed_message = if task.completed {
+    let completed_message = if task.is_complete() {
         "Completed"
     } else {
         "Not completed"
     };
     println!("{}", completed_message);
-    println!("{}", task.priority);
+    println!("{}", task.get_priority());
 }
