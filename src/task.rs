@@ -7,28 +7,6 @@ pub struct Task {
 }
 
 impl Task {
-    pub fn from_str(s: &str) -> Task {
-        let completed = s.starts_with("x");
-        let x: &[_] = &['x', ' ', '(' , ')'];
-        let priority = s.trim_matches(x).chars().next().unwrap();
-        let name = s.trim_start_matches(x).trim_start_matches(char::is_alphabetic).trim_start_matches(x);
-
-        let mut project = String::new();
-        for word in name.split_whitespace() {
-            if word.starts_with("+") {
-                project = word.to_string().trim_start_matches('+').to_string();
-                break;
-            }
-        }
-
-        Task {
-            name: name.to_string(),
-            project: project.to_string(),
-            completed,
-            priority,
-        }
-    }
-
     pub fn to_str(&self) -> String {
         let mut s = String::new();
         if self.completed {
@@ -111,29 +89,6 @@ mod test {
     fn test_task_get_priority() {
         let task = Task::new(String::from("Learn Rust"), String::from("Learn Rust"), 'A');
         assert_eq!(task.get_priority(), 'A');
-    }
-
-    #[test]
-    fn test_task_from_str_no_project() {
-        let task = Task::from_str("(A) Learn Rust");
-        assert_eq!(task.name, "Learn Rust");
-        assert_eq!(task.project, "");
-        assert_eq!(task.priority, 'A');
-    }
-
-    #[test]
-    fn test_task_from_str() {
-        let task = Task::from_str("x (A) Learn Rust +project");
-        assert_eq!(task.name, "Learn Rust +project");
-        assert_eq!(task.project, "project");
-        assert_eq!(task.completed, true);
-        assert_eq!(task.priority, 'A');
-    }
-
-    #[test]
-    fn test_task_from_tsr_completed() {
-        let task = Task::from_str("x (A) Learn Rust +project");
-        assert_eq!(task.is_complete(), true);
     }
 
     #[test]

@@ -2,10 +2,37 @@ use crate::{Task, Todo};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::io::{BufWriter, Write, Seek};
+use std::str::FromStr;
+use std::string::{ToString, ParseError};
 
 pub trait TodotxtIO {
     fn read_tasks(&mut self) -> Vec<Task>;
     fn write_tasks(&mut self, tasks: &mut Vec<Task>);
+}
+
+impl FromStr for Task {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Task, Self::Err> {
+        let completed = s.starts_with("x");
+        let x: &[_] = &['x', ' ', '(' , ')'];
+        let priority = s.trim_matches(x).chars().next().unwrap();
+        let name = s.trim_start_matches(x).trim_start_matches(char::is_alphabetic).trim_start_matches(x);
+
+        let mut project = String::new();
+        for word in name.split_whitespace() {
+            if word.starts_with("+") {
+                project = word.to_string().trim_start_matches('+').to_string();
+                break;
+            }
+        }
+
+        let mut task = Task::new(name.to_string(), project.to_string(), priority);
+        if completed {
+            task.complete();
+        }
+        Ok(task)
+    }
 }
 
 impl TodotxtIO for File {
@@ -18,7 +45,7 @@ impl TodotxtIO for File {
                 return;
             }
             let task = Task::from_str(&line);
-            tasks.push(task);
+            tasks.push(task.unwrap());
         });
         tasks
     }
@@ -116,4 +143,28 @@ mod test {
         let mut todo = TodoTxt::new(Box::new(MockIO::new()));
         assert_eq!(todo.list().len(), 0);
     }
+
+    #[test]
+    fn test_task_from_str_no_project() {
+        let task = Task::from_str("(A) Learn Rust").unwrap();
+        assert_eq!(task.name, "Learn Rust");
+        assert_eq!(task.project, "");
+        assert_eq!(task.get_priority(), 'A');
+    }
+
+    #[test]
+    fn test_task_from_str() {
+        let task = Task::from_str("x (A) Learn Rust +project").unwrap();
+        assert_eq!(task.name, "Learn Rust +project");
+        assert_eq!(task.project, "project");
+        assert_eq!(task.is_complete(), true);
+        assert_eq!(task.get_priority(), 'A');
+    }
+
+    #[test]
+    fn test_task_from_str_completed() {
+        let task = Task::from_str("x (A) Learn Rust +project").unwrap();
+        assert_eq!(task.is_complete(), true);
+    }
+
 }
