@@ -7,25 +7,6 @@ pub struct Task {
 }
 
 impl Task {
-    pub fn to_str(&self) -> String {
-        let mut s = String::new();
-        if self.completed {
-            s.push('x');
-            s.push(' ');
-        }
-        s.push('(');
-        s.push(self.priority);
-        s.push(')');
-        s.push(' ');
-        s.push_str(&self.name);
-        if !self.project.is_empty() && !self.name.contains(format!("+{}", self.project).as_str()) {
-            s.push(' ');
-            s.push('+');
-            s.push_str(&self.project);
-        }
-        s
-    }
-
     pub fn new(name: String, project: String, priority: char) -> Task {
         Task {
             name: name,
@@ -89,24 +70,5 @@ mod test {
     fn test_task_get_priority() {
         let task = Task::new(String::from("Learn Rust"), String::from("Learn Rust"), 'A');
         assert_eq!(task.get_priority(), 'A');
-    }
-
-    #[test]
-    fn test_task_to_str_no_project() {
-        let task = Task::new(String::from("Learn Rust"), String::from(""), 'A');
-        assert_eq!(task.to_str(), "(A) Learn Rust");
-    }
-
-    #[test]
-    fn test_task_to_str() {
-        let task = Task::new(String::from("Learn Rust"), String::from("project"), 'A');
-        assert_eq!(task.to_str(), "(A) Learn Rust +project");
-    }
-
-    #[test]
-    fn test_task_to_str_completed() {
-        let mut task = Task::new(String::from("Learn Rust"), String::from("project"), 'A');
-        task.complete();
-        assert_eq!(task.to_str(), "x (A) Learn Rust +project");
     }
 }

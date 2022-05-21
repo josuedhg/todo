@@ -35,6 +35,28 @@ impl FromStr for Task {
     }
 }
 
+impl ToString for Task {
+    fn to_string(&self) -> String {
+        let mut s = String::new();
+        if self.is_complete() {
+            s.push('x');
+            s.push(' ');
+        }
+        s.push('(');
+        s.push(self.get_priority());
+        s.push(')');
+        s.push(' ');
+        s.push_str(&self.name);
+        if !self.project.is_empty() && !self.name.contains(format!("+{}", self.project).as_str()) {
+            s.push(' ');
+            s.push('+');
+            s.push_str(&self.project);
+        }
+        s
+    }
+
+}
+
 impl TodotxtIO for File {
     fn read_tasks(&mut self) -> Vec<Task> {
         let mut tasks = Vec::new();
@@ -54,7 +76,7 @@ impl TodotxtIO for File {
         let mut writer = BufWriter::new(self);
         writer.rewind().unwrap();
         for task in tasks {
-            let line = format!("{}\n", task.to_str());
+            let line = format!("{}\n", task.to_string());
             writer.write(line.as_bytes()).unwrap();
         }
     }
@@ -167,4 +189,22 @@ mod test {
         assert_eq!(task.is_complete(), true);
     }
 
+    #[test]
+    fn test_task_to_str_no_project() {
+        let task = Task::new(String::from("Learn Rust"), String::from(""), 'A');
+        assert_eq!(task.to_string(), "(A) Learn Rust");
+    }
+
+    #[test]
+    fn test_task_to_str() {
+        let task = Task::new(String::from("Learn Rust"), String::from("project"), 'A');
+        assert_eq!(task.to_string(), "(A) Learn Rust +project");
+    }
+
+    #[test]
+    fn test_task_to_str_completed() {
+        let mut task = Task::new(String::from("Learn Rust"), String::from("project"), 'A');
+        task.complete();
+        assert_eq!(task.to_string(), "x (A) Learn Rust +project");
+    }
 }
