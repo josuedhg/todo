@@ -8,29 +8,23 @@ use std::error::Error;
 pub trait TodotxtIO: Read + Write + Seek {}
 impl TodotxtIO for std::fs::File {}
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TaskParseError(());
+#[derive(Debug)]
+pub struct TaskParseError { }
 
 impl fmt::Display for TaskParseError {
-    #[allow(deprecated, deprecated_in_future)]
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt.write_str(self.description())
+        fmt.write_str("Error parsing task")
     }
 }
 
-impl Error for TaskParseError {
-    #[allow(deprecated)]
-    fn description(&self) -> &str {
-        "Failed to parse task"
-    }
-}
+impl Error for TaskParseError {}
 
 impl FromStr for Task {
     type Err = TaskParseError;
 
-    fn from_str(s: &str) -> Result<Task, Self::Err> {
+    fn from_str(s: &str) -> Result<Task, TaskParseError> {
         if s == "" {
-            return Err(TaskParseError(()));
+            return Err(TaskParseError { });
         }
         let completed = s.starts_with("x");
         let x: &[_] = &['x', ' ', '(' , ')'];
@@ -110,6 +104,7 @@ impl TodoTxt {
         }
         self.io.rewind().unwrap();
         self.io.write(content.as_bytes()).unwrap();
+        self.io.flush().unwrap();
     }
 }
 
@@ -135,18 +130,35 @@ mod test {
     use super::*;
 
     struct MockIO {
+        content: String,
+        read: bool,
     }
 
     impl MockIO {
+        fn from_string(content: String) -> MockIO {
+            MockIO {
+                content,
+                read: false,
+            }
+        }
+
         fn new() -> MockIO {
-            MockIO { }
+            MockIO {
+                content: String::new(),
+                read: false,
+            }
         }
     }
 
     impl Read for MockIO {
-        #[allow(unused_variables)]
         fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-            Ok(0)
+            self.content.as_bytes().read(buf).unwrap();
+            if !self.read {
+                self.read = true;
+                Ok(self.content.len())
+            } else {
+                Ok(0)
+            }
         }
     }
 
@@ -188,9 +200,7 @@ mod test {
 
     #[test]
     fn test_list() {
-        let mut todo = TodoTxt::new(Box::new(MockIO::new()));
-        let task = Task::new("test".to_string(), "project".to_string(), 'A');
-        todo.add(task);
+        let mut todo = TodoTxt::new(Box::new(MockIO::from_string("(A) test +project".to_string())));
         assert_eq!(todo.list().len(), 1);
     }
 
@@ -198,6 +208,13 @@ mod test {
     fn test_list_empty() {
         let mut todo = TodoTxt::new(Box::new(MockIO::new()));
         assert_eq!(todo.list().len(), 0);
+    }
+
+    #[test]
+    fn test_task_from_str_invalid_format() {
+        let task = Task::from_str("");
+        assert!(task.is_err());
+        assert_eq!(format!("{}", task.err().unwrap()), "Error parsing task");
     }
 
     #[test]
