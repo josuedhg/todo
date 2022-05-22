@@ -1,19 +1,37 @@
 use crate::{Task, Todo};
-use std::fs::File;
-use std::io::{BufRead, BufReader};
-use std::io::{BufWriter, Write, Seek};
+use std::io::{Read, Write, Seek};
 use std::str::FromStr;
-use std::string::{ToString, ParseError};
+use std::string::ToString;
+use std::fmt;
+use std::error::Error;
 
-pub trait TodotxtIO {
-    fn read_tasks(&mut self) -> Vec<Task>;
-    fn write_tasks(&mut self, tasks: &mut Vec<Task>);
+pub trait TodotxtIO: Read + Write + Seek {}
+impl TodotxtIO for std::fs::File {}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TaskParseError(());
+
+impl fmt::Display for TaskParseError {
+    #[allow(deprecated, deprecated_in_future)]
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt.write_str(self.description())
+    }
+}
+
+impl Error for TaskParseError {
+    #[allow(deprecated)]
+    fn description(&self) -> &str {
+        "Failed to parse task"
+    }
 }
 
 impl FromStr for Task {
-    type Err = ParseError;
+    type Err = TaskParseError;
 
     fn from_str(s: &str) -> Result<Task, Self::Err> {
+        if s == "" {
+            return Err(TaskParseError(()));
+        }
         let completed = s.starts_with("x");
         let x: &[_] = &['x', ' ', '(' , ')'];
         let priority = s.trim_matches(x).chars().next().unwrap();
@@ -57,31 +75,6 @@ impl ToString for Task {
 
 }
 
-impl TodotxtIO for File {
-    fn read_tasks(&mut self) -> Vec<Task> {
-        let mut tasks = Vec::new();
-        let mut line = String::new();
-        BufReader::new(self).lines().for_each(|l| {
-            line = l.unwrap();
-            if line.starts_with("#") {
-                return;
-            }
-            let task = Task::from_str(&line);
-            tasks.push(task.unwrap());
-        });
-        tasks
-    }
-
-    fn write_tasks(&mut self, tasks: &mut Vec<Task>) {
-        let mut writer = BufWriter::new(self);
-        writer.rewind().unwrap();
-        for task in tasks {
-            let line = format!("{}\n", task.to_string());
-            writer.write(line.as_bytes()).unwrap();
-        }
-    }
-}
-
 pub struct TodoTxt {
     io: Box<dyn TodotxtIO>,
     tasks: Vec<Task>,
@@ -94,21 +87,45 @@ impl TodoTxt {
             tasks: Vec::new(),
         }
     }
+
+    pub fn load(&mut self) {
+        let mut content = String::new();
+        self.io.read_to_string(&mut content).unwrap();
+
+        for line in content.split("\n") {
+            if line.starts_with("#") {
+                continue;
+            }
+            let task = Task::from_str(line);
+            if let Ok(task) = task {
+                self.tasks.push(task);
+            }
+        }
+    }
+
+    pub fn save(&mut self) {
+        let mut content = String::new();
+        for task in &self.tasks {
+            content.push_str(&format!("{}\n", task.to_string()));
+        }
+        self.io.rewind().unwrap();
+        self.io.write(content.as_bytes()).unwrap();
+    }
 }
 
 impl Todo for TodoTxt {
     fn add(&mut self, task: Task) {
-        self.tasks.append(&mut self.io.read_tasks());
+        self.load();
         self.tasks.push(task);
-        self.io.write_tasks(&mut self.tasks);
+        self.save();
     }
     fn remove(&mut self, index: usize) {
-        self.tasks.append(&mut self.io.read_tasks());
+        self.load();
         self.tasks.remove(index);
-        self.io.write_tasks(&mut self.tasks);
+        self.save();
     }
     fn list(&mut self) -> Vec<Task> {
-        self.tasks.append(&mut self.io.read_tasks());
+        self.load();
         self.tasks.clone()
     }
 }
@@ -118,37 +135,53 @@ mod test {
     use super::*;
 
     struct MockIO {
-        tasks: Vec<Task>,
     }
 
     impl MockIO {
         fn new() -> MockIO {
-            MockIO { tasks: Vec::new() }
+            MockIO { }
         }
     }
 
-    impl TodotxtIO for MockIO {
-        fn read_tasks(&mut self) -> Vec<Task> {
-            let mut ret = Vec::new();
-            ret.append(&mut self.tasks);
-            ret
-        }
-        fn write_tasks(&mut self, tasks: &mut Vec<Task>) {
-            self.tasks.append(tasks);
+    impl Read for MockIO {
+        #[allow(unused_variables)]
+        fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+            Ok(0)
         }
     }
+
+    impl Write for MockIO {
+        fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+            Ok(buf.len())
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    impl Seek for MockIO {
+        #[allow(unused_variables)]
+        fn seek(&mut self, pos: std::io::SeekFrom) -> std::io::Result<u64> {
+            Ok(0)
+        }
+    }
+
+    impl TodotxtIO for MockIO {}
 
     #[test]
     fn test_add() {
         let mut todo = TodoTxt::new(Box::new(MockIO::new()));
-        todo.add(Task::new("test".to_string(), "project".to_string(), 'A'));
+        let task = Task::new("test".to_string(), "project".to_string(), 'A');
+        todo.add(task);
         assert_eq!(todo.list().len(), 1);
     }
 
     #[test]
     fn test_remove() {
         let mut todo = TodoTxt::new(Box::new(MockIO::new()));
-        todo.add(Task::new("test".to_string(), "project".to_string(), 'A'));
+        let task = Task::new("test".to_string(), "project".to_string(), 'A');
+        todo.add(task);
         todo.remove(0);
         assert_eq!(todo.list().len(), 0);
     }
@@ -156,7 +189,8 @@ mod test {
     #[test]
     fn test_list() {
         let mut todo = TodoTxt::new(Box::new(MockIO::new()));
-        todo.add(Task::new("test".to_string(), "project".to_string(), 'A'));
+        let task = Task::new("test".to_string(), "project".to_string(), 'A');
+        todo.add(task);
         assert_eq!(todo.list().len(), 1);
     }
 
