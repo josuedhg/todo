@@ -23,23 +23,23 @@ impl FromStr for Task {
     type Err = TaskParseError;
 
     fn from_str(s: &str) -> Result<Task, TaskParseError> {
-        if s == "" {
+        if s.is_empty() {
             return Err(TaskParseError { });
         }
-        let completed = s.starts_with("x");
+        let completed = s.starts_with('x');
         let x: &[_] = &['x', ' ', '(' , ')'];
         let priority = s.trim_matches(x).chars().next().unwrap();
         let name = s.trim_start_matches(x).trim_start_matches(char::is_alphabetic).trim_start_matches(x);
 
         let mut project = String::new();
         for word in name.split_whitespace() {
-            if word.starts_with("+") {
+            if word.starts_with('+') {
                 project = word.to_string().trim_start_matches('+').to_string();
                 break;
             }
         }
 
-        let mut task = Task::new(name.to_string(), project.to_string(), priority);
+        let mut task = Task::new(name.to_string(), project, priority);
         if completed {
             task.complete();
         }
@@ -86,8 +86,8 @@ impl TodoTxt {
         let mut content = String::new();
         self.io.read_to_string(&mut content).unwrap();
 
-        for line in content.split("\n") {
-            if line.starts_with("#") {
+        for line in content.split('\n') {
+            if line.starts_with('#') {
                 continue;
             }
             let task = Task::from_str(line);
@@ -103,7 +103,7 @@ impl TodoTxt {
             content.push_str(&format!("{}\n", task.to_string()));
         }
         self.io.rewind().unwrap();
-        self.io.write(content.as_bytes()).unwrap();
+        self.io.write_all(content.as_bytes()).unwrap();
         self.io.flush().unwrap();
     }
 }

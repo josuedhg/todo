@@ -9,10 +9,10 @@ pub struct Task {
 impl Task {
     pub fn new(name: String, project: String, priority: char) -> Task {
         Task {
-            name: name,
-            project: project,
+            name,
+            project,
             completed: false,
-            priority: priority,
+            priority,
         }
     }
 
