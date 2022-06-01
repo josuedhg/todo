@@ -12,6 +12,7 @@
 
 struct todo todo = {
 	.task_counter = 0,
+	.driver = &mock_todo_driver,
 };
 
 static struct command_descriptor desc = {SHOW_COMMAND_ID, "show", "show [task_id]", "Show task details" };
@@ -50,7 +51,7 @@ static void test_show_command_task_not_found(void **state)
 	command.argv = params;
 	command.argc = 2;
 
-	will_return(__wrap_todo_get_task, NULL);
+	will_return(mock_todo_get_task, NULL);
 	expect_string(mock_log_function, report_string, "Error: Unable to find task with id 1.\n");
 	assert_int_equal(command_handle(&command), -1);
 }
@@ -62,7 +63,7 @@ static void test_show_command_task_found(void **state)
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 
 	// setup todo
-	will_return(__wrap_todo_get_task, task);
+	will_return(mock_todo_get_task, task);
 
 	// setup stdout
 	expect_string(mock_log_function, report_string, "Task 1: name\n"

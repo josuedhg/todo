@@ -51,7 +51,7 @@ int __wrap_vfprintf(FILE *stream, const char *fmt, va_list args)
 }
 
 // libtodo instrument functions
-struct task *__wrap_todo_get_task(struct todo *todo, int id)
+struct task *mock_todo_get_task(struct todo *todo, int id)
 {
 	return mock_ptr_type(struct task *);
 }
@@ -106,4 +106,5 @@ struct todo_driver mock_todo_driver = {
 	.load_tasks = mock_todo_load_tasks,
 	.save_tasks = mock_todo_save_tasks,
 	.add_task = mock_todo_add_task,
+	.get_task = mock_todo_get_task,
 };

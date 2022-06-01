@@ -51,8 +51,11 @@ static void remove_task(struct todo *todo, struct task *task)
 	todo->task_list[index] = NULL;
 }
 
-struct task *get_task(struct todo *todo, int id)
+static struct task *todo_get_task(struct todo *todo, int id)
 {
+	assert(todo != NULL);
+	if (todo->task_counter == 0)
+		return NULL;
 	struct task *task = NULL;
 	for (int i = 0; i < todo->task_counter; i++) {
 		struct task *current = todo->task_list[i];
@@ -70,7 +73,7 @@ struct todo_driver driver = {
 	.clean_tasks = clean_tasks,
 	.add_task = todo_add_task,
 	.remove_task = remove_task,
-	.get_task = get_task,
+	.get_task = todo_get_task,
 };
 
 void todo_init(struct todo *todo)
@@ -93,14 +96,6 @@ void todo_clean_tasks(struct todo *todo)
 	if (todo->task_counter == 0)
 		return;
 	todo->driver->clean_tasks(todo);
-}
-
-struct task *todo_get_task(struct todo *todo, int id)
-{
-	assert(todo != NULL);
-	if (todo->task_counter == 0)
-		return NULL;
-	return todo->driver->get_task(todo, id);
 }
 
 struct task *todo_iterator_next(struct todo_iterator *iterator)

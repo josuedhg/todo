@@ -195,7 +195,10 @@ void test_todo_clean_tasks(void **state)
 
 void test_negative_todo_get_task_null(void **state)
 {
-	expect_assert_failure(todo_get_task(NULL, 0));
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	expect_assert_failure(todo.driver->get_task(NULL, 0));
 }
 
 void test_negative_todo_get_task_empty(void **state)
@@ -204,7 +207,7 @@ void test_negative_todo_get_task_empty(void **state)
 		.driver = &todo_driver,
 	};
 	todo_init(&todo);
-	assert_null(todo_get_task(&todo, 1));
+	assert_null(todo.driver->get_task(&todo, 1));
 }
 
 void test_negative_todo_get_task_not_found(void **state)
@@ -219,7 +222,7 @@ void test_negative_todo_get_task_not_found(void **state)
 	task2->id = 2;
 	todo.driver->add_task(&todo, task);
 	todo.driver->add_task(&todo, task2);
-	assert_null(todo_get_task(&todo, 4));
+	assert_null(todo.driver->get_task(&todo, 4));
 	todo_clean_tasks(&todo);
 }
 
@@ -235,7 +238,7 @@ void test_negative_todo_get_task_found(void **state)
 	task2->id = 2;
 	todo.driver->add_task(&todo, task);
 	todo.driver->add_task(&todo, task2);
-	assert_non_null(todo_get_task(&todo, 2));
+	assert_non_null(todo.driver->get_task(&todo, 2));
 	todo_clean_tasks(&todo);
 }
 
