@@ -113,9 +113,9 @@ void test_negative_todo_remove_task_null(void **state)
 	};
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
-	expect_assert_failure(todo_remove_task(NULL, task));
-	expect_assert_failure(todo_remove_task(&todo, NULL));
-	expect_assert_failure(todo_remove_task(NULL, NULL));
+	expect_assert_failure(todo.driver->remove_task(NULL, task));
+	expect_assert_failure(todo.driver->remove_task(&todo, NULL));
+	expect_assert_failure(todo.driver->remove_task(NULL, NULL));
 	destroy_task(&task);
 }
 
@@ -126,7 +126,7 @@ void test_negative_todo_remove_task_empty(void **state)
 	};
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
-	todo_remove_task(&todo, task);
+	todo.driver->remove_task(&todo, task);
 	destroy_task(&task);
 }
 
@@ -139,7 +139,7 @@ void test_negative_todo_remove_task_not_found(void **state)
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 	struct task *task2 = create_task("name", "project", TASK_PRIORITY_LOW);
 	todo.driver->add_task(&todo, task);
-	todo_remove_task(&todo, task2);
+	todo.driver->remove_task(&todo, task2);
 	assert_int_equal(todo.task_counter, 1);
 	assert_memory_equal(task, todo.task_list[0], sizeof(struct task));
 	destroy_task(&task2);
@@ -156,7 +156,7 @@ void test_todo_remove_task(void **state)
 	struct task *task2 = create_task("name", "project", TASK_PRIORITY_LOW);
 	todo.driver->add_task(&todo, task);
 	todo.driver->add_task(&todo, task2);
-	todo_remove_task(&todo, task);
+	todo.driver->remove_task(&todo, task);
 	assert_int_equal(todo.task_counter, 1);
 	assert_memory_equal(task2, todo.task_list[0], sizeof(struct task));
 	destroy_task(&task);

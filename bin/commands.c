@@ -125,7 +125,7 @@ static int delete_command_handle(struct command *cmd)
 		return -1;
 	}
 
-	todo_remove_task(cmd->todo, task);
+	cmd->todo->driver->remove_task(cmd->todo, task);
 
 	if (cmd->todo->driver->save_tasks(cmd->todo) < 0) {
 		cmd->log->error("Error: Unable to save tasks\n");
