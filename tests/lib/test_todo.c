@@ -90,7 +90,7 @@ void test_negative_todo_add_task_full(void **state)
 	struct task *task = create_task("last_task", "project", TASK_PRIORITY_LOW);
 	expect_assert_failure(todo.driver->add_task(&todo, task));
 	destroy_task(&task);
-	todo_clean_tasks(&todo);
+	todo.driver->clean_tasks(&todo);
 }
 
 void test_todo_add_task_empty(void **state)
@@ -103,7 +103,7 @@ void test_todo_add_task_empty(void **state)
 	todo.driver->add_task(&todo, task);
 	assert_memory_equal(task, todo.task_list[0], sizeof(struct task));
 	assert_int_equal(todo.task_counter, 1);
-	todo_clean_tasks(&todo);
+	todo.driver->clean_tasks(&todo);
 }
 
 void test_negative_todo_remove_task_null(void **state)
@@ -143,7 +143,7 @@ void test_negative_todo_remove_task_not_found(void **state)
 	assert_int_equal(todo.task_counter, 1);
 	assert_memory_equal(task, todo.task_list[0], sizeof(struct task));
 	destroy_task(&task2);
-	todo_clean_tasks(&todo);
+	todo.driver->clean_tasks(&todo);
 }
 
 void test_todo_remove_task(void **state)
@@ -160,12 +160,15 @@ void test_todo_remove_task(void **state)
 	assert_int_equal(todo.task_counter, 1);
 	assert_memory_equal(task2, todo.task_list[0], sizeof(struct task));
 	destroy_task(&task);
-	todo_clean_tasks(&todo);
+	todo.driver->clean_tasks(&todo);
 }
 
 void test_negative_todo_clean_tasks_null(void **state)
 {
-	expect_assert_failure(todo_clean_tasks(NULL));
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	expect_assert_failure(todo.driver->clean_tasks(NULL));
 }
 
 void test_negative_todo_clean_tasks_empty(void **state)
@@ -174,7 +177,7 @@ void test_negative_todo_clean_tasks_empty(void **state)
 		.driver = &todo_driver,
 	};
 	todo_init(&todo);
-	todo_clean_tasks(&todo);
+	todo.driver->clean_tasks(&todo);
 }
 
 void test_todo_clean_tasks(void **state)
@@ -187,7 +190,7 @@ void test_todo_clean_tasks(void **state)
 	struct task *task2 = create_new_task("name", "project", TASK_PRIORITY_LOW);
 	todo.driver->add_task(&todo, task);
 	todo.driver->add_task(&todo, task2);
-	todo_clean_tasks(&todo);
+	todo.driver->clean_tasks(&todo);
 	assert_int_equal(todo.task_counter, 0);
 	assert_null(todo.task_list[0]);
 	assert_null(todo.task_list[1]);
@@ -223,7 +226,7 @@ void test_negative_todo_get_task_not_found(void **state)
 	todo.driver->add_task(&todo, task);
 	todo.driver->add_task(&todo, task2);
 	assert_null(todo.driver->get_task(&todo, 4));
-	todo_clean_tasks(&todo);
+	todo.driver->clean_tasks(&todo);
 }
 
 void test_negative_todo_get_task_found(void **state)
@@ -239,7 +242,7 @@ void test_negative_todo_get_task_found(void **state)
 	todo.driver->add_task(&todo, task);
 	todo.driver->add_task(&todo, task2);
 	assert_non_null(todo.driver->get_task(&todo, 2));
-	todo_clean_tasks(&todo);
+	todo.driver->clean_tasks(&todo);
 }
 
 bool iterator_callback(struct task *task, void *data)

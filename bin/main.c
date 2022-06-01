@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 		.argv = argv + 1, .descriptor = desc };
 
 	ret = command_handle(&command);
-	todo_clean_tasks(todo);
+	todo->driver->clean_tasks(todo);
 	destroy_todotxt(&todo);
 	return ret;
 }
