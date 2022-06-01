@@ -158,7 +158,7 @@ static int done_command_handle(struct command *cmd)
 	task_set_completed(task);
 
 	if (todo_save_tasks(cmd->todo) < 0) {
-		cmd->log->error("Error: Unable to save tasks\n", task->name);
+		cmd->log->error("Error: Unable to save tasks\n");
 		return -1;
 	}
 
@@ -188,7 +188,7 @@ static int reopen_command_handle(struct command *cmd)
 	task_reopen(task);
 
 	if (todo_save_tasks(cmd->todo) < 0) {
-		cmd->log->error("Error: Unable to save tasks\n", task->name);
+		cmd->log->error("Error: Unable to save tasks\n");
 		return -1;
 	}
 
