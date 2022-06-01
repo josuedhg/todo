@@ -5,11 +5,6 @@
 
 #include "debug_i.h"
 
-static int save_tasks(struct todo *todo)
-{
-	return 0;
-}
-
 static void clean_tasks(struct todo *todo)
 {
 	for (int i = 0; i < todo->task_counter; i++) {
@@ -55,7 +50,7 @@ struct task *get_task(struct todo *todo, int id)
 
 struct todo_driver driver = {
 	.load_tasks = todo_load_tasks,
-	.save_tasks = save_tasks,
+	.save_tasks = todo_save_tasks,
 	.clean_tasks = clean_tasks,
 	.add_task = add_task,
 	.remove_task = remove_task,
@@ -79,7 +74,7 @@ int todo_save_tasks(struct todo *todo)
 {
 	if (todo == NULL)
 		return -1;
-	return todo->driver->save_tasks(todo);
+	return 0;
 }
 
 void todo_add_task(struct todo *todo, struct task *task)

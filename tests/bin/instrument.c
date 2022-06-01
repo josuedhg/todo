@@ -56,7 +56,7 @@ struct task *__wrap_todo_get_task(struct todo *todo, int id)
 	return mock_ptr_type(struct task *);
 }
 
-int __wrap_todo_save_tasks(struct todo *todo)
+int mock_todo_save_tasks(struct todo *todo)
 {
 	return mock_type(int);
 }
@@ -104,4 +104,5 @@ void __wrap_destroy_todotxt(struct todo **todo)
 
 struct todo_driver mock_todo_driver = {
 	.load_tasks = mock_todo_load_tasks,
+	.save_tasks = mock_todo_save_tasks,
 };

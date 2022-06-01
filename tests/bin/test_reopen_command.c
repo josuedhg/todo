@@ -12,6 +12,7 @@
 
 struct todo todo = {
 	.task_counter = 0,
+	.driver = &mock_todo_driver,
 };
 
 static struct command_descriptor desc = {REOPEN_COMMAND_ID, "reopen", "reopen [task id]", "Set task as open" };
@@ -65,7 +66,7 @@ static void test_reopen_command_cannot_save_task(void **state)
 	command.argc = 2;
 
 	will_return(__wrap_todo_get_task, task);
-	will_return(__wrap_todo_save_tasks, -1);
+	will_return(mock_todo_save_tasks, -1);
 	expect_string(mock_log_function, report_string, "Error: Unable to save tasks\n");
 	assert_int_equal(command_handle(&command), -1);
 
@@ -85,7 +86,7 @@ static void test_reopen_command_success(void **state)
 	command.argc = 2;
 
 	will_return(__wrap_todo_get_task, task);
-	will_return(__wrap_todo_save_tasks, 0);
+	will_return(mock_todo_save_tasks, 0);
 	assert_int_equal(command_handle(&command), 0);
 
 	assert_int_equal(task->status, TASK_STATUS_OPEN);

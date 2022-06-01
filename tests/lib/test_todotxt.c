@@ -433,7 +433,7 @@ void test_negative_todo_save_tasks_cannot_open(void **state)
 {
 	struct todo *todo = (struct todo *)*state;
 	will_return(__wrap_fopen, NULL);
-	int res = todo_save_tasks(todo);
+	int res = todo->driver->save_tasks(todo);
 	assert_int_equal(res, -1);
 }
 
@@ -447,7 +447,7 @@ void test_negative_todo_save_tasks_bad_write(void **state)
 	will_return(__wrap_fopen, &file_p);
 	will_return(__wrap_fwrite, EINVAL);
 	will_return(__wrap_fwrite, -1);
-	int res = todo_save_tasks(todo);
+	int res = todo->driver->save_tasks(todo);
 	assert_int_equal(res, -1);
 }
 
@@ -474,7 +474,7 @@ void test_todo_save_tasks(void **state)
 	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE_IN_FILE);
 	expect_memory(__wrap_fwrite, ptr, expected_todotxtline, EXPECTED_LINE_SIZE_IN_FILE);
 
-	int res = todo_save_tasks(todo);
+	int res = todo->driver->save_tasks(todo);
 	assert_int_equal(res, 0);
 }
 
@@ -516,7 +516,7 @@ void test_todo_save_tasks_multiline(void **state)
 	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE_IN_FILE);
 	expect_memory(__wrap_fwrite, ptr, expected_todotxtline2, EXPECTED_LINE_SIZE_IN_FILE);
 
-	int res = todo_save_tasks(todo);
+	int res = todo->driver->save_tasks(todo);
 	assert_int_equal(res, 0);
 }
 

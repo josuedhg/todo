@@ -12,6 +12,7 @@
 
 struct todo todo = {
 	.task_counter = 0,
+	.driver = &mock_todo_driver,
 };
 
 static struct command_descriptor desc = {ADD_COMMAND_ID, "add", "add <task description>", "Add a new task" };
@@ -58,7 +59,7 @@ static void test_add_command_cannot_save_task(void **state)
 	expect_string(__wrap_create_new_task, desc, "task");
 	expect_value(__wrap_create_new_task, project, NULL);
 	expect_value(__wrap_create_new_task, priority, TASK_PRIORITY_LOW);
-	will_return(__wrap_todo_save_tasks, -1);
+	will_return(mock_todo_save_tasks, -1);
 	expect_string(mock_log_function, report_string, "Error: Unable to save tasks\n");
 	assert_int_equal(command_handle(&command), -1);
 }
@@ -76,7 +77,7 @@ static void test_add_command_success(void **state)
 	expect_string(__wrap_create_new_task, desc, "task");
 	expect_value(__wrap_create_new_task, project, NULL);
 	expect_value(__wrap_create_new_task, priority, TASK_PRIORITY_LOW);
-	will_return(__wrap_todo_save_tasks, 0);
+	will_return(mock_todo_save_tasks, 0);
 	assert_int_equal(command_handle(&command), 0);
 
 	destroy_task(&task);
@@ -97,7 +98,7 @@ static void test_add_command_success_multi_word(void **state)
 	expect_string(__wrap_create_new_task, desc, "task with spaces");
 	expect_value(__wrap_create_new_task, project, NULL);
 	expect_value(__wrap_create_new_task, priority, TASK_PRIORITY_LOW);
-	will_return(__wrap_todo_save_tasks, 0);
+	will_return(mock_todo_save_tasks, 0);
 	assert_int_equal(command_handle(&command), 0);
 }
 
