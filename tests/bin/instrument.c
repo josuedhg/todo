@@ -66,7 +66,7 @@ void __wrap_todo_remove_task(struct todo *todo, struct task *task)
 	return;
 }
 
-void __wrap_todo_add_task(struct todo *todo, struct task *task)
+void mock_todo_add_task(struct todo *todo, struct task *task)
 {
 	return;
 }
@@ -105,4 +105,5 @@ void __wrap_destroy_todotxt(struct todo **todo)
 struct todo_driver mock_todo_driver = {
 	.load_tasks = mock_todo_load_tasks,
 	.save_tasks = mock_todo_save_tasks,
+	.add_task = mock_todo_add_task,
 };

@@ -52,7 +52,7 @@ static int add_command_handle(struct command *cmd)
 		goto FREE_AND_EXIT;
 	}
 
-	todo_add_task(cmd->todo, task);
+	cmd->todo->driver->add_task(cmd->todo, task);
 
 	if (cmd->todo->driver->save_tasks(cmd->todo) < 0) {
 		cmd->log->error("Error: Unable to save tasks\n");

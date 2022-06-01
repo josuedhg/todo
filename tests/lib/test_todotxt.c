@@ -442,7 +442,7 @@ void test_negative_todo_save_tasks_bad_write(void **state)
 	wrap_fwrite();
 	struct todo *todo = (struct todo *)*state;
 	struct task *task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
-	todo_add_task(todo, task);
+	todo->driver->add_task(todo, task);
 	int file_p = 1;
 	will_return(__wrap_fopen, &file_p);
 	will_return(__wrap_fwrite, EINVAL);
@@ -457,7 +457,7 @@ void test_todo_save_tasks(void **state)
 	struct todo *todo = (struct todo *)*state;
 	struct task *task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
 	task->creation_date = FIRST_DAY_UNIX_TIME;
-	todo_add_task(todo, task);
+	todo->driver->add_task(todo, task);
 
 	char creation_date[DATE_LENGHT] = { 0 };
 	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
@@ -485,11 +485,11 @@ void test_todo_save_tasks_multiline(void **state)
 
 	struct task *task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
 	task->creation_date = FIRST_DAY_UNIX_TIME;
-	todo_add_task(todo, task);
+	todo->driver->add_task(todo, task);
 
 	struct task *task2 = create_new_task("my tazk", "myproject", TASK_PRIORITY_HIGH);
 	task2->creation_date = FIRST_DAY_UNIX_TIME;
-	todo_add_task(todo, task2);
+	todo->driver->add_task(todo, task2);
 
 	char creation_date[DATE_LENGHT] = { 0 };
 	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));

@@ -71,9 +71,9 @@ void test_negative_todo_add_task_null(void **state)
 	};
 	todo_init(&todo);
 	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);
-	expect_assert_failure(todo_add_task(NULL, task));
-	expect_assert_failure(todo_add_task(&todo, NULL));
-	expect_assert_failure(todo_add_task(NULL, NULL));
+	expect_assert_failure(todo.driver->add_task(NULL, task));
+	expect_assert_failure(todo.driver->add_task(&todo, NULL));
+	expect_assert_failure(todo.driver->add_task(NULL, NULL));
 	destroy_task(&task);
 }
 
@@ -85,10 +85,10 @@ void test_negative_todo_add_task_full(void **state)
 	todo_init(&todo);
 	for (int i = 0; i < TODO_TASK_LIST_LENGTH; i++) {
 		struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
-		todo_add_task(&todo, task);
+		todo.driver->add_task(&todo, task);
 	}
 	struct task *task = create_task("last_task", "project", TASK_PRIORITY_LOW);
-	expect_assert_failure(todo_add_task(&todo, task));
+	expect_assert_failure(todo.driver->add_task(&todo, task));
 	destroy_task(&task);
 	todo_clean_tasks(&todo);
 }
@@ -100,7 +100,7 @@ void test_todo_add_task_empty(void **state)
 	};
 	todo_init(&todo);
 	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);
-	todo_add_task(&todo, task);
+	todo.driver->add_task(&todo, task);
 	assert_memory_equal(task, todo.task_list[0], sizeof(struct task));
 	assert_int_equal(todo.task_counter, 1);
 	todo_clean_tasks(&todo);
@@ -138,7 +138,7 @@ void test_negative_todo_remove_task_not_found(void **state)
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 	struct task *task2 = create_task("name", "project", TASK_PRIORITY_LOW);
-	todo_add_task(&todo, task);
+	todo.driver->add_task(&todo, task);
 	todo_remove_task(&todo, task2);
 	assert_int_equal(todo.task_counter, 1);
 	assert_memory_equal(task, todo.task_list[0], sizeof(struct task));
@@ -154,8 +154,8 @@ void test_todo_remove_task(void **state)
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 	struct task *task2 = create_task("name", "project", TASK_PRIORITY_LOW);
-	todo_add_task(&todo, task);
-	todo_add_task(&todo, task2);
+	todo.driver->add_task(&todo, task);
+	todo.driver->add_task(&todo, task2);
 	todo_remove_task(&todo, task);
 	assert_int_equal(todo.task_counter, 1);
 	assert_memory_equal(task2, todo.task_list[0], sizeof(struct task));
@@ -185,8 +185,8 @@ void test_todo_clean_tasks(void **state)
 	todo_init(&todo);
 	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);
 	struct task *task2 = create_new_task("name", "project", TASK_PRIORITY_LOW);
-	todo_add_task(&todo, task);
-	todo_add_task(&todo, task2);
+	todo.driver->add_task(&todo, task);
+	todo.driver->add_task(&todo, task2);
 	todo_clean_tasks(&todo);
 	assert_int_equal(todo.task_counter, 0);
 	assert_null(todo.task_list[0]);
@@ -217,8 +217,8 @@ void test_negative_todo_get_task_not_found(void **state)
 	task->id = 1;
 	struct task *task2 = create_new_task("name", "project", TASK_PRIORITY_LOW);
 	task2->id = 2;
-	todo_add_task(&todo, task);
-	todo_add_task(&todo, task2);
+	todo.driver->add_task(&todo, task);
+	todo.driver->add_task(&todo, task2);
 	assert_null(todo_get_task(&todo, 4));
 	todo_clean_tasks(&todo);
 }
@@ -233,8 +233,8 @@ void test_negative_todo_get_task_found(void **state)
 	task->id = 1;
 	struct task *task2 = create_new_task("name", "project", TASK_PRIORITY_LOW);
 	task2->id = 2;
-	todo_add_task(&todo, task);
-	todo_add_task(&todo, task2);
+	todo.driver->add_task(&todo, task);
+	todo.driver->add_task(&todo, task2);
 	assert_non_null(todo_get_task(&todo, 2));
 	todo_clean_tasks(&todo);
 }
@@ -268,7 +268,7 @@ void test_todo_iterator_next_no_filter_with_tasks(void **state)
 		.driver = &todo_driver,
 	};
 	todo_init(&todo);
-	todo_add_task(&todo, create_new_task("my task", "myproject", TASK_PRIORITY_HIGH));
+	todo.driver->add_task(&todo, create_new_task("my task", "myproject", TASK_PRIORITY_HIGH));
 	struct todo_iterator iterator = { .todo = &todo, .filter = NULL, .data = NULL, .index = 0 };
 	struct task *task = todo_iterator_next(&iterator);
 	assert_non_null(task);
@@ -295,7 +295,7 @@ void test_todo_iterator_next_filter_with_tasks(void **state)
 	todo_init(&todo);
 	int data = 0xDEADBEEF;
 	struct task *created_task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
-	todo_add_task(&todo, created_task);
+	todo.driver->add_task(&todo, created_task);
 	struct todo_iterator iterator = { .todo = &todo, .filter = iterator_callback, .data = &data, .index = 0 };
 
 	expect_value(iterator_callback, task, created_task);
@@ -315,7 +315,7 @@ void test_todo_iterator_next_filter_with_tasks_and_filter_false(void **state)
 	todo_init(&todo);
 	int data = 0xDEADBEEF;
 	struct task *created_task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
-	todo_add_task(&todo, created_task);
+	todo.driver->add_task(&todo, created_task);
 	struct todo_iterator iterator = { .todo = &todo, .filter = iterator_callback, .data = &data, .index = 0 };
 
 	expect_value(iterator_callback, task, created_task);
