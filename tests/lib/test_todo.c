@@ -26,7 +26,11 @@ void test_todo_init(void **state)
 
 void test_negative_todo_load_tasks_null(void **state)
 {
-	int res = todo_load_tasks(NULL);
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	todo_init(&todo);
+	int res = todo.driver->load_tasks(NULL);
 	assert_int_equal(res, -1);
 }
 
@@ -36,13 +40,17 @@ void test_todo_load_tasks(void **state)
 		.driver = &todo_driver,
 	};
 	todo_init(&todo);
-	int res = todo_load_tasks(&todo);
+	int res = todo.driver->load_tasks(&todo);
 	assert_int_equal(res, 0);
 }
 
 void test_negative_todo_save_tasks_null(void **state)
 {
-	int res = todo_save_tasks(NULL);
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	todo_init(&todo);
+	int res = todo.driver->save_tasks(NULL);
 	assert_int_equal(res, -1);
 }
 
@@ -52,7 +60,7 @@ void test_todo_save_tasks(void **state)
 		.driver = &todo_driver,
 	};
 	todo_init(&todo);
-	int res = todo_save_tasks(&todo);
+	int res = todo.driver->save_tasks(&todo);
 	assert_int_equal(res, 0);
 }
 

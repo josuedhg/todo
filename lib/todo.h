@@ -37,8 +37,6 @@ struct todo_iterator {
 
 
 void todo_init(struct todo *);
-int todo_load_tasks(struct todo*);
-int todo_save_tasks(struct todo*);
 void todo_add_task(struct todo*, struct task*);
 struct task *todo_get_task(struct todo*, int);
 void todo_remove_task(struct todo*, struct task*);
