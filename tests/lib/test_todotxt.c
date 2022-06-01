@@ -392,7 +392,7 @@ void test_negative_todotxt_load_tasks_cannot_open(void **state)
 {
 	struct todo *todo = (struct todo *)*state;
 	will_return(__wrap_fopen, NULL);
-	int res = todo_load_tasks(todo);
+	int res = todo->driver->load_tasks(todo);
 	assert_int_equal(res, -1);
 }
 
@@ -404,7 +404,7 @@ void test_negative_todo_load_tasks_bad_read(void **state)
 	will_return(__wrap_getline, EINVAL);
 	will_return(__wrap_getline, NULL);
 	will_return(__wrap_getline, -1);
-	int res = todo_load_tasks(todo);
+	int res = todo->driver->load_tasks(todo);
 	assert_int_equal(res, -1);
 }
 
@@ -422,7 +422,7 @@ void test_todo_load_tasks(void **state)
 	will_return(__wrap_getline, 0);
 	will_return(__wrap_getline, NULL);
 	will_return(__wrap_getline, -1);
-	int res = todo_load_tasks(todo);
+	int res = todo->driver->load_tasks(todo);
 	assert_int_equal(res, 0);
 	assert_int_equal(todo->task_counter, 1);
 	assert_string_equal(todo->task_list[0]->name, "new task");

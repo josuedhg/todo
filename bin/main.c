@@ -68,7 +68,7 @@ static struct todo *get_todo()
 		goto FREE_AND_EXIT;
 	}
 
-	if (todo_load_tasks(todo) < 0) {
+	if (todo->driver->load_tasks(todo) < 0) {
 		logger.error("Error: Unable to load tasks from %s file.\n", todotxt_filepath);
 		destroy_todotxt(&todo);
 		todo = NULL;

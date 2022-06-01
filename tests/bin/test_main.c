@@ -79,11 +79,13 @@ static void test_main_command_fail_loading_tasks(void **state)
 		"test_main",
 		"list"
 	};
-	struct todo todo;
+	struct todo todo = {
+		.driver = &mock_todo_driver
+	};
 
 	// prepare returns
 	will_return(__wrap_create_todotxt, &todo);
-	will_return(__wrap_todo_load_tasks, -1);
+	will_return(mock_todo_load_tasks, -1);
 
 	char *message = "Error: Unable to load tasks from";
 	expect_memory(mock_log_function, report_string, message, strlen(message));
@@ -96,10 +98,13 @@ static void test_main_command(void **state)
 		"test_main",
 		"list"
 	};
-	struct todo todo = { 0 };
+	struct todo todo = {
+		.driver = &mock_todo_driver
+	};
+
 	// prepare returns
 	will_return(__wrap_create_todotxt, &todo);
-	will_return(__wrap_todo_load_tasks, 0);
+	will_return(mock_todo_load_tasks, 0);
 
 	assert_int_equal(test_main(2, argv), 0);
 }

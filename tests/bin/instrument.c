@@ -87,7 +87,7 @@ struct todo *__wrap_create_todotxt(const char *pathname)
 	return mock_ptr_type(struct todo *);
 }
 
-int __wrap_todo_load_tasks(struct todo *todo)
+int mock_todo_load_tasks(struct todo *todo)
 {
 	return mock_type(int);
 }
@@ -101,3 +101,7 @@ void __wrap_destroy_todotxt(struct todo **todo)
 {
 	return;
 }
+
+struct todo_driver mock_todo_driver = {
+	.load_tasks = mock_todo_load_tasks,
+};
