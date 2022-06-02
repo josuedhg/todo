@@ -46,6 +46,24 @@ static void test_add_command_cannot_create_task(void **state)
 
 extern struct task *__real_create_new_task(const char *, const char *, int);
 
+static void test_add_command_cannot_add_task(void **state)
+{
+	(void)state; /* unused */
+	char *params[] = {"add", "task"};
+	struct task *task = __real_create_new_task("name", "project", TASK_PRIORITY_LOW);
+
+	command.argv = params;
+	command.argc = 2;
+
+	will_return(__wrap_create_new_task, task);
+	expect_string(__wrap_create_new_task, desc, "task");
+	expect_value(__wrap_create_new_task, project, NULL);
+	expect_value(__wrap_create_new_task, priority, TASK_PRIORITY_LOW);
+	will_return(mock_todo_add_task, -1);
+	expect_string(mock_log_function, report_string, "Error: Unable to add task: task\n");
+	assert_int_equal(command_handle(&command), -1);
+}
+
 static void test_add_command_cannot_save_task(void **state)
 {
 	(void)state; /* unused */
@@ -59,6 +77,7 @@ static void test_add_command_cannot_save_task(void **state)
 	expect_string(__wrap_create_new_task, desc, "task");
 	expect_value(__wrap_create_new_task, project, NULL);
 	expect_value(__wrap_create_new_task, priority, TASK_PRIORITY_LOW);
+	will_return(mock_todo_add_task, 0);
 	will_return(mock_todo_save_tasks, -1);
 	expect_string(mock_log_function, report_string, "Error: Unable to save tasks\n");
 	assert_int_equal(command_handle(&command), -1);
@@ -77,6 +96,7 @@ static void test_add_command_success(void **state)
 	expect_string(__wrap_create_new_task, desc, "task");
 	expect_value(__wrap_create_new_task, project, NULL);
 	expect_value(__wrap_create_new_task, priority, TASK_PRIORITY_LOW);
+	will_return(mock_todo_add_task, 0);
 	will_return(mock_todo_save_tasks, 0);
 	assert_int_equal(command_handle(&command), 0);
 
@@ -98,6 +118,7 @@ static void test_add_command_success_multi_word(void **state)
 	expect_string(__wrap_create_new_task, desc, "task with spaces");
 	expect_value(__wrap_create_new_task, project, NULL);
 	expect_value(__wrap_create_new_task, priority, TASK_PRIORITY_LOW);
+	will_return(mock_todo_add_task, 0);
 	will_return(mock_todo_save_tasks, 0);
 	assert_int_equal(command_handle(&command), 0);
 }
@@ -107,6 +128,7 @@ int main(int argc, char *argv[])
 	struct CMUnitTest tests[] = {
 		cmocka_unit_test(test_add_command_no_param),
 		cmocka_unit_test(test_add_command_cannot_create_task),
+		cmocka_unit_test(test_add_command_cannot_add_task),
 		cmocka_unit_test(test_add_command_cannot_save_task),
 		cmocka_unit_test(test_add_command_success),
 		cmocka_unit_test(test_add_command_success_multi_word),

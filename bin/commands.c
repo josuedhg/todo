@@ -52,7 +52,11 @@ static int add_command_handle(struct command *cmd)
 		goto FREE_AND_EXIT;
 	}
 
-	cmd->todo->driver->add_task(cmd->todo, task);
+	if (cmd->todo->driver->add_task(cmd->todo, task) < 0) {
+		cmd->log->error("Error: Unable to add task: %s\n", task_description);
+		ret = -1;
+		goto FREE_AND_EXIT;
+	}
 
 	if (cmd->todo->driver->save_tasks(cmd->todo) < 0) {
 		cmd->log->error("Error: Unable to save tasks\n");
@@ -125,7 +129,10 @@ static int delete_command_handle(struct command *cmd)
 		return -1;
 	}
 
-	cmd->todo->driver->remove_task(cmd->todo, task);
+	if (cmd->todo->driver->remove_task(cmd->todo, task)) {
+		cmd->log->error("Error: Unable to remove task with id %d.\n", task_id);
+		return -1;
+	}
 
 	if (cmd->todo->driver->save_tasks(cmd->todo) < 0) {
 		cmd->log->error("Error: Unable to save tasks\n");

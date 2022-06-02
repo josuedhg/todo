@@ -13,9 +13,9 @@ struct todo;
 struct todo_driver {
 	int (*load_tasks)(struct todo*);
 	int (*save_tasks)(struct todo*);
-	void (*add_task)(struct todo*, struct task*);
+	int (*add_task)(struct todo*, struct task*);
 	struct task *(*get_task)(struct todo*, int);
-	void (*remove_task)(struct todo*, struct task*);
+	int (*remove_task)(struct todo*, struct task*);
 };
 
 struct todo {
@@ -36,7 +36,7 @@ struct todo_iterator {
 
 
 void todo_init(struct todo *);
-void todo_add_task(struct todo*, struct task*);
+int todo_add_task(struct todo*, struct task*);
 void todo_clean_tasks(struct todo *todo);
 struct task *todo_iterator_next(struct todo_iterator*);
 

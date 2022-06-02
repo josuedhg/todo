@@ -92,14 +92,14 @@ int mock_todo_save_tasks(struct todo *todo)
 	return mock_type(int);
 }
 
-void mock_todo_remove_task(struct todo *todo, struct task *task)
+int mock_todo_remove_task(struct todo *todo, struct task *task)
 {
-	return;
+	return mock_type(int);
 }
 
-void mock_todo_add_task(struct todo *todo, struct task *task)
+int mock_todo_add_task(struct todo *todo, struct task *task)
 {
-	return;
+	return mock_type(int);
 }
 
 struct todo_driver mock_todo_driver = {
