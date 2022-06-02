@@ -19,7 +19,7 @@ static int todo_save_tasks(struct todo *todo)
 	return 0;
 }
 
-static void todo_clean_tasks(struct todo *todo)
+void todo_clean_tasks(struct todo *todo)
 {
 	assert(todo != NULL);
 	if (todo->task_counter == 0)
@@ -76,7 +76,6 @@ static struct task *todo_get_task(struct todo *todo, int id)
 struct todo_driver driver = {
 	.load_tasks = todo_load_tasks,
 	.save_tasks = todo_save_tasks,
-	.clean_tasks = todo_clean_tasks,
 	.add_task = todo_add_task,
 	.remove_task = todo_remove_task,
 	.get_task = todo_get_task,

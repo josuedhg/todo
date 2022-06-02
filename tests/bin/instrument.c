@@ -108,5 +108,4 @@ struct todo_driver mock_todo_driver = {
 	.add_task = mock_todo_add_task,
 	.get_task = mock_todo_get_task,
 	.remove_task = mock_todo_remove_task,
-	.clean_tasks = mock_todo_clean_tasks,
 };

@@ -254,6 +254,7 @@ void destroy_todotxt(struct todo **todo)
 	struct todotxt *todotxt = container_of(*todo,
 					       struct todotxt,
 					       todo);
+	todo_clean_tasks(*todo);
 	free(todotxt->filename);
 	free(todotxt);
 	*todo = NULL;

@@ -379,7 +379,6 @@ void test_create_todotxt(void **state)
 	assert_non_null(todo->task_list);
 	assert_non_null(todo->driver);
 	assert_non_null(todo->driver->load_tasks);
-	assert_non_null(todo->driver->clean_tasks);
 	assert_non_null(todo->driver->save_tasks);
 	assert_non_null(todo->driver->add_task);
 	assert_non_null(todo->driver->remove_task);
