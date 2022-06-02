@@ -37,7 +37,7 @@ struct todo_iterator {
 
 void todo_init(struct todo *);
 int todo_add_task(struct todo*, struct task*);
-void todo_clean_tasks(struct todo *todo);
+void todo_clean_tasks(struct todo*);
 struct task *todo_iterator_next(struct todo_iterator*);
 
 #endif /* end of include guard: __TODO_H__ */
