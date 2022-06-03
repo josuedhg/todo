@@ -11,7 +11,6 @@
 struct todo;
 
 struct todo_driver {
-	int (*load_tasks)(struct todo*);
 	int (*save_tasks)(struct todo*);
 	int (*add_task)(struct todo*, struct task*);
 	struct task *(*get_task)(struct todo*, int);

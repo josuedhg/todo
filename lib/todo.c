@@ -5,13 +5,6 @@
 
 #include "debug_i.h"
 
-static int todo_load_tasks(struct todo *todo)
-{
-	if (todo == NULL)
-		return -1;
-	return 0;
-}
-
 static int todo_save_tasks(struct todo *todo)
 {
 	if (todo == NULL)
@@ -81,7 +74,6 @@ static struct task *todo_get_task(struct todo *todo, int id)
 }
 
 struct todo_driver driver = {
-	.load_tasks = todo_load_tasks,
 	.save_tasks = todo_save_tasks,
 	.add_task = todo_add_task,
 	.remove_task = todo_remove_task,

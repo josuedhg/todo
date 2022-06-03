@@ -17,30 +17,9 @@ void test_todo_init(void **state)
 	assert_int_equal(todo.task_counter, 0);
 	assert_non_null(todo.task_list);
 	assert_non_null(todo.driver);
-	assert_non_null(todo.driver->load_tasks);
 	assert_non_null(todo.driver->save_tasks);
 	assert_non_null(todo.driver->add_task);
 	assert_non_null(todo.driver->remove_task);
-}
-
-void test_negative_todo_load_tasks_null(void **state)
-{
-	struct todo todo = {
-		.driver = &todo_driver,
-	};
-	todo_init(&todo);
-	int res = todo.driver->load_tasks(NULL);
-	assert_int_equal(res, -1);
-}
-
-void test_todo_load_tasks(void **state)
-{
-	struct todo todo = {
-		.driver = &todo_driver,
-	};
-	todo_init(&todo);
-	int res = todo.driver->load_tasks(&todo);
-	assert_int_equal(res, 0);
 }
 
 void test_negative_todo_save_tasks_null(void **state)
@@ -325,8 +304,6 @@ int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
 		cmocka_unit_test(test_todo_init),
-		cmocka_unit_test(test_negative_todo_load_tasks_null),
-		cmocka_unit_test(test_todo_load_tasks),
 		cmocka_unit_test(test_negative_todo_save_tasks_null),
 		cmocka_unit_test(test_todo_save_tasks),
 		cmocka_unit_test(test_negative_todo_add_task_null),

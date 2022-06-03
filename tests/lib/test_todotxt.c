@@ -338,6 +338,11 @@ void test_create_todotxt_line_from_task_completed_with_date(void **state)
 int setup(void **state)
 {
 	will_return(__wrap_access, 0);
+	int file_p = 1;
+	will_return(__wrap_fopen, &file_p);
+	will_return(__wrap_getline, 0);
+	will_return(__wrap_getline, NULL);
+	will_return(__wrap_getline, -1);
 	struct todo *todo = create_todotxt("filename");
 	*state = todo;
 	errno = 0;
@@ -367,9 +372,34 @@ void test_negative_create_todotxt_bad_file(void **state)
 	assert_null(todo);
 }
 
+void test_negative_create_todotxt_cannot_open_file(void **state)
+{
+	will_return(__wrap_access, 0);
+	will_return(__wrap_fopen, NULL);
+	struct todo *todo = create_todotxt("badfilename");
+	assert_null(todo);
+}
+
+void test_negative_create_todotxt_cannot_read_file(void **state)
+{
+	will_return(__wrap_access, 0);
+	int file_p = 1;
+	will_return(__wrap_fopen, &file_p);
+	will_return(__wrap_getline, EINVAL);
+	will_return(__wrap_getline, NULL);
+	will_return(__wrap_getline, -1);
+	struct todo *todo = create_todotxt("badfilename");
+	assert_null(todo);
+}
+
 void test_create_todotxt(void **state)
 {
 	will_return(__wrap_access, 0);
+	int file_p = 1;
+	will_return(__wrap_fopen, &file_p);
+	will_return(__wrap_getline, 0);
+	will_return(__wrap_getline, NULL);
+	will_return(__wrap_getline, -1);
 	struct todo *todo = create_todotxt("filename");
 	struct todotxt *todotxt = container_of(todo,
 					       struct todotxt,
@@ -378,7 +408,6 @@ void test_create_todotxt(void **state)
 	assert_int_equal(todo->task_counter, 0);
 	assert_non_null(todo->task_list);
 	assert_non_null(todo->driver);
-	assert_non_null(todo->driver->load_tasks);
 	assert_non_null(todo->driver->save_tasks);
 	assert_non_null(todo->driver->add_task);
 	assert_non_null(todo->driver->remove_task);
@@ -387,29 +416,9 @@ void test_create_todotxt(void **state)
 	destroy_todotxt(&todo);
 }
 
-void test_negative_todotxt_load_tasks_cannot_open(void **state)
+void test_create_todotxt_with_file_content(void **state)
 {
-	struct todo *todo = (struct todo *)*state;
-	will_return(__wrap_fopen, NULL);
-	int res = todo->driver->load_tasks(todo);
-	assert_int_equal(res, -1);
-}
-
-void test_negative_todo_load_tasks_bad_read(void **state)
-{
-	struct todo *todo = (struct todo *)*state;
-	int file_p = 1;
-	will_return(__wrap_fopen, &file_p);
-	will_return(__wrap_getline, EINVAL);
-	will_return(__wrap_getline, NULL);
-	will_return(__wrap_getline, -1);
-	int res = todo->driver->load_tasks(todo);
-	assert_int_equal(res, -1);
-}
-
-void test_todo_load_tasks(void **state)
-{
-	struct todo *todo = (struct todo *)*state;
+	will_return(__wrap_access, 0);
 	int file_p = 1;
 #define SAMPLE_TEXT_LEN 9
 	char *line = calloc(1, sizeof(char) * SAMPLE_TEXT_LEN + 1);
@@ -421,11 +430,20 @@ void test_todo_load_tasks(void **state)
 	will_return(__wrap_getline, 0);
 	will_return(__wrap_getline, NULL);
 	will_return(__wrap_getline, -1);
-	int res = todo->driver->load_tasks(todo);
-	assert_int_equal(res, 0);
+	struct todo *todo = create_todotxt("filename");
+	struct todotxt *todotxt = container_of(todo,
+					       struct todotxt,
+					       todo);
+	assert_non_null(todo);
 	assert_int_equal(todo->task_counter, 1);
-	assert_string_equal(todo->task_list[0]->name, "new task");
-	free(line);
+	assert_non_null(todo->task_list);
+	assert_non_null(todo->driver);
+	assert_non_null(todo->driver->save_tasks);
+	assert_non_null(todo->driver->add_task);
+	assert_non_null(todo->driver->remove_task);
+
+	assert_string_equal(todotxt->filename, "filename");
+	destroy_todotxt(&todo);
 }
 
 void test_negative_todo_save_tasks_cannot_open(void **state)
@@ -547,10 +565,10 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_create_todotxt_line_from_task_completed_with_date),
 		cmocka_unit_test(test_negative_create_todotxt_null),
 		cmocka_unit_test(test_negative_create_todotxt_bad_file),
+		cmocka_unit_test(test_negative_create_todotxt_cannot_open_file),
+		cmocka_unit_test(test_negative_create_todotxt_cannot_read_file),
 		cmocka_unit_test(test_create_todotxt),
-		cmocka_unit_test_setup_teardown(test_negative_todotxt_load_tasks_cannot_open, setup, teardown),
-		cmocka_unit_test_setup_teardown(test_negative_todo_load_tasks_bad_read, setup, teardown),
-		cmocka_unit_test_setup_teardown(test_todo_load_tasks, setup, teardown),
+		cmocka_unit_test(test_create_todotxt_with_file_content),
 		cmocka_unit_test_setup_teardown(test_negative_todo_save_tasks_cannot_open, setup, teardown),
 		cmocka_unit_test_setup_teardown(test_negative_todo_save_tasks_bad_write, setup, teardown),
 		cmocka_unit_test_setup_teardown(test_todo_save_tasks, setup, teardown),

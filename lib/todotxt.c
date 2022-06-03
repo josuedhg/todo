@@ -198,9 +198,9 @@ int create_todotxt_line_from_task(struct task *task, char **buffer)
 	return line_length;
 }
 
-static int load_tasks(struct todo *todo)
+static int todotxt_load_tasks(struct todotxt *todotxt)
 {
-	struct todotxt *todotxt = container_of(todo, struct todotxt, todo);
+	struct todo *todo = &todotxt->todo;
 	FILE *file = fopen(todotxt->filename, "r");
 	int ret = 0;
 	int index = 1;
@@ -271,9 +271,13 @@ struct todo *create_todotxt(char *filename)
 	struct todotxt *todotxt = calloc(1, sizeof(struct todotxt));
 	todotxt->todo.driver = &todotxt_driver;
 	todo_init(&todotxt->todo);
-	todotxt->todo.driver->load_tasks = load_tasks;
 	todotxt->todo.driver->save_tasks = save_tasks;
 	todotxt->filename = calloc(1, strlen(filename) + 1);
 	strcpy(todotxt->filename, filename);
+	if (todotxt_load_tasks(todotxt) < 0) {
+		struct todo *todo = &todotxt->todo;
+		destroy_todotxt(&todo);
+		return NULL;
+	}
 	return &todotxt->todo;
 }

@@ -73,25 +73,6 @@ static void test_main_command_fail_create_todo(void **state)
 	assert_int_equal(test_main(2, argv), -1);
 }
 
-static void test_main_command_fail_loading_tasks(void **state)
-{
-	char *argv[] = {
-		"test_main",
-		"list"
-	};
-	struct todo todo = {
-		.driver = &mock_todo_driver
-	};
-
-	// prepare returns
-	will_return(__wrap_create_todotxt, &todo);
-	will_return(mock_todo_load_tasks, -1);
-
-	char *message = "Error: Unable to load tasks from";
-	expect_memory(mock_log_function, report_string, message, strlen(message));
-	assert_int_equal(test_main(2, argv), -1);
-}
-
 static void test_main_command(void **state)
 {
 	char *argv[] = {
@@ -104,7 +85,6 @@ static void test_main_command(void **state)
 
 	// prepare returns
 	will_return(__wrap_create_todotxt, &todo);
-	will_return(mock_todo_load_tasks, 0);
 
 	assert_int_equal(test_main(2, argv), 0);
 }
@@ -130,7 +110,6 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_main_no_command),
 		cmocka_unit_test(test_main_invalid_command),
 		cmocka_unit_test(test_main_command_fail_create_todo),
-		cmocka_unit_test(test_main_command_fail_loading_tasks),
 		cmocka_unit_test(test_main_command),
 		cmocka_unit_test(test_check_log_functions),
 	};
