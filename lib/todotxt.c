@@ -230,10 +230,13 @@ static int todotxt_save_tasks(struct todotxt *todotxt)
 	FILE *file = fopen(todotxt->filename, "w");
 	if (file == NULL)
 		return -1;
-	struct task **task = todo->task_list;
-	for (int i = 0; i < todo->task_counter; i++) {
+
+	struct todo_iterator iterator = { .todo = todo, .index = 0, .filter = NULL, .data = NULL };
+	struct task *task = NULL;
+	int i = 0;
+	while ((task = todo_iterator_next(&iterator)) != NULL) {
 		char *line = NULL;
-		int line_length = create_todotxt_line_from_task(task[i], &line);
+		int line_length = create_todotxt_line_from_task(task, &line);
 		if (i < todo->task_counter - 1) {
 			line_length = line_length + 1;
 			line = realloc(line, line_length);
@@ -244,8 +247,9 @@ static int todotxt_save_tasks(struct todotxt *todotxt)
 			fclose(file);
 			return -1;
 		}
-		task[i]->id = i + 1;
+		task->id = i + 1;
 		free(line);
+		i++;
 	}
 	fclose(file);
 	return 0;
