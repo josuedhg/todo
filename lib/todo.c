@@ -5,17 +5,32 @@
 
 #include "debug_i.h"
 
+static struct task *todo_get_task(struct todo *todo, int id)
+{
+	assert(todo != NULL);
+	if (todo->task_counter == 0)
+		return NULL;
+	struct task *task = NULL;
+	for (int i = 0; i < todo->task_counter; i++) {
+		struct task *current = todo->task_list[i];
+		if (current->id == id) {
+			task = current;
+			break;
+		}
+	}
+	return task;
+}
+
 int todo_edit_task(struct todo *todo, struct task *task)
 {
 	if (todo == NULL || task == NULL)
 		return -1;
 
-	for (int i = 0; i < todo->task_counter; i++) {
-		struct task *current = todo->task_list[i];
-		if (current->id == task->id)
-			return 0;
-	}
-	return -1;
+	struct task *current = todo_get_task(todo, task->id);
+	if (current == NULL)
+		return -1;
+	*current = *task;
+	return 0;
 }
 
 void todo_clean_tasks(struct todo *todo)
@@ -61,22 +76,6 @@ int todo_remove_task(struct todo *todo, struct task *task)
 	}
 	todo->task_list[index] = NULL;
 	return 0;
-}
-
-static struct task *todo_get_task(struct todo *todo, int id)
-{
-	assert(todo != NULL);
-	if (todo->task_counter == 0)
-		return NULL;
-	struct task *task = NULL;
-	for (int i = 0; i < todo->task_counter; i++) {
-		struct task *current = todo->task_list[i];
-		if (current->id == id) {
-			task = current;
-			break;
-		}
-	}
-	return task;
 }
 
 struct todo_driver driver = {
