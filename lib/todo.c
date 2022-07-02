@@ -58,25 +58,27 @@ int todo_add_task(struct todo *todo, struct task *task)
 	return id;
 }
 
-int todo_remove_task(struct todo *todo, struct task *task)
+struct task *todo_remove_task(struct todo *todo, int id)
 {
-	if (todo == NULL || task == NULL)
-		return -1;
+	if (todo == NULL)
+		return NULL;
 	if (todo->task_counter == 0)
-		return -1;
+		return NULL;
+	struct task *task = NULL;
 	int index = 0;
 	for (; index < todo->task_counter; index++) {
-		if (todo->task_list[index] == task)
+		if (todo->task_list[index]->id == id)
 			break;
 	}
+	task = todo->task_list[index];
 	if (index >= todo->task_counter)
-		return -1;
+		return NULL;
 	todo->task_counter--;
 	for (; index < todo->task_counter; index++) {
 		todo->task_list[index] = todo->task_list[index + 1];
 	}
 	todo->task_list[index] = NULL;
-	return 0;
+	return task;
 }
 
 struct todo_driver driver = {

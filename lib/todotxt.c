@@ -269,7 +269,7 @@ static int todotxt_add_task(struct todo *todo, struct task *task)
 	if (todo_add_task(todo, task) < 0)
 		return -1;
 	if (todotxt_save_tasks(todotxt) < 0) {
-		todo_remove_task(todo, task);
+		todo_remove_task(todo, task->id);
 		return -1;
 	}
 	return task->id;
@@ -292,16 +292,17 @@ static int todotxt_edit_task(struct todo *todo, struct task *task)
 	return task->id;
 }
 
-static int todotxt_remove_task(struct todo *todo, struct task *task)
+static struct task *todotxt_remove_task(struct todo *todo, int id)
 {
 	struct todotxt *todotxt = container_of(todo, struct todotxt, todo);
-	if (todo_remove_task(todo, task) < 0)
-		return -1;
+	struct task *task = todo_remove_task(todo, id);
+	if (task == NULL)
+		return NULL;
 	if (todotxt_save_tasks(todotxt) < 0) {
 		todo_add_task(todo, task);
-		return -1;
+		return NULL;
 	}
-	return 0;
+	return task;
 }
 
 struct todo_driver todotxt_driver;

@@ -613,9 +613,8 @@ void test_negative_remove_task_not_found(void **state)
 {
 	wrap_fwrite();
 	struct todo *todo = (struct todo *)*state;
-	struct task *task = create_task("my task", "myproject", TASK_PRIORITY_HIGH);
 
-	assert_int_equal(todo->driver->remove_task(todo, task), -1);
+	assert_null(todo->driver->remove_task(todo, 0));
 }
 
 void test_negative_remove_task_cannot_write(void **state)
@@ -639,7 +638,7 @@ void test_negative_remove_task_cannot_write(void **state)
 	assert_int_equal(todo->driver->add_task(todo, task), 1);
 
 	will_return(__wrap_fopen, NULL);
-	assert_int_equal(todo->driver->remove_task(todo, task), -1);
+	assert_null(todo->driver->remove_task(todo, task->id));
 }
 
 void test_remove_task(void **state)
@@ -666,7 +665,7 @@ void test_remove_task(void **state)
 	sprintf(expected_todotxtline, "(B) %s my task +myproject", creation_date);
 
 	will_return(__wrap_fopen, &fake_pointer);
-	assert_int_equal(todo->driver->remove_task(todo, task), 0);
+	assert_non_null(todo->driver->remove_task(todo, task->id));
 }
 
 int main(int argc, char *argv[])

@@ -96,28 +96,13 @@ void test_todo_add_task_empty(void **state)
 	assert_int_equal(todo.task_counter, 1);
 }
 
-void test_negative_todo_remove_task_null(void **state)
-{
-	struct todo todo = {
-		.driver = &todo_driver,
-	};
-	todo_init(&todo);
-	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
-	assert_int_equal(todo.driver->remove_task(NULL, task), -1);
-	assert_int_equal(todo.driver->remove_task(&todo, NULL), -1);
-	assert_int_equal(todo.driver->remove_task(NULL, NULL), -1);
-	destroy_task(&task);
-}
-
 void test_negative_todo_remove_task_empty(void **state)
 {
 	struct todo todo = {
 		.driver = &todo_driver,
 	};
 	todo_init(&todo);
-	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
-	todo.driver->remove_task(&todo, task);
-	destroy_task(&task);
+	assert_null(todo.driver->remove_task(&todo, 0));
 }
 
 void test_negative_todo_remove_task_not_found(void **state)
@@ -127,12 +112,10 @@ void test_negative_todo_remove_task_not_found(void **state)
 	};
 	todo_init(&todo);
 	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
-	struct task *task2 = create_task("name", "project", TASK_PRIORITY_LOW);
 	todo.driver->add_task(&todo, task);
-	todo.driver->remove_task(&todo, task2);
+	assert_null(todo.driver->remove_task(&todo, 3));
 	assert_int_equal(todo.task_counter, 1);
 	assert_memory_equal(task, todo.task_list[0], sizeof(struct task));
-	destroy_task(&task2);
 }
 
 void test_todo_remove_task(void **state)
@@ -145,7 +128,7 @@ void test_todo_remove_task(void **state)
 	struct task *task2 = create_task("name", "project", TASK_PRIORITY_LOW);
 	todo.driver->add_task(&todo, task);
 	todo.driver->add_task(&todo, task2);
-	todo.driver->remove_task(&todo, task);
+	assert_non_null(todo.driver->remove_task(&todo, 0));
 	assert_int_equal(todo.task_counter, 1);
 	assert_memory_equal(task2, todo.task_list[0], sizeof(struct task));
 	destroy_task(&task);
@@ -324,7 +307,6 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_negative_todo_add_task_null),
 		cmocka_unit_test(test_negative_todo_add_task_full),
 		cmocka_unit_test(test_todo_add_task_empty),
-		cmocka_unit_test(test_negative_todo_remove_task_null),
 		cmocka_unit_test(test_negative_todo_remove_task_empty),
 		cmocka_unit_test(test_negative_todo_remove_task_not_found),
 		cmocka_unit_test(test_todo_remove_task),
