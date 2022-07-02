@@ -53,14 +53,14 @@ int todo_remove_task(struct todo *todo, struct task *task)
 		if (todo->task_list[index] == task)
 			break;
 	}
-	if (index == todo->task_counter)
-		return 0;
+	if (index >= todo->task_counter)
+		return -1;
 	todo->task_counter--;
 	for (; index < todo->task_counter; index++) {
 		todo->task_list[index] = todo->task_list[index + 1];
 	}
 	todo->task_list[index] = NULL;
-	return index;
+	return 0;
 }
 
 static struct task *todo_get_task(struct todo *todo, int id)
