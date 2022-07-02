@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2022-07-02 20:32:03</td>
+            <td class="headerValue">2022-07-02 21:03:15</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">7</td>
@@ -156,19 +156,19 @@
 <a name="94"><span class="lineNum">      94 </span><span class="lineCov">         70 :         *todo-&gt;driver = driver;</span></a>
 <a name="95"><span class="lineNum">      95 </span><span class="lineCov">         70 : }</span></a>
 <a name="96"><span class="lineNum">      96 </span>            : </a>
-<a name="97"><span class="lineNum">      97 </span><span class="lineCov">         30 : struct task *todo_iterator_next(struct todo_iterator *iterator)</span></a>
+<a name="97"><span class="lineNum">      97 </span><span class="lineCov">         68 : struct task *todo_iterator_next(struct todo_iterator *iterator)</span></a>
 <a name="98"><span class="lineNum">      98 </span>            : {</a>
-<a name="99"><span class="lineNum">      99 </span><span class="lineCov">         30 :         assert(iterator != NULL);</span></a>
-<a name="100"><span class="lineNum">     100 </span><span class="lineCov">         28 :         struct task *task = NULL;</span></a>
-<a name="101"><span class="lineNum">     101 </span><span class="lineCov">         30 :         while (iterator-&gt;index &lt; iterator-&gt;todo-&gt;task_counter) {</span></a>
-<a name="102"><span class="lineNum">     102 </span><span class="lineCov">         12 :                 struct task *tmp = iterator-&gt;todo-&gt;task_list[iterator-&gt;index];</span></a>
-<a name="103"><span class="lineNum">     103 </span><span class="lineCov">         12 :                 iterator-&gt;index++;</span></a>
-<a name="104"><span class="lineNum">     104 </span><span class="lineCov">         12 :                 if (iterator-&gt;filter == NULL || iterator-&gt;filter(tmp, iterator-&gt;data)) {</span></a>
-<a name="105"><span class="lineNum">     105 </span><span class="lineCov">         10 :                         task = tmp;</span></a>
-<a name="106"><span class="lineNum">     106 </span><span class="lineCov">         10 :                         break;</span></a>
+<a name="99"><span class="lineNum">      99 </span><span class="lineCov">         68 :         assert(iterator != NULL);</span></a>
+<a name="100"><span class="lineNum">     100 </span><span class="lineCov">         66 :         struct task *task = NULL;</span></a>
+<a name="101"><span class="lineNum">     101 </span><span class="lineCov">         68 :         while (iterator-&gt;index &lt; iterator-&gt;todo-&gt;task_counter) {</span></a>
+<a name="102"><span class="lineNum">     102 </span><span class="lineCov">         32 :                 struct task *tmp = iterator-&gt;todo-&gt;task_list[iterator-&gt;index];</span></a>
+<a name="103"><span class="lineNum">     103 </span><span class="lineCov">         32 :                 iterator-&gt;index++;</span></a>
+<a name="104"><span class="lineNum">     104 </span><span class="lineCov">         32 :                 if (iterator-&gt;filter == NULL || iterator-&gt;filter(tmp, iterator-&gt;data)) {</span></a>
+<a name="105"><span class="lineNum">     105 </span><span class="lineCov">         30 :                         task = tmp;</span></a>
+<a name="106"><span class="lineNum">     106 </span><span class="lineCov">         30 :                         break;</span></a>
 <a name="107"><span class="lineNum">     107 </span>            :                 }</a>
 <a name="108"><span class="lineNum">     108 </span>            :         }</a>
-<a name="109"><span class="lineNum">     109 </span><span class="lineCov">         28 :         return task;</span></a>
+<a name="109"><span class="lineNum">     109 </span><span class="lineCov">         66 :         return task;</span></a>
 <a name="110"><span class="lineNum">     110 </span>            : }</a>
 </pre>
       </td>
