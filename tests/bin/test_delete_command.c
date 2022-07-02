@@ -43,53 +43,34 @@ static void test_delete_command_invalid_param(void **state)
 	assert_int_equal(command_handle(&command), -1);
 }
 
-static void test_delete_command_task_not_found(void **state)
-{
-	(void)state; /* unused */
-	char *params[] = {"delete", "1"};
-
-	command.argv = params;
-	command.argc = 2;
-
-	will_return(mock_todo_get_task, NULL);
-	expect_string(mock_log_function, report_string, "Error: Unable to find task with id 1.\n");
-	assert_int_equal(command_handle(&command), -1);
-}
-
 static void test_delete_command_cannot_remove_task(void **state)
 {
 	(void)state; /* unused */
 	char *params[] = {"delete", "1"};
-	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 
 	command.argv = params;
 	command.argc = 2;
 
-	will_return(mock_todo_get_task, task);
 	will_return(mock_todo_remove_task, -1);
 	expect_string(mock_log_function, report_string, "Error: Unable to remove task with id 1.\n");
 	assert_int_equal(command_handle(&command), -1);
 
 	todo.task_list[0] = NULL;
 	todo.task_counter = 0;
-	destroy_task(&task);
 }
 
 static void test_delete_command_success(void **state)
 {
 	(void)state; /* unused */
 	char *params[] = {"delete", "1"};
-	struct task *task = create_task("name", "project", TASK_PRIORITY_LOW);
 
 	command.argv = params;
 	command.argc = 2;
 
-	will_return(mock_todo_get_task, task);
 	will_return(mock_todo_remove_task, 0);
 	assert_int_equal(command_handle(&command), 0);
 	todo.task_list[0] = NULL;
 	todo.task_counter = 0;
-	destroy_task(&task);
 }
 
 int main(int argc, char *argv[])
@@ -97,7 +78,6 @@ int main(int argc, char *argv[])
 	struct CMUnitTest tests[] = {
 		cmocka_unit_test(test_delete_command_no_param),
 		cmocka_unit_test(test_delete_command_invalid_param),
-		cmocka_unit_test(test_delete_command_task_not_found),
 		cmocka_unit_test(test_delete_command_cannot_remove_task),
 		cmocka_unit_test(test_delete_command_success),
 	};

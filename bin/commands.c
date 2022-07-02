@@ -118,13 +118,7 @@ static int delete_command_handle(struct command *cmd)
 		return -1;
 	}
 
-	struct task *task = cmd->todo->driver->get_task(cmd->todo, task_id);
-	if (task == NULL) {
-		cmd->log->error("Error: Unable to find task with id %d.\n", task_id);
-		return -1;
-	}
-
-	if (cmd->todo->driver->remove_task(cmd->todo, task)) {
+	if (cmd->todo->driver->remove_task(cmd->todo, task_id)) {
 		cmd->log->error("Error: Unable to remove task with id %d.\n", task_id);
 		return -1;
 	}
