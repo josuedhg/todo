@@ -223,9 +223,9 @@ static int todotxt_load_tasks(struct todotxt *todotxt)
 	return ret;
 }
 
-static int save_tasks(struct todo *todo)
+static int todotxt_save_tasks(struct todotxt *todotxt)
 {
-	struct todotxt *todotxt = container_of(todo, struct todotxt, todo);
+	struct todo *todo = &todotxt->todo;
 	FILE *file = fopen(todotxt->filename, "w");
 	if (file == NULL)
 		return -1;
@@ -260,6 +260,39 @@ void destroy_todotxt(struct todo **todo)
 	*todo = NULL;
 }
 
+
+static int todotxt_add_task(struct todo *todo, struct task *task)
+{
+	struct todotxt *todotxt = container_of(todo, struct todotxt, todo);
+	if (todo_add_task(todo, task) < 0)
+		return -1;
+	if (todotxt_save_tasks(todotxt) < 0) {
+		todo_remove_task(todo, task);
+		return -1;
+	}
+	return 0;
+}
+
+static int todotxt_edit_task(struct todo *todo, struct task *task)
+{
+	struct todotxt *todotxt = container_of(todo, struct todotxt, todo);
+	if (todo_edit_task(todo, task) < 0)
+		return -1;
+	return todotxt_save_tasks(todotxt);
+}
+
+static int todotxt_remove_task(struct todo *todo, struct task *task)
+{
+	struct todotxt *todotxt = container_of(todo, struct todotxt, todo);
+	if (todo_remove_task(todo, task) < 0)
+		return -1;
+	if (todotxt_save_tasks(todotxt) < 0) {
+		todo_add_task(todo, task);
+		return -1;
+	}
+	return 0;
+}
+
 struct todo_driver todotxt_driver;
 
 struct todo *create_todotxt(char *filename)
@@ -271,7 +304,9 @@ struct todo *create_todotxt(char *filename)
 	struct todotxt *todotxt = calloc(1, sizeof(struct todotxt));
 	todotxt->todo.driver = &todotxt_driver;
 	todo_init(&todotxt->todo);
-	todotxt->todo.driver->save_tasks = save_tasks;
+	todotxt->todo.driver->add_task = todotxt_add_task;
+	todotxt->todo.driver->edit_task = todotxt_edit_task;
+	todotxt->todo.driver->remove_task = todotxt_remove_task;
 	todotxt->filename = calloc(1, strlen(filename) + 1);
 	strcpy(todotxt->filename, filename);
 	if (todotxt_load_tasks(todotxt) < 0) {

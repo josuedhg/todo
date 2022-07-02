@@ -58,11 +58,6 @@ static int add_command_handle(struct command *cmd)
 		goto FREE_AND_EXIT;
 	}
 
-	if (cmd->todo->driver->save_tasks(cmd->todo) < 0) {
-		cmd->log->error("Error: Unable to save tasks\n");
-		ret = -1;
-	}
-
 FREE_AND_EXIT:
 	free(task_description);
 	return ret;
@@ -134,11 +129,6 @@ static int delete_command_handle(struct command *cmd)
 		return -1;
 	}
 
-	if (cmd->todo->driver->save_tasks(cmd->todo) < 0) {
-		cmd->log->error("Error: Unable to save tasks\n");
-		return -1;
-	}
-
 	return 0;
 }
 
@@ -164,8 +154,8 @@ static int done_command_handle(struct command *cmd)
 
 	task_set_completed(task);
 
-	if (cmd->todo->driver->save_tasks(cmd->todo) < 0) {
-		cmd->log->error("Error: Unable to save tasks\n");
+	if (cmd->todo->driver->edit_task(cmd->todo, task) < 0) {
+		cmd->log->error("Error: Unable to set task as done\n");
 		return -1;
 	}
 
@@ -194,8 +184,8 @@ static int reopen_command_handle(struct command *cmd)
 
 	task_reopen(task);
 
-	if (cmd->todo->driver->save_tasks(cmd->todo) < 0) {
-		cmd->log->error("Error: Unable to save tasks\n");
+	if (cmd->todo->driver->edit_task(cmd->todo, task) < 0) {
+		cmd->log->error("Error: Unable to reopen task\n");
 		return -1;
 	}
 

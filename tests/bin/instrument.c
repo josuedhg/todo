@@ -82,7 +82,7 @@ struct task *mock_todo_get_task(struct todo *todo, int id)
 	return mock_ptr_type(struct task *);
 }
 
-int mock_todo_save_tasks(struct todo *todo)
+int mock_todo_edit_task(struct todo *todo, struct task *task)
 {
 	return mock_type(int);
 }
@@ -98,7 +98,7 @@ int mock_todo_add_task(struct todo *todo, struct task *task)
 }
 
 struct todo_driver mock_todo_driver = {
-	.save_tasks = mock_todo_save_tasks,
+	.edit_task = mock_todo_edit_task,
 	.add_task = mock_todo_add_task,
 	.get_task = mock_todo_get_task,
 	.remove_task = mock_todo_remove_task,

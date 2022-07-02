@@ -408,7 +408,6 @@ void test_create_todotxt(void **state)
 	assert_int_equal(todo->task_counter, 0);
 	assert_non_null(todo->task_list);
 	assert_non_null(todo->driver);
-	assert_non_null(todo->driver->save_tasks);
 	assert_non_null(todo->driver->add_task);
 	assert_non_null(todo->driver->remove_task);
 
@@ -438,7 +437,6 @@ void test_create_todotxt_with_file_content(void **state)
 	assert_int_equal(todo->task_counter, 1);
 	assert_non_null(todo->task_list);
 	assert_non_null(todo->driver);
-	assert_non_null(todo->driver->save_tasks);
 	assert_non_null(todo->driver->add_task);
 	assert_non_null(todo->driver->remove_task);
 
@@ -446,95 +444,204 @@ void test_create_todotxt_with_file_content(void **state)
 	destroy_todotxt(&todo);
 }
 
-void test_negative_todo_save_tasks_cannot_open(void **state)
+void test_negative_add_task_null(void **state)
 {
+	wrap_fwrite();
 	struct todo *todo = (struct todo *)*state;
+	struct task *task = create_task("task", "myproject", TASK_PRIORITY_HIGH);
+
+	assert_int_equal(todo->driver->add_task(NULL, NULL), -1);
+	assert_int_equal(todo->driver->add_task(todo, NULL), -1);
+	assert_int_equal(todo->driver->add_task(NULL, task), -1);
+	destroy_task(&task);
+}
+
+void test_negative_add_task_cannot_open_file(void **state)
+{
+	wrap_fwrite();
+	struct todo *todo = (struct todo *)*state;
+	struct task *task = create_task("task", "myproject", TASK_PRIORITY_HIGH);
+
 	will_return(__wrap_fopen, NULL);
-	int res = todo->driver->save_tasks(todo);
-	assert_int_equal(res, -1);
+	assert_int_equal(todo->driver->add_task(todo, task), -1);
+	destroy_task(&task);
 }
 
-void test_negative_todo_save_tasks_bad_write(void **state)
+void test_negative_add_task_error_writing(void **state)
 {
 	wrap_fwrite();
 	struct todo *todo = (struct todo *)*state;
-	struct task *task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
-	todo->driver->add_task(todo, task);
-	int file_p = 1;
-	will_return(__wrap_fopen, &file_p);
-	will_return(__wrap_fwrite, EINVAL);
-	will_return(__wrap_fwrite, -1);
-	int res = todo->driver->save_tasks(todo);
-	assert_int_equal(res, -1);
+	struct task *task = create_task("task", "myproject", TASK_PRIORITY_HIGH);
+	int fake_pointer = 0;
+
+	will_return(__wrap_fopen, &fake_pointer);
+	will_return(__wrap_fwrite, 0);
+	assert_int_equal(todo->driver->add_task(todo, task), -1);
+	destroy_task(&task);
 }
 
-void test_todo_save_tasks(void **state)
+void test_add_task_single_task(void **state)
 {
 	wrap_fwrite();
 	struct todo *todo = (struct todo *)*state;
-	struct task *task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	struct task *task = create_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	int fake_pointer = 0;
+
 	task->creation_date = FIRST_DAY_UNIX_TIME;
-	todo->driver->add_task(todo, task);
-
 	char creation_date[DATE_LENGHT] = { 0 };
 	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
-
-#define EXPECTED_LINE_SIZE_IN_FILE 33
-	char expected_todotxtline[EXPECTED_LINE_SIZE_IN_FILE] = { 0 };
+	char expected_todotxtline[EXPECTED_LINE_SIZE] = { 0 };
 	sprintf(expected_todotxtline, "(A) %s my task +myproject", creation_date);
 
-	int file_p = 1;
-	will_return(__wrap_fopen, &file_p);
-	will_return(__wrap_fwrite, 0);
+	will_return(__wrap_fopen, &fake_pointer);
 	will_return(__wrap_fwrite, 1);
 
-	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE_IN_FILE);
-	expect_memory(__wrap_fwrite, ptr, expected_todotxtline, EXPECTED_LINE_SIZE_IN_FILE);
-
-	int res = todo->driver->save_tasks(todo);
-	assert_int_equal(res, 0);
+	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
+	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
+	assert_int_equal(todo->driver->add_task(todo, task), 0);
 }
 
-void test_todo_save_tasks_multiline(void **state)
+void test_add_task_multi_tasks(void **state)
 {
 	wrap_fwrite();
 	struct todo *todo = (struct todo *)*state;
+	struct task *task = create_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	int fake_pointer = 0;
 
-	struct task *task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
 	task->creation_date = FIRST_DAY_UNIX_TIME;
-	todo->driver->add_task(todo, task);
-
-	struct task *task2 = create_new_task("my tazk", "myproject", TASK_PRIORITY_HIGH);
-	task2->creation_date = FIRST_DAY_UNIX_TIME;
-	todo->driver->add_task(todo, task2);
-
 	char creation_date[DATE_LENGHT] = { 0 };
 	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
+	char expected_todotxtline[EXPECTED_LINE_SIZE] = { 0 };
+	sprintf(expected_todotxtline, "(A) %s my task +myproject", creation_date);
 
-	// task1
-	char expected_todotxtline[EXPECTED_LINE_SIZE_IN_FILE + 1] = { 0 };
-	sprintf(expected_todotxtline, "(A) %s my task +myproject\n", creation_date);
-
-	int file_p = 1;
-	will_return(__wrap_fopen, &file_p);
-	will_return(__wrap_fwrite, 0);
+	will_return(__wrap_fopen, &fake_pointer);
 	will_return(__wrap_fwrite, 1);
 
-	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE_IN_FILE + 1);
-	expect_memory(__wrap_fwrite, ptr, expected_todotxtline, EXPECTED_LINE_SIZE_IN_FILE + 1);
+	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
+	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
+	assert_int_equal(todo->driver->add_task(todo, task), 0);
 
-	// task2
-	char expected_todotxtline2[EXPECTED_LINE_SIZE_IN_FILE] = { 0 };
-	sprintf(expected_todotxtline2, "(A) %s my tazk +myproject", creation_date);
+	struct task *task2 = create_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	task2->creation_date = FIRST_DAY_UNIX_TIME;
 
-	will_return(__wrap_fwrite, 0);
+	char expected_todotxtline_newline[EXPECTED_LINE_SIZE + 1] = { 0 };
+	sprintf(expected_todotxtline_newline, "(A) %s my task +myproject\n", creation_date);
+
+	char expected_todotxtline2[EXPECTED_LINE_SIZE] = { 0 };
+	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task2->creation_date));
+	sprintf(expected_todotxtline2, "(A) %s my task +myproject", creation_date);
+
+	will_return(__wrap_fopen, &fake_pointer);
+
+	will_return(__wrap_fwrite, 1);
+	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE);
+	expect_string(__wrap_fwrite, ptr, expected_todotxtline_newline);
+
+	will_return(__wrap_fwrite, 1);
+	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
+	expect_string(__wrap_fwrite, ptr, expected_todotxtline2);
+	assert_int_equal(todo->driver->add_task(todo, task2), 0);
+
+}
+
+void test_negative_edit_task_not_found(void **state)
+{
+	wrap_fwrite();
+	struct todo *todo = (struct todo *)*state;
+	struct task *task = create_task("my task", "myproject", TASK_PRIORITY_HIGH);
+
+	assert_int_equal(todo->driver->edit_task(todo, task), -1);
+}
+
+void test_edit_task(void **state)
+{
+	wrap_fwrite();
+	struct todo *todo = (struct todo *)*state;
+	struct task *task = create_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	int fake_pointer = 0;
+
+	task->creation_date = FIRST_DAY_UNIX_TIME;
+	char creation_date[DATE_LENGHT] = { 0 };
+	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
+	char expected_todotxtline[EXPECTED_LINE_SIZE] = { 0 };
+	sprintf(expected_todotxtline, "(A) %s my task +myproject", creation_date);
+
+	will_return(__wrap_fopen, &fake_pointer);
 	will_return(__wrap_fwrite, 1);
 
-	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE_IN_FILE);
-	expect_memory(__wrap_fwrite, ptr, expected_todotxtline2, EXPECTED_LINE_SIZE_IN_FILE);
+	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
+	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
+	assert_int_equal(todo->driver->add_task(todo, task), 0);
 
-	int res = todo->driver->save_tasks(todo);
-	assert_int_equal(res, 0);
+	task->priority = TASK_PRIORITY_MEDIUM;
+	sprintf(expected_todotxtline, "(B) %s my task +myproject", creation_date);
+
+	will_return(__wrap_fopen, &fake_pointer);
+	will_return(__wrap_fwrite, 1);
+
+	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
+	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
+	assert_int_equal(todo->driver->edit_task(todo, task), 0);
+}
+
+void test_negative_remove_task_not_found(void **state)
+{
+	wrap_fwrite();
+	struct todo *todo = (struct todo *)*state;
+	struct task *task = create_task("my task", "myproject", TASK_PRIORITY_HIGH);
+
+	assert_int_equal(todo->driver->remove_task(todo, task), -1);
+}
+
+void test_negative_remove_task_cannot_write(void **state)
+{
+	wrap_fwrite();
+	struct todo *todo = (struct todo *)*state;
+	struct task *task = create_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	int fake_pointer = 0;
+
+	task->creation_date = FIRST_DAY_UNIX_TIME;
+	char creation_date[DATE_LENGHT] = { 0 };
+	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
+	char expected_todotxtline[EXPECTED_LINE_SIZE] = { 0 };
+	sprintf(expected_todotxtline, "(A) %s my task +myproject", creation_date);
+
+	will_return(__wrap_fopen, &fake_pointer);
+	will_return(__wrap_fwrite, 1);
+
+	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
+	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
+	assert_int_equal(todo->driver->add_task(todo, task), 0);
+
+	will_return(__wrap_fopen, NULL);
+	assert_int_equal(todo->driver->remove_task(todo, task), -1);
+}
+
+void test_remove_task(void **state)
+{
+	wrap_fwrite();
+	struct todo *todo = (struct todo *)*state;
+	struct task *task = create_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	int fake_pointer = 0;
+
+	task->creation_date = FIRST_DAY_UNIX_TIME;
+	char creation_date[DATE_LENGHT] = { 0 };
+	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
+	char expected_todotxtline[EXPECTED_LINE_SIZE] = { 0 };
+	sprintf(expected_todotxtline, "(A) %s my task +myproject", creation_date);
+
+	will_return(__wrap_fopen, &fake_pointer);
+	will_return(__wrap_fwrite, 1);
+
+	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
+	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
+	assert_int_equal(todo->driver->add_task(todo, task), 0);
+
+	task->priority = TASK_PRIORITY_MEDIUM;
+	sprintf(expected_todotxtline, "(B) %s my task +myproject", creation_date);
+
+	will_return(__wrap_fopen, &fake_pointer);
+	assert_int_equal(todo->driver->remove_task(todo, task), 0);
 }
 
 int main(int argc, char *argv[])
@@ -569,10 +676,16 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_negative_create_todotxt_cannot_read_file),
 		cmocka_unit_test(test_create_todotxt),
 		cmocka_unit_test(test_create_todotxt_with_file_content),
-		cmocka_unit_test_setup_teardown(test_negative_todo_save_tasks_cannot_open, setup, teardown),
-		cmocka_unit_test_setup_teardown(test_negative_todo_save_tasks_bad_write, setup, teardown),
-		cmocka_unit_test_setup_teardown(test_todo_save_tasks, setup, teardown),
-		cmocka_unit_test_setup_teardown(test_todo_save_tasks_multiline, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_negative_add_task_null, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_negative_add_task_cannot_open_file, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_negative_add_task_error_writing, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_add_task_single_task, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_add_task_multi_tasks, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_negative_edit_task_not_found, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_edit_task, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_negative_remove_task_not_found, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_negative_remove_task_cannot_write, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_remove_task, setup, teardown),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

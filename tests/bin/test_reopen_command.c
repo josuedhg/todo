@@ -56,7 +56,7 @@ static void test_reopen_command_task_not_found(void **state)
 	assert_int_equal(command_handle(&command), -1);
 }
 
-static void test_reopen_command_cannot_save_task(void **state)
+static void test_reopen_command_cannot_edit_task(void **state)
 {
 	(void)state; /* unused */
 	char *params[] = {"reopen", "1"};
@@ -66,8 +66,8 @@ static void test_reopen_command_cannot_save_task(void **state)
 	command.argc = 2;
 
 	will_return(mock_todo_get_task, task);
-	will_return(mock_todo_save_tasks, -1);
-	expect_string(mock_log_function, report_string, "Error: Unable to save tasks\n");
+	will_return(mock_todo_edit_task, -1);
+	expect_string(mock_log_function, report_string, "Error: Unable to reopen task\n");
 	assert_int_equal(command_handle(&command), -1);
 
 	todo.task_list[0] = NULL;
@@ -86,7 +86,7 @@ static void test_reopen_command_success(void **state)
 	command.argc = 2;
 
 	will_return(mock_todo_get_task, task);
-	will_return(mock_todo_save_tasks, 0);
+	will_return(mock_todo_edit_task, 0);
 	assert_int_equal(command_handle(&command), 0);
 
 	assert_int_equal(task->status, TASK_STATUS_OPEN);
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_reopen_command_no_param),
 		cmocka_unit_test(test_reopen_command_invalid_param),
 		cmocka_unit_test(test_reopen_command_task_not_found),
-		cmocka_unit_test(test_reopen_command_cannot_save_task),
+		cmocka_unit_test(test_reopen_command_cannot_edit_task),
 		cmocka_unit_test(test_reopen_command_success),
 	};
 

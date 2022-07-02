@@ -4,6 +4,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
+#include "task.h"
 #include "todo.h"
 
 struct todo_driver todo_driver;
@@ -17,29 +18,42 @@ void test_todo_init(void **state)
 	assert_int_equal(todo.task_counter, 0);
 	assert_non_null(todo.task_list);
 	assert_non_null(todo.driver);
-	assert_non_null(todo.driver->save_tasks);
 	assert_non_null(todo.driver->add_task);
 	assert_non_null(todo.driver->remove_task);
 }
 
-void test_negative_todo_save_tasks_null(void **state)
+void test_negative_todo_edit_task_null(void **state)
 {
 	struct todo todo = {
 		.driver = &todo_driver,
 	};
 	todo_init(&todo);
-	int res = todo.driver->save_tasks(NULL);
-	assert_int_equal(res, -1);
+	assert_int_equal(todo.driver->edit_task(NULL, NULL), -1);
+	assert_int_equal(todo.driver->edit_task(&todo, NULL), -1);
 }
 
-void test_todo_save_tasks(void **state)
+void test_negative_todo_edit_unexistent_task(void **state)
 {
 	struct todo todo = {
 		.driver = &todo_driver,
 	};
 	todo_init(&todo);
-	int res = todo.driver->save_tasks(&todo);
-	assert_int_equal(res, 0);
+	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);
+
+	assert_int_equal(todo.driver->edit_task(&todo, task), -1);
+	destroy_task(&task);
+}
+
+void test_todo_edit_task(void **state)
+{
+	struct todo todo = {
+		.driver = &todo_driver,
+	};
+	todo_init(&todo);
+	struct task *task = create_new_task("name", "project", TASK_PRIORITY_LOW);
+	todo.driver->add_task(&todo, task);
+	assert_int_equal(todo.driver->edit_task(&todo, task), 0);
+	destroy_task(&task);
 }
 
 void test_negative_todo_add_task_null(void **state)
@@ -304,8 +318,9 @@ int main(int argc, char *argv[])
 {
 	struct CMUnitTest tests[] = {
 		cmocka_unit_test(test_todo_init),
-		cmocka_unit_test(test_negative_todo_save_tasks_null),
-		cmocka_unit_test(test_todo_save_tasks),
+		cmocka_unit_test(test_negative_todo_edit_task_null),
+		cmocka_unit_test(test_negative_todo_edit_unexistent_task),
+		cmocka_unit_test(test_todo_edit_task),
 		cmocka_unit_test(test_negative_todo_add_task_null),
 		cmocka_unit_test(test_negative_todo_add_task_full),
 		cmocka_unit_test(test_todo_add_task_empty),

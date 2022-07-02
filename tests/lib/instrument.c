@@ -41,15 +41,16 @@ ssize_t __wrap_getline(char **lineptr, size_t *n, FILE *stream)
 extern size_t __real_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
 size_t __wrap_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
+	int ret = 0;
 	if (real_fwrite)
 		return __real_fwrite(ptr, size, nmemb, stream);
 
-	errno = mock_type(int);
-	if (errno == 0) {
+	ret = mock_type(int);
+	if (ret == nmemb) {
 		check_expected(size);
 		check_expected(ptr);
 	}
-	return mock_type(size_t);
+	return ret;
 }
 
 int __wrap_fclose(FILE *stream)
