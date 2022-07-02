@@ -26,19 +26,14 @@ struct todo {
 
 typedef bool (*iterator_filter)(struct task*, void*);
 
-struct todo_iterator {
-	iterator_filter filter;
-	struct todo *todo;
-	int index;
-	void *data;
-};
-
+struct todo_iterator;
 
 void todo_init(struct todo *);
 int todo_add_task(struct todo*, struct task*);
 int todo_edit_task(struct todo*, struct task*);
 struct task *todo_remove_task(struct todo*, int);
 void todo_clean_tasks(struct todo*);
+struct todo_iterator *todo_get_iterator(struct todo*, iterator_filter, void*);
 struct task *todo_iterator_next(struct todo_iterator*);
 
 #endif /* end of include guard: __TODO_H__ */

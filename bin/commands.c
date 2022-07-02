@@ -1,3 +1,4 @@
+#include "todo.h"
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,11 +66,11 @@ FREE_AND_EXIT:
 
 static int list_command_handle(struct command *cmd)
 {
-	struct todo_iterator iterator = { .todo = cmd->todo, .index = 0, .filter = NULL, .data = NULL };
+	struct todo_iterator *iterator = todo_get_iterator(cmd->todo, NULL, NULL);
 	struct task *task = NULL;
-	while ((task = todo_iterator_next(&iterator)) != NULL)
+	while ((task = todo_iterator_next(iterator)) != NULL)
 		cmd->log->notify("%d. %s\n", task->id, task->name);
-
+	free(iterator);
 	return 0;
 }
 
@@ -118,7 +119,7 @@ static int delete_command_handle(struct command *cmd)
 		return -1;
 	}
 
-	if (cmd->todo->driver->remove_task(cmd->todo, task_id)) {
+	if (!cmd->todo->driver->remove_task(cmd->todo, task_id)) {
 		cmd->log->error("Error: Unable to remove task with id %d.\n", task_id);
 		return -1;
 	}

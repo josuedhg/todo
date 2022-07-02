@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -94,6 +95,11 @@ void test_todo_add_task_empty(void **state)
 	assert_int_equal(todo.driver->add_task(&todo, task), 0);
 	assert_memory_equal(task, todo.task_list[0], sizeof(struct task));
 	assert_int_equal(todo.task_counter, 1);
+}
+
+void test_negative_todo_remove_task_null(void **state)
+{
+	assert_int_equal(todo_remove_task(NULL, 0), NULL);
 }
 
 void test_negative_todo_remove_task_empty(void **state)
@@ -229,9 +235,10 @@ void test_todo_iterator_next_no_filter_no_tasks(void **state)
 		.driver = &todo_driver,
 	};
 	todo_init(&todo);
-	struct todo_iterator iterator = { .todo = &todo, .filter = NULL, .data = NULL, .index = 0 };
-	struct task *task = todo_iterator_next(&iterator);
+	struct todo_iterator *iterator = todo_get_iterator(&todo, NULL, NULL);
+	struct task *task = todo_iterator_next(iterator);
 	assert_null(task);
+	free(iterator);
 }
 
 void test_todo_iterator_next_no_filter_with_tasks(void **state)
@@ -241,11 +248,12 @@ void test_todo_iterator_next_no_filter_with_tasks(void **state)
 	};
 	todo_init(&todo);
 	todo.driver->add_task(&todo, create_new_task("my task", "myproject", TASK_PRIORITY_HIGH));
-	struct todo_iterator iterator = { .todo = &todo, .filter = NULL, .data = NULL, .index = 0 };
-	struct task *task = todo_iterator_next(&iterator);
+	struct todo_iterator *iterator = todo_get_iterator(&todo, NULL, NULL);
+	struct task *task = todo_iterator_next(iterator);
 	assert_non_null(task);
-	task = todo_iterator_next(&iterator);
+	task = todo_iterator_next(iterator);
 	assert_null(task);
+	free(iterator);
 }
 
 void test_todo_iterator_next_filter_no_tasks(void **state)
@@ -254,9 +262,10 @@ void test_todo_iterator_next_filter_no_tasks(void **state)
 		.driver = &todo_driver,
 	};
 	todo_init(&todo);
-	struct todo_iterator iterator = {.todo = &todo, .filter = iterator_callback, .data = NULL, .index = 0};
-	struct task *task = todo_iterator_next(&iterator);
+	struct todo_iterator *iterator = todo_get_iterator(&todo, iterator_callback, NULL);
+	struct task *task = todo_iterator_next(iterator);
 	assert_null(task);
+	free(iterator);
 }
 
 void test_todo_iterator_next_filter_with_tasks(void **state)
@@ -268,15 +277,16 @@ void test_todo_iterator_next_filter_with_tasks(void **state)
 	int data = 0xDEADBEEF;
 	struct task *created_task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
 	todo.driver->add_task(&todo, created_task);
-	struct todo_iterator iterator = { .todo = &todo, .filter = iterator_callback, .data = &data, .index = 0 };
+	struct todo_iterator *iterator = todo_get_iterator(&todo, iterator_callback, &data);
 
 	expect_value(iterator_callback, task, created_task);
 	expect_value(iterator_callback, data, &data);
 	will_return(iterator_callback, true);
-	struct task *task = todo_iterator_next(&iterator);
+	struct task *task = todo_iterator_next(iterator);
 	assert_non_null(task);
-	task = todo_iterator_next(&iterator);
+	task = todo_iterator_next(iterator);
 	assert_null(task);
+	free(iterator);
 }
 
 void test_todo_iterator_next_filter_with_tasks_and_filter_false(void **state)
@@ -288,12 +298,12 @@ void test_todo_iterator_next_filter_with_tasks_and_filter_false(void **state)
 	int data = 0xDEADBEEF;
 	struct task *created_task = create_new_task("my task", "myproject", TASK_PRIORITY_HIGH);
 	todo.driver->add_task(&todo, created_task);
-	struct todo_iterator iterator = { .todo = &todo, .filter = iterator_callback, .data = &data, .index = 0 };
+	struct todo_iterator *iterator = todo_get_iterator(&todo, iterator_callback, &data);
 
 	expect_value(iterator_callback, task, created_task);
 	expect_value(iterator_callback, data, &data);
 	will_return(iterator_callback, false);
-	struct task *task = todo_iterator_next(&iterator);
+	struct task *task = todo_iterator_next(iterator);
 	assert_null(task);
 }
 
@@ -307,6 +317,7 @@ int main(int argc, char *argv[])
 		cmocka_unit_test(test_negative_todo_add_task_null),
 		cmocka_unit_test(test_negative_todo_add_task_full),
 		cmocka_unit_test(test_todo_add_task_empty),
+		cmocka_unit_test(test_negative_todo_remove_task_null),
 		cmocka_unit_test(test_negative_todo_remove_task_empty),
 		cmocka_unit_test(test_negative_todo_remove_task_not_found),
 		cmocka_unit_test(test_todo_remove_task),

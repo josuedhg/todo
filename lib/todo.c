@@ -94,6 +94,23 @@ void todo_init(struct todo *todo)
 	*todo->driver = driver;
 }
 
+struct todo_iterator {
+	iterator_filter filter;
+	struct todo *todo;
+	int index;
+	void *data;
+};
+
+struct todo_iterator *todo_get_iterator(struct todo *todo, iterator_filter filter, void *data)
+{
+	struct todo_iterator *iterator = calloc(1, sizeof(struct todo_iterator));
+	iterator->filter = filter;
+	iterator->todo = todo;
+	iterator->index = 0;
+	iterator->data = data;
+	return iterator;
+}
+
 struct task *todo_iterator_next(struct todo_iterator *iterator)
 {
 	assert(iterator != NULL);

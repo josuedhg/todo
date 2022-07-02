@@ -51,7 +51,7 @@ static void test_delete_command_cannot_remove_task(void **state)
 	command.argv = params;
 	command.argc = 2;
 
-	will_return(mock_todo_remove_task, -1);
+	will_return(mock_todo_remove_task, NULL);
 	expect_string(mock_log_function, report_string, "Error: Unable to remove task with id 1.\n");
 	assert_int_equal(command_handle(&command), -1);
 
@@ -63,11 +63,12 @@ static void test_delete_command_success(void **state)
 {
 	(void)state; /* unused */
 	char *params[] = {"delete", "1"};
+	int fake_pointer_to_task = 0xDEADBEEF;
 
 	command.argv = params;
 	command.argc = 2;
 
-	will_return(mock_todo_remove_task, 0);
+	will_return(mock_todo_remove_task, &fake_pointer_to_task);
 	assert_int_equal(command_handle(&command), 0);
 	todo.task_list[0] = NULL;
 	todo.task_counter = 0;

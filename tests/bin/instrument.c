@@ -87,9 +87,9 @@ int mock_todo_edit_task(struct todo *todo, struct task *task)
 	return mock_type(int);
 }
 
-int mock_todo_remove_task(struct todo *todo, struct task *task)
+struct task *mock_todo_remove_task(struct todo *todo, int id)
 {
-	return mock_type(int);
+	return mock_ptr_type(struct task *);
 }
 
 int mock_todo_add_task(struct todo *todo, struct task *task)
