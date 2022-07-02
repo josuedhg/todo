@@ -1,3 +1,4 @@
+#include "todo.h"
 #define _XOPEN_SOURCE
 #define _GNU_SOURCE
 #include <assert.h>
@@ -243,6 +244,7 @@ static int todotxt_save_tasks(struct todotxt *todotxt)
 			fclose(file);
 			return -1;
 		}
+		task[i]->id = i + 1;
 		free(line);
 	}
 	fclose(file);
@@ -270,15 +272,24 @@ static int todotxt_add_task(struct todo *todo, struct task *task)
 		todo_remove_task(todo, task);
 		return -1;
 	}
-	return 0;
+	return task->id;
 }
 
 static int todotxt_edit_task(struct todo *todo, struct task *task)
 {
 	struct todotxt *todotxt = container_of(todo, struct todotxt, todo);
-	if (todo_edit_task(todo, task) < 0)
+	struct task old_task;
+	struct task *target_task = todo->driver->get_task(todo, task->id);
+	if (target_task == NULL)
 		return -1;
-	return todotxt_save_tasks(todotxt);
+
+	old_task = *target_task;
+	todo_edit_task(todo, task);
+	if (todotxt_save_tasks(todotxt) < 0) {
+		todo_edit_task(todo, &old_task);
+		return -1;
+	}
+	return task->id;
 }
 
 static int todotxt_remove_task(struct todo *todo, struct task *task)

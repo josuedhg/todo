@@ -30,7 +30,7 @@ int todo_edit_task(struct todo *todo, struct task *task)
 	if (current == NULL)
 		return -1;
 	*current = *task;
-	return 0;
+	return task->id;
 }
 
 void todo_clean_tasks(struct todo *todo)
@@ -52,9 +52,10 @@ int todo_add_task(struct todo *todo, struct task *task)
 	if (todo->task_counter >= TODO_TASK_LIST_LENGTH)
 		return -1;
 
-	todo->task_list[todo->task_counter] = task;
+	int id = todo->task_counter;
+	todo->task_list[id] = task;
 	todo->task_counter++;
-	return 0;
+	return id;
 }
 
 int todo_remove_task(struct todo *todo, struct task *task)

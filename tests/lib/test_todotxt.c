@@ -498,7 +498,7 @@ void test_add_task_single_task(void **state)
 
 	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
 	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
-	assert_int_equal(todo->driver->add_task(todo, task), 0);
+	assert_int_equal(todo->driver->add_task(todo, task), 1);
 }
 
 void test_add_task_multi_tasks(void **state)
@@ -519,7 +519,7 @@ void test_add_task_multi_tasks(void **state)
 
 	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
 	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
-	assert_int_equal(todo->driver->add_task(todo, task), 0);
+	assert_int_equal(todo->driver->add_task(todo, task), 1);
 
 	struct task *task2 = create_task("my task", "myproject", TASK_PRIORITY_HIGH);
 	task2->creation_date = FIRST_DAY_UNIX_TIME;
@@ -540,7 +540,7 @@ void test_add_task_multi_tasks(void **state)
 	will_return(__wrap_fwrite, 1);
 	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
 	expect_string(__wrap_fwrite, ptr, expected_todotxtline2);
-	assert_int_equal(todo->driver->add_task(todo, task2), 0);
+	assert_int_equal(todo->driver->add_task(todo, task2), 2);
 
 }
 
@@ -549,6 +549,31 @@ void test_negative_edit_task_not_found(void **state)
 	wrap_fwrite();
 	struct todo *todo = (struct todo *)*state;
 	struct task *task = create_task("my task", "myproject", TASK_PRIORITY_HIGH);
+
+	assert_int_equal(todo->driver->edit_task(todo, task), -1);
+}
+
+void test_negative_edit_task_cannot_write(void **state)
+{
+	wrap_fwrite();
+	struct todo *todo = (struct todo *)*state;
+	struct task *task = create_task("my task", "myproject", TASK_PRIORITY_HIGH);
+	int fake_pointer = 0;
+
+	task->creation_date = FIRST_DAY_UNIX_TIME;
+	char creation_date[DATE_LENGHT] = { 0 };
+	strftime(creation_date, DATE_LENGHT, DATE_FORMAT, localtime(&task->creation_date));
+	char expected_todotxtline[EXPECTED_LINE_SIZE] = { 0 };
+	sprintf(expected_todotxtline, "(A) %s my task +myproject", creation_date);
+
+	will_return(__wrap_fopen, &fake_pointer);
+	will_return(__wrap_fwrite, 1);
+
+	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
+	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
+	assert_int_equal(todo->driver->add_task(todo, task), 1);
+
+	will_return(__wrap_fopen, NULL);
 
 	assert_int_equal(todo->driver->edit_task(todo, task), -1);
 }
@@ -571,7 +596,7 @@ void test_edit_task(void **state)
 
 	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
 	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
-	assert_int_equal(todo->driver->add_task(todo, task), 0);
+	assert_int_equal(todo->driver->add_task(todo, task), 1);
 
 	task->priority = TASK_PRIORITY_MEDIUM;
 	sprintf(expected_todotxtline, "(B) %s my task +myproject", creation_date);
@@ -581,7 +606,7 @@ void test_edit_task(void **state)
 
 	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
 	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
-	assert_int_equal(todo->driver->edit_task(todo, task), 0);
+	assert_int_equal(todo->driver->edit_task(todo, task), 1);
 }
 
 void test_negative_remove_task_not_found(void **state)
@@ -611,7 +636,7 @@ void test_negative_remove_task_cannot_write(void **state)
 
 	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
 	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
-	assert_int_equal(todo->driver->add_task(todo, task), 0);
+	assert_int_equal(todo->driver->add_task(todo, task), 1);
 
 	will_return(__wrap_fopen, NULL);
 	assert_int_equal(todo->driver->remove_task(todo, task), -1);
@@ -635,7 +660,7 @@ void test_remove_task(void **state)
 
 	expect_value(__wrap_fwrite, size, EXPECTED_LINE_SIZE - 1);
 	expect_string(__wrap_fwrite, ptr, expected_todotxtline);
-	assert_int_equal(todo->driver->add_task(todo, task), 0);
+	assert_int_equal(todo->driver->add_task(todo, task), 1);
 
 	task->priority = TASK_PRIORITY_MEDIUM;
 	sprintf(expected_todotxtline, "(B) %s my task +myproject", creation_date);
@@ -682,6 +707,7 @@ int main(int argc, char *argv[])
 		cmocka_unit_test_setup_teardown(test_add_task_single_task, setup, teardown),
 		cmocka_unit_test_setup_teardown(test_add_task_multi_tasks, setup, teardown),
 		cmocka_unit_test_setup_teardown(test_negative_edit_task_not_found, setup, teardown),
+		cmocka_unit_test_setup_teardown(test_negative_edit_task_cannot_write, setup, teardown),
 		cmocka_unit_test_setup_teardown(test_edit_task, setup, teardown),
 		cmocka_unit_test_setup_teardown(test_negative_remove_task_not_found, setup, teardown),
 		cmocka_unit_test_setup_teardown(test_negative_remove_task_cannot_write, setup, teardown),
