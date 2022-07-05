@@ -10,15 +10,13 @@ static struct task *todo_get_task(struct todo *todo, int id)
 	assert(todo != NULL);
 	if (todo->task_counter == 0)
 		return NULL;
-	struct task *task = NULL;
-	for (int i = 0; i < todo->task_counter; i++) {
-		struct task *current = todo->task_list[i];
-		if (current->id == id) {
-			task = current;
+	struct todo_iterator *it = todo_get_iterator(todo, NULL, NULL);
+	struct task *current = NULL;
+	while ((current = todo_iterator_next(it)) != NULL)
+		if (current->id == id)
 			break;
-		}
-	}
-	return task;
+	free(it);
+	return current;
 }
 
 int todo_edit_task(struct todo *todo, struct task *task)
