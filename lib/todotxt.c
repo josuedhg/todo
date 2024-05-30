@@ -1,6 +1,6 @@
-#include "todo.h"
 #define _XOPEN_SOURCE
 #define _GNU_SOURCE
+#include "todo.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <time.h>
