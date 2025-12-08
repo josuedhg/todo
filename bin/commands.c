@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <getopt.h>
 
 #include "task.h"
 #include "commands.h"
@@ -33,20 +34,80 @@ static char *join_params(int argc, char **argv, char *separator)
 	return joined_params;
 }
 
+static struct option add_options[] = {
+	{"project", required_argument, 0, 'p'},
+	{"priority", required_argument, 0, 'P'},
+	{"help", no_argument, 0, 'h'},
+	{0, 0, 0, 0}
+};
+
+static char *options_descriptions[] = {
+	"\tProject name",
+	"Priority (low, medium, high)",
+	"\t\tShow this help message"
+};
+
+static void print_add_command_help(struct command *cmd, struct option *options)
+{
+	cmd->log->error("Usage: %s\n", cmd->descriptor->usage);
+	cmd->log->error("\n");
+	cmd->log->error("Options:\n");
+	for (int i = 0; options[i].name != 0; i++) {
+		cmd->log->error("  -%c, --%s %s\t%s\n",
+				options[i].val,
+				options[i].name,
+				(options[i].has_arg)? "<VALUE>" : "",
+				options_descriptions[i]);
+	}
+	cmd->log->error("\n");
+}
+
 static int add_command_handle(struct command *cmd)
 {
 	char *task_description = NULL;
 	struct task *task = NULL;
 	int ret = 0;
+	char *project_name = NULL;
+	int priority = TASK_PRIORITY_LOW;
+	int opt = 0;
 
 	if (cmd->argc < 2)
 	{
-		cmd->log->error("Usage: %s \n", cmd->descriptor->usage);
+		print_add_command_help(cmd, add_options);
 		return -1;
 	}
 
-	task_description = join_params(cmd->argc - 1, cmd->argv + 1, " ");
-	task = create_new_task(task_description, NULL, TASK_PRIORITY_LOW);
+	while ((opt = getopt_long(cmd->argc, cmd->argv, "p:P:h", add_options, NULL)) != -1) {
+		switch (opt) {
+			case 'p':
+				project_name = optarg;
+				break;
+			case 'P':
+				if (strcmp(optarg, "low") == 0)
+					priority = TASK_PRIORITY_LOW;
+				else if (strcmp(optarg, "medium") == 0)
+					priority = TASK_PRIORITY_MEDIUM;
+				else if (strcmp(optarg, "high") == 0)
+					priority = TASK_PRIORITY_HIGH;
+				else {
+					cmd->log->error("Invalid priority: %s\n", optarg);
+					return -1;
+				}
+				break;
+			case 'h':
+				print_add_command_help(cmd, add_options);
+				return -1;
+			default:
+				cmd->log->error("Invalid option: %c\n", opt);
+				return -1;
+		}
+	}
+
+	cmd->argc -= optind;
+	cmd->argv += optind;
+
+	task_description = join_params(cmd->argc, cmd->argv, " ");
+	task = create_new_task(task_description, project_name, priority);
 	if (task == NULL) {
 		cmd->log->error("Error: Unable to create new task: %s\n", task_description);
 		ret = -1;

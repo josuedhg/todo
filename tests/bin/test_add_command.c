@@ -27,7 +27,13 @@ static void test_add_command_no_param(void **state)
 {
 	(void)state; /* unused */
 
-	expect_string(mock_log_function, report_string, "Usage: add <task description> \n");
+	expect_string(mock_log_function, report_string, "Usage: add <task description>\n");
+	expect_string(mock_log_function, report_string, "\n");
+	expect_string(mock_log_function, report_string, "Options:\n");
+	expect_string(mock_log_function, report_string, "  -p, --project <VALUE>\t\tProject name\n");
+	expect_string(mock_log_function, report_string, "  -P, --priority <VALUE>\tPriority (low, medium, high)\n");
+	expect_string(mock_log_function, report_string, "  -h, --help \t\t\tShow this help message\n");
+	expect_string(mock_log_function, report_string, "\n");
 	assert_int_equal(command_handle(&command), -1);
 }
 

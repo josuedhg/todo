@@ -23,7 +23,7 @@ struct log logger = {
 };
 
 static const struct command_descriptor commands[] = {
-	{ADD_COMMAND_ID, "add", "add <task description>", "Add a new task" },
+	{ADD_COMMAND_ID, "add", "add [options] <task description>", "Add a new task" },
 	{LIST_COMMAND_ID, "list", "list", "List all available commands" },
 	{SHOW_COMMAND_ID, "show", "show [task_id]", "Show task details" },
 	{DELETE_COMMAND_ID, "delete", "delete [task id]", "Delete a task" },
