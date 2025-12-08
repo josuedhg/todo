@@ -26,14 +26,14 @@ int setup(void **state)
 void check_help(void)
 {
 	expect_string(mock_log_function, report_string, "Usage: test_main <command>\n"
-							"Available commands:\n" \
-							"\thelp: Display this help message\n");
-	expect_string(mock_log_function, report_string, "\tadd: Add a new task\n");
-	expect_string(mock_log_function, report_string, "\tlist: List all available commands\n");
-	expect_string(mock_log_function, report_string, "\tshow: Show task details\n");
-	expect_string(mock_log_function, report_string, "\tdelete: Delete a task\n");
-	expect_string(mock_log_function, report_string, "\tdone: Set task as done\n");
-	expect_string(mock_log_function, report_string, "\treopen: Set task as open\n");
+							"Available commands:\n");
+	expect_string(mock_log_function, report_string, "  add   \tAdd a new task\n");
+	expect_string(mock_log_function, report_string, "  list   \tList all available commands\n");
+	expect_string(mock_log_function, report_string, "  show   \tShow task details\n");
+	expect_string(mock_log_function, report_string, "  delete   \tDelete a task\n");
+	expect_string(mock_log_function, report_string, "  done   \tSet task as done\n");
+	expect_string(mock_log_function, report_string, "  reopen   \tSet task as open\n");
+	expect_string(mock_log_function, report_string, "  help   \tDisplay this help message\n");
 }
 
 static void test_main_no_command(void **state)

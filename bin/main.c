@@ -25,10 +25,10 @@ struct log logger = {
 static const struct command_descriptor commands[] = {
 	{ADD_COMMAND_ID, "add", "add [options] <task description>", "Add a new task" },
 	{LIST_COMMAND_ID, "list", "list", "List all available commands" },
-	{SHOW_COMMAND_ID, "show", "show [task_id]", "Show task details" },
-	{DELETE_COMMAND_ID, "delete", "delete [task id]", "Delete a task" },
-	{DONE_COMMAND_ID, "done", "done [task id]", "Set task as done" },
-	{REOPEN_COMMAND_ID, "reopen", "reopen [task id]", "Set task as open" },
+	{SHOW_COMMAND_ID, "show", "show <task_id>", "Show task details" },
+	{DELETE_COMMAND_ID, "delete", "delete <task id>", "Delete a task" },
+	{DONE_COMMAND_ID, "done", "done <task id>", "Set task as done" },
+	{REOPEN_COMMAND_ID, "reopen", "reopen <task id>", "Set task as open" },
 	{.name = NULL},
 };
 
@@ -47,12 +47,12 @@ static int help(char *bin_name)
 {
 	int i;
 	logger.error("Usage: %s <command>\n"
-			"Available commands:\n"
-			"\thelp: Display this help message\n",
+			"Available commands:\n",
 			bin_name);
 	for (i = 0; commands[i].name != NULL; i++) {
-		logger.error("\t%s: %s\n", commands[i].name, commands[i].description);
+		logger.error("  %s   \t%s\n", commands[i].name, commands[i].description);
 	}
+	logger.error("  help   \tDisplay this help message\n");
 	return -1;
 }
 
